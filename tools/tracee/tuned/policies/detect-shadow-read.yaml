@@ -1,0 +1,13 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-shadow-read
+  annotations:
+    description: T1003.008 access to password hash files
+spec:
+  scope:
+    - container
+  rules:
+    - event: security_file_open
+      filters:
+        - data.pathname=/etc/shadow,/etc/gshadow,/etc/shadow-,/etc/gshadow-

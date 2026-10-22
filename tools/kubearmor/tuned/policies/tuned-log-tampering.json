@@ -1,0 +1,21 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-log-tampering"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/truncate"}
+      ]
+    },
+    "file": {
+      "matchDirectories": [
+        {"dir": "/var/log/", "recursive": true, "readOnly": true, "fromSource": [{"path": "/usr/bin/truncate"}, {"path": "/usr/bin/shred"}, {"path": "/usr/bin/tee"}, {"path": "/usr/bin/sed"}]}
+      ]
+    },
+    "message": "System logs truncated or overwritten outside of the log rotation tooling",
+    "severity": 7,
+    "tags": ["MITRE", "MITRE_T1070.002_clear_linux_or_mac_system_logs", "MITRE_TA0005_defense_evasion"],
+    "action": "Audit"
+  }
+}

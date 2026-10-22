@@ -1,0 +1,14 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-masquerading
+  annotations:
+    description: T1036.005 a process named like a system daemon runs from an unexpected location
+spec:
+  scope:
+    - container
+  rules:
+    - event: sched_process_exec
+      filters:
+        - comm=sshd,systemd,cron,dbus-daemon,kworker
+        - data.pathname!=/usr/sbin/sshd,/usr/lib/systemd/systemd,/usr/sbin/cron,/usr/bin/dbus-daemon

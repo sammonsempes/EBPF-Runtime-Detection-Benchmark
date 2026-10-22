@@ -1,0 +1,12 @@
+id: benign-log-rotation
+name: Application log rotation with logrotate
+kind: benign
+tactic: null
+technique: null
+description: >-
+  Writes application logs to /var/log/benchapp-<marker>/, runs logrotate -f with a
+  dedicated configuration (rotate 3, compress) and state file, which renames the logs
+  and gzips the rotated copies, then verifies the .1.gz archives. Everything is removed
+  afterwards. Exercises legitimate file renames and writes under /var/log.
+timeout: 30
+requires: []

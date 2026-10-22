@@ -1,0 +1,18 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "harden-trusted-cert-mod"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchDirectories": [
+        {"dir": "/etc/ssl/", "readOnly": true, "recursive": true},
+        {"dir": "/etc/pki/", "readOnly": true, "recursive": true},
+        {"dir": "/usr/local/share/ca-certificates/", "readOnly": true, "recursive": true}
+      ]
+    },
+    "message": "Credentials modification denied",
+    "severity": 1,
+    "tags": ["MITRE", "MITRE_T1552_unsecured_credentials", "FGT1555", "FIGHT"],
+    "action": "Block"
+  }
+}

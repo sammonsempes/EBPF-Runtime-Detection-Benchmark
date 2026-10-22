@@ -1,0 +1,11 @@
+id: benign-backup
+name: Data directory backup with tar
+kind: benign
+tactic: null
+technique: null
+description: >-
+  Creates a data directory /srv/bench-data-<marker> with a few text files, archives it
+  with tar -czf to /backup/data-<marker>.tar.gz, lists the archive to verify it and
+  removes both afterwards. Local only, no network.
+timeout: 30
+requires: []

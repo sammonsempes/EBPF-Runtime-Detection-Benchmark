@@ -1,0 +1,11 @@
+id: t1059-006-python-exec
+name: Python inline code spawning a shell
+kind: attack
+tactic: execution
+technique: T1059.006
+description: >-
+  Runs python3 -c with inline code that spawns /bin/sh -c to execute id and uname.
+  The resulting process tree is python3 -> sh -> id/uname. BENCH_MARKER is passed as
+  a python argument and echoed by the shell.
+timeout: 30
+requires: []

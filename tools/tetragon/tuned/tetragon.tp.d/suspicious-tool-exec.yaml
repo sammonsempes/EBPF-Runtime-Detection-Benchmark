@@ -1,0 +1,108 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "suspicious-tool-exec"
+  annotations:
+    description: "Execution of account management, scanning, mining, data destruction, container management and system inventory tools inside containers"
+spec:
+  kprobes:
+  - call: "security_bprm_check"
+    syscall: false
+    message: "Security relevant tool executed in a container"
+    args:
+    - index: 0
+      type: "linux_binprm"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "/useradd"
+        - "/adduser"
+        - "/usermod"
+        - "/userdel"
+        - "/groupadd"
+        - "/groupmod"
+        - "/chpasswd"
+        - "/newusers"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+    - matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "/nmap"
+        - "/masscan"
+        - "/zmap"
+        - "/rustscan"
+        - "/naabu"
+        - "/hping3"
+        - "/unicornscan"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+    - matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "/xmrig"
+        - "/xmr-stak"
+        - "/minerd"
+        - "/cpuminer"
+        - "/ccminer"
+        - "/cgminer"
+        - "/bfgminer"
+        - "/ethminer"
+        - "/nbminer"
+        - "/t-rex"
+        - "/lolminer"
+        - "/phoenixminer"
+        - "/nanominer"
+    - matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "/shred"
+        - "/wipe"
+        - "/srm"
+        - "/sfill"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+    - matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "/docker"
+        - "/kubectl"
+        - "/crictl"
+        - "/ctr"
+        - "/nerdctl"
+        - "/podman"
+        - "/amicontained"
+        - "/deepce"
+        - "/cdk"
+        - "/capsh"
+        - "/uname"
+        - "/lscpu"
+        - "/lsb_release"
+        - "/dmidecode"
+        - "/lshw"
+        - "/hostnamectl"
+        - "/lspci"
+        - "/lsusb"
+        - "/systemd-detect-virt"
+        - "/virt-what"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+    tags: ["mitre.persistence", "mitre.discovery", "mitre.impact", "T1136.001", "T1046", "T1496", "T1485", "T1613", "T1082"]

@@ -1,0 +1,13 @@
+tool: kunai
+namespace: ebpf-bench-kunai
+release: kunai
+install:
+  type: manifests
+  manifests: [daemonset.yaml]
+  container: kunai
+  from_adapter: true
+agent:
+  selector: app.kubernetes.io/name=kunai
+  log_containers: [kunai]
+  alerts_container: kunai
+  ready_pattern: adapter

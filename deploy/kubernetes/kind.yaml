@@ -1,0 +1,30 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: ebpf-bench
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.33.1
+    extraMounts:
+      - hostPath: /proc
+        containerPath: /procHost
+      - hostPath: /sys/kernel/debug
+        containerPath: /sys/kernel/debug
+        propagation: HostToContainer
+      - hostPath: /sys/kernel/tracing
+        containerPath: /sys/kernel/tracing
+        propagation: HostToContainer
+      - hostPath: /sys/kernel/security
+        containerPath: /sys/kernel/security
+        propagation: HostToContainer
+      - hostPath: /sys/kernel/btf
+        containerPath: /sys/kernel/btf
+        readOnly: true
+      - hostPath: /sys/fs/bpf
+        containerPath: /sys/fs/bpf
+        propagation: Bidirectional
+      - hostPath: /lib/modules
+        containerPath: /lib/modules
+        readOnly: true
+      - hostPath: /usr/src
+        containerPath: /usr/src
+        readOnly: true

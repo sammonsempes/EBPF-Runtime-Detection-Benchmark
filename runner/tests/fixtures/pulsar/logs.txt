@@ -1,0 +1,6 @@
+[2025-09-18T12:00:00Z INFO  pulsar::pulsard::daemon] Starting module rules-engine
+[2025-09-18T12:00:00Z INFO  pulsar::pulsard::daemon] Starting module process-monitor
+[2025-09-18T12:00:05Z INFO  pulsar::pulsard::module_manager] Module threat-logger exited
+[2025-09-18T12:00:01Z EVENT /usr/bin/ls (48400)] [process-monitor] Exec { filename: /usr/bin/ls, argc: 2, argv: [ ls, -l ] }
+
+{"header":{"image":"/usr/bin/ls","threat":null},"payload":{"type":"Exec"}}

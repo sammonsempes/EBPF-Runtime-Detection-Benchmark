@@ -1,0 +1,8 @@
+[2025-06-10T14:00:40Z WARN  kunai] An instance of Kunai pid=1234 is already running
+[2025-06-10T14:00:41Z INFO  kunai] Starting event producer
+[2025-06-10T14:00:41Z INFO  kunai] Waiting for Ctrl-C...
+[2025-06-10T14:00:42Z WARN  kunai] sending SIGKILL to PID=1981502
+
+{"detection":{"rules":["mimic.kthread"],"severity":10},"info":{"event":{"source":"other"}}}
+{"data":{},"detection":null,"info":{"event":{"source":"kunai","id":1,"name":"execve"}}}
+not json at all {"detection":{}}

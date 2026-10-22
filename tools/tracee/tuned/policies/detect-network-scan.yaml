@@ -1,0 +1,13 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-network-scan
+  annotations:
+    description: T1046 network scanning tools executed in a container
+spec:
+  scope:
+    - container
+  rules:
+    - event: sched_process_exec
+      filters:
+        - data.pathname=/usr/bin/nc,/usr/bin/nc.openbsd,/usr/bin/nc.traditional,/usr/bin/ncat,/usr/bin/netcat,/usr/bin/nmap,/usr/bin/masscan,/usr/bin/zmap

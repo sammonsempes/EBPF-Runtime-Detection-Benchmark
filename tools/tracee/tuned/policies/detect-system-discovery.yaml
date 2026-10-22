@@ -1,0 +1,13 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-system-discovery
+  annotations:
+    description: T1082 system information discovery tools executed in a container
+spec:
+  scope:
+    - container
+  rules:
+    - event: sched_process_exec
+      filters:
+        - data.pathname=/usr/bin/uname,/usr/bin/hostnamectl,/usr/bin/lscpu,/usr/bin/lsb_release,/usr/sbin/dmidecode,/usr/bin/lspci,/usr/bin/lsblk,/usr/sbin/lsmod,/usr/bin/lsmod

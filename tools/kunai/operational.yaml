@@ -1,0 +1,42 @@
+tool: kunai
+version: "0.6.2"
+license: GPL-3.0
+deployment:
+  linux: static musl binary from the GitHub release, wrapped in a privileged alpine container built from tools/kunai/Dockerfile (host PID namespace, /sys/kernel/debug, /sys/kernel/btf and /sys/fs/bpf mounted)
+  kubernetes: none upstream
+  steps: 3
+rules:
+  language: Gene YAML rules (match-on event names, $variables matching event fields with ==, ~= regex, &= flags and numeric comparisons, boolean condition, severity, ATT&CK ids), plus JSON-lines IoCs and YARA for file scans
+  custom_rules: true
+  hot_reload: false
+output:
+  formats: [json]
+  enrichment: [process_ancestry, container, file_hashes, user, dns]
+  attack_mapping: true
+response:
+  blocking: false
+  mechanisms: [kill]
+  synchronous: false
+  notes: >-
+    Detection rules accept `actions: [kill]` (v0.6.2 `kunai/src/bin/main.rs`, actions `kill` and `scan-files`). The
+    userland event loop calls kill(pid, SIGKILL) on `info.task.pid` after the event went through the ring buffer,
+    reordering and rule scan, and after it was printed; the syscall that produced the event has already completed, so
+    this is an asynchronous after-the-fact response, not prevention. Kill is ignored for filter rules. Matching events
+    carry `detection.actions: ["kill"]`, the kill itself is only logged on stderr (`sending SIGKILL to PID=<pid>`).
+scores:
+  deployment: 3
+  rule_customization: 4
+  output_quality: 4
+notes: >-
+  Deployment 3: upstream ships a distribution-agnostic static binary (assets kunai-amd64 / kunai-aarch64 with .asc signatures
+  and sha512.txt on the v0.6.2 release) and no container image or Kubernetes manifest; the README recommends the binary,
+  the docs install it as a systemd service with `kunai install`. Running it in a container needs host preparation:
+  privileged mode, host PID namespace, BTF and the bpf/debug filesystems. Steps 3 = download, chmod +x, `kunai run -r <rules>`;
+  upstream ships no detection rule, so with the bare `sudo kunai` quickstart every event is printed and nothing is an alert.
+  Rule customization 4: rules are declarative YAML (Gene engine) with detection, filter and dependency types, regex and
+  flag operators, severity and actions (kill, scan-files), loaded from the config `scanner.rules` or `-r`; there is no
+  runtime reload in 0.6.2, a restart is required (hardened mode even requires a reboot). Output quality 4: one JSON object
+  per line (`data`, `detection`, `filter`, `info`) with process ancestors, parent command line, executable hashes,
+  task/parent uid/gid, mount namespace and container name/type; `detection` carries rule names, tags, severity and
+  ATT&CK ids from rule metadata. Not 5 because container context is only the UTS hostname plus a heuristic type
+  (no container id, image or Kubernetes metadata), and the container `type` is often null for processes started after kunai.

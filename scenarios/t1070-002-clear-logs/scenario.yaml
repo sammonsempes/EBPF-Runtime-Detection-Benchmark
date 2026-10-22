@@ -1,0 +1,12 @@
+id: t1070-002-clear-logs
+name: System logs truncated under /var/log
+kind: attack
+tactic: defense-evasion
+technique: T1070.002
+description: >-
+  Truncates /var/log/auth.log (seeded honey log), wtmp, btmp, lastlog, dpkg.log,
+  apt/history.log and a dedicated /var/log/bench-<marker>.log, using both shell
+  redirection and truncate -s 0. Every existing file is backed up to
+  /tmp/bench-logs-<marker>/ first and its content restored in place on exit.
+timeout: 30
+requires: []

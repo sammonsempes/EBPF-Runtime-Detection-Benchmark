@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bench"
+version = "0.1.0"
+description = "eBPF runtime detection benchmark runner"
+requires-python = ">=3.12"
+dependencies = [
+    "docker>=7.1",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+k8s = ["kubernetes>=31,<33"]
+
+[project.scripts]
+bench = "bench.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["bench*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

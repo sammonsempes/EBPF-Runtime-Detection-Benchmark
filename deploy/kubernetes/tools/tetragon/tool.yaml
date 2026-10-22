@@ -1,0 +1,23 @@
+tool: tetragon
+namespace: ebpf-bench-tetragon
+release: tetragon
+install:
+  type: helm
+  repo: https://helm.cilium.io
+  chart: tetragon
+  version: 1.7.0
+  values:
+    default: values-default.yaml
+    tuned: values-tuned.yaml
+agent:
+  selector: app.kubernetes.io/name=tetragon,app.kubernetes.io/instance=tetragon
+  log_containers: [tetragon, export-stdout]
+  alerts_container: export-stdout
+  ready_pattern: adapter
+custom_resources:
+  - source: tetragon.tp.d
+    format: manifest
+    group: cilium.io
+    version: v1alpha1
+    plural: tracingpolicies
+    namespaced: false

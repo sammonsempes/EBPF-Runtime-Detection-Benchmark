@@ -1,0 +1,13 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-setuid-bit
+  annotations:
+    description: T1548.001 setuid, setgid or sticky bit set on a file (mode 1024 and above)
+spec:
+  scope:
+    - container
+  rules:
+    - event: chmod_common
+      filters:
+        - data.mode>=1024

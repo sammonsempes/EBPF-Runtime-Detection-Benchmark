@@ -1,0 +1,34 @@
+tool: kubearmor
+namespace: ebpf-bench-kubearmor
+release: kubearmor
+install:
+  type: helm
+  repo: https://kubearmor.github.io/charts
+  chart: kubearmor
+  version: v1.7.5
+  values:
+    default: values-default.yaml
+    tuned: values-tuned.yaml
+  set_from_profile:
+    - file: kubearmor.yaml
+      prefix: kubearmorConfigMap
+      keys:
+        - visibility
+        - defaultFilePosture
+        - defaultNetworkPosture
+        - defaultCapabilitiesPosture
+        - alertThrottling
+        - maxAlertPerSec
+        - throttleSec
+agent:
+  selector: kubearmor-app=kubearmor
+  log_containers: [kubearmor]
+  alerts_container: kubearmor
+  ready_pattern: adapter
+custom_resources:
+  - source: policies
+    format: kubearmor-backup
+    group: security.kubearmor.com
+    version: v1
+    plural: kubearmorpolicies
+    namespaced: true

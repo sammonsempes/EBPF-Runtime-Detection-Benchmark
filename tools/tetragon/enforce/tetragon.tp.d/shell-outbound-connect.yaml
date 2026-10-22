@@ -1,0 +1,57 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "shell-outbound-connect"
+  annotations:
+    description: "Kill shell interpreters inside containers that open outbound TCP connections (reverse shells); observe them on the host"
+spec:
+  kprobes:
+  - call: "tcp_connect"
+    syscall: false
+    message: "Shell process opened an outbound TCP connection"
+    args:
+    - index: 0
+      type: "sock"
+    selectors:
+    - matchBinaries:
+      - operator: "In"
+        values:
+        - "/bin/sh"
+        - "/usr/bin/sh"
+        - "/bin/bash"
+        - "/usr/bin/bash"
+        - "/bin/dash"
+        - "/usr/bin/dash"
+        - "/bin/zsh"
+        - "/usr/bin/zsh"
+        - "/bin/ksh"
+        - "/usr/bin/ksh"
+        - "/bin/ash"
+        - "/usr/bin/ash"
+        - "/bin/busybox"
+        - "/usr/bin/busybox"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Sigkill
+    - matchBinaries:
+      - operator: "In"
+        values:
+        - "/bin/sh"
+        - "/usr/bin/sh"
+        - "/bin/bash"
+        - "/usr/bin/bash"
+        - "/bin/dash"
+        - "/usr/bin/dash"
+        - "/bin/zsh"
+        - "/usr/bin/zsh"
+        - "/bin/ksh"
+        - "/usr/bin/ksh"
+        - "/bin/ash"
+        - "/usr/bin/ash"
+        - "/bin/busybox"
+        - "/usr/bin/busybox"
+    tags: ["mitre.execution", "T1059.004"]

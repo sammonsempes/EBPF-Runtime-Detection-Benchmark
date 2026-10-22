@@ -1,0 +1,187 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "container-escape"
+  annotations:
+    description: "Deny and kill host disk mounts, namespace joins and chroot performed from inside a container"
+spec:
+  kprobes:
+  - call: "sys_mount"
+    syscall: true
+    message: "Block device mounted from a container"
+    args:
+    - index: 0
+      type: "string"
+    - index: 1
+      type: "string"
+    - index: 2
+      type: "string"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "Prefix"
+        values:
+        - "/dev/sd"
+        - "/dev/vd"
+        - "/dev/xvd"
+        - "/dev/nvme"
+        - "/dev/hd"
+        - "/dev/dm-"
+        - "/dev/mapper/"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 2
+        operator: "Equal"
+        values:
+        - "ext2"
+        - "ext3"
+        - "ext4"
+        - "xfs"
+        - "btrfs"
+        - "vfat"
+        - "ntfs"
+        - "ntfs3"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    tags: ["mitre.privilege_escalation", "T1611"]
+  - call: "sys_fsopen"
+    syscall: true
+    message: "Disk filesystem mount prepared from a container"
+    args:
+    - index: 0
+      type: "string"
+    - index: 1
+      type: "int"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "Equal"
+        values:
+        - "ext2"
+        - "ext3"
+        - "ext4"
+        - "xfs"
+        - "btrfs"
+        - "vfat"
+        - "ntfs"
+        - "ntfs3"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    ignore:
+      callNotFound: true
+    tags: ["mitre.privilege_escalation", "T1611"]
+  - call: "sys_fsconfig"
+    syscall: true
+    message: "Block device mounted from a container"
+    args:
+    - index: 0
+      type: "int"
+    - index: 1
+      type: "int"
+    - index: 2
+      type: "string"
+    - index: 3
+      type: "string"
+    selectors:
+    - matchArgs:
+      - index: 2
+        operator: "Equal"
+        values:
+        - "source"
+      - index: 3
+        operator: "Prefix"
+        values:
+        - "/dev/sd"
+        - "/dev/vd"
+        - "/dev/xvd"
+        - "/dev/nvme"
+        - "/dev/hd"
+        - "/dev/dm-"
+        - "/dev/mapper/"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    ignore:
+      callNotFound: true
+    tags: ["mitre.privilege_escalation", "T1611"]
+  - call: "sys_setns"
+    syscall: true
+    message: "Namespace joined from a container"
+    args:
+    - index: 0
+      type: "int"
+    - index: 1
+      type: "int"
+    selectors:
+    - matchBinaries:
+      - operator: "In"
+        values:
+        - "/usr/bin/nsenter"
+        - "/bin/nsenter"
+      matchNamespaces:
+      - namespace: Pid
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchBinaries:
+      - operator: "NotIn"
+        values:
+        - "/usr/bin/runc"
+        - "/usr/sbin/runc"
+        - "/usr/local/bin/runc"
+        - "/usr/local/sbin/runc"
+      matchNamespaces:
+      - namespace: Pid
+        operator: NotIn
+        values:
+        - "host_ns"
+    tags: ["mitre.privilege_escalation", "T1611"]
+  - call: "sys_chroot"
+    syscall: true
+    message: "chroot called from a container"
+    args:
+    - index: 0
+      type: "string"
+    selectors:
+    - matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    tags: ["mitre.privilege_escalation", "T1611"]

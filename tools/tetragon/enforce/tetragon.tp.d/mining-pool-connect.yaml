@@ -1,0 +1,65 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "mining-pool-connect"
+  annotations:
+    description: "Kill container processes connecting to ports commonly used by cryptocurrency mining pools (stratum); observe on the host"
+spec:
+  kprobes:
+  - call: "tcp_connect"
+    syscall: false
+    message: "Connection to a mining pool port"
+    args:
+    - index: 0
+      type: "sock"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "DPort"
+        values:
+        - "3333"
+        - "3334"
+        - "3335"
+        - "3336"
+        - "3357"
+        - "4444"
+        - "5555"
+        - "5556"
+        - "5588"
+        - "5730"
+        - "6099"
+        - "7777"
+        - "7778"
+        - "14433"
+        - "14444"
+        - "45560"
+        - "45700"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Sigkill
+    - matchArgs:
+      - index: 0
+        operator: "DPort"
+        values:
+        - "3333"
+        - "3334"
+        - "3335"
+        - "3336"
+        - "3357"
+        - "4444"
+        - "5555"
+        - "5556"
+        - "5588"
+        - "5730"
+        - "6099"
+        - "7777"
+        - "7778"
+        - "14433"
+        - "14444"
+        - "45560"
+        - "45700"
+    tags: ["mitre.impact", "T1496"]

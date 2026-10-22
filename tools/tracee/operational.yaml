@@ -1,0 +1,39 @@
+tool: tracee
+version: "0.24.1"
+license: Apache-2.0
+deployment:
+  linux: single privileged container aquasec/tracee:0.24.1 with host pid and cgroup namespaces, /etc/os-release and the docker socket mounted, config and policies from tools/tracee/<profile>
+  kubernetes: official Helm chart deploy/helm/tracee (DaemonSet plus tracee-operator, Policy CRD) or the static manifest deploy/kubernetes/tracee/tracee.yaml
+  steps: 1
+rules:
+  language: built-in Go signatures selected by YAML Policy CRDs (scope plus event rules with data, scope and return value filters); new signatures require Go code compiled as plugins
+  custom_rules: true
+  hot_reload: false
+output:
+  formats: [json, table, gotemplate]
+  enrichment: [container, kubernetes]
+  attack_mapping: true
+response:
+  blocking: false
+  mechanisms: []
+  notes: >-
+    Tracee 0.24.1 is detection and forensics only: policies select and filter events, there is no Block/Deny action
+    (docs/docs/policies/rules.md) and its eBPF programs only observe. The closest features are artifact capture
+    (files, memory, network pcap, docs/docs/flags/artifacts.1.md) and webhook output for an external responder.
+    docs/docs/install/lsm-support.md only describes a BPF LSM availability check used for LSM-based event sources,
+    not enforcement. No enforce profile is provided.
+scores:
+  deployment: 4
+  rule_customization: 3
+  output_quality: 4
+notes: >-
+  deployment 4: docs/docs/install/docker.md documents a single docker run (privileged, --pid=host, --cgroupns=host,
+  os-release and /var/run mounts) and the 0.24.1 Helm chart and static manifest exist; it needs a BTF kernel and a few host mounts
+  but no build or kernel headers. rule_customization 3: Policy CRDs (docs/docs/policies) only select events and filter them on
+  scope and single data fields with prefix or suffix wildcards, without correlation, process ancestry or array argument matching;
+  writing a new signature means Go code (signatures-dir loads compiled .so plugins, docs/docs/flags/signatures-dir.1.md) and
+  policies are only read at startup. YAML detectors with CEL exist on main but are not in a release yet. output_quality 4:
+  one JSON object per line (types/trace/trace.go) with process ids, parent pid, executable, container id/name/image and pod
+  fields; signature findings carry metadata.Properties with Severity, Category, Technique and external_id (ATT&CK id) and the
+  triggering event under the detectedFrom argument (pkg/events/findings/findings.go); full ancestry is only in the unreleased
+  v1beta1 format.

@@ -1,0 +1,14 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-systemd-persistence
+  annotations:
+    description: T1543.002 write access to systemd unit directories
+spec:
+  scope:
+    - container
+  rules:
+    - event: security_file_open
+      filters:
+        - data.pathname=/etc/systemd/system/*,/usr/lib/systemd/system/*,/lib/systemd/system/*,/run/systemd/system/*
+        - data.flags=O_WRONLY*,O_RDWR*

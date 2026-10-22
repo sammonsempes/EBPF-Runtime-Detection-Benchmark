@@ -1,0 +1,26 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-container-escape"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/nsenter"},
+        {"path": "/usr/bin/unshare"},
+        {"path": "/usr/sbin/chroot"},
+        {"path": "/usr/bin/mount"},
+        {"path": "/usr/bin/mknod"},
+        {"path": "/usr/sbin/debugfs"}
+      ]
+    },
+    "syscalls": {
+      "matchSyscalls": [
+        {"syscall": ["mount"]}
+      ]
+    },
+    "message": "Container escape attempt: namespace switch, device node creation or mount",
+    "severity": 9,
+    "tags": ["MITRE", "MITRE_T1611_escape_to_host", "MITRE_TA0004_privilege_escalation"],
+    "action": "Audit"
+  }
+}

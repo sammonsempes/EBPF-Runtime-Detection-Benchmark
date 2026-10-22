@@ -1,0 +1,149 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "history-and-log-tampering"
+  annotations:
+    description: "Deletion, renaming, truncation or symlinking of shell history files and deletion or truncation of /var/log files outside log rotation"
+spec:
+  kprobes:
+  - call: "sys_unlinkat"
+    syscall: true
+    message: "History or log file deleted"
+    args:
+    - index: 0
+      type: "int"
+    - index: 1
+      type: "string"
+    - index: 2
+      type: "int"
+    selectors:
+    - matchArgs:
+      - index: 1
+        operator: "Postfix"
+        values:
+        - "_history"
+    - matchArgs:
+      - index: 1
+        operator: "Prefix"
+        values:
+        - "/var/log/"
+      - index: 2
+        operator: "Equal"
+        values:
+        - "0"
+      matchBinaries:
+      - operator: "NotIn"
+        values:
+        - "/usr/sbin/logrotate"
+        - "/sbin/logrotate"
+        - "/usr/bin/savelog"
+        - "/bin/savelog"
+        - "/usr/bin/gzip"
+        - "/bin/gzip"
+        - "/usr/bin/bzip2"
+        - "/usr/bin/xz"
+        - "/usr/bin/zstd"
+        - "/usr/sbin/rsyslogd"
+    tags: ["mitre.defense_evasion", "T1070.003", "T1070.002"]
+  - call: "sys_unlink"
+    syscall: true
+    message: "History or log file deleted"
+    args:
+    - index: 0
+      type: "string"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "_history"
+    - matchArgs:
+      - index: 0
+        operator: "Prefix"
+        values:
+        - "/var/log/"
+      matchBinaries:
+      - operator: "NotIn"
+        values:
+        - "/usr/sbin/logrotate"
+        - "/sbin/logrotate"
+        - "/usr/bin/savelog"
+        - "/bin/savelog"
+        - "/usr/bin/gzip"
+        - "/bin/gzip"
+        - "/usr/bin/bzip2"
+        - "/usr/bin/xz"
+        - "/usr/bin/zstd"
+        - "/usr/sbin/rsyslogd"
+    ignore:
+      callNotFound: true
+    tags: ["mitre.defense_evasion", "T1070.003", "T1070.002"]
+  - call: "sys_renameat2"
+    syscall: true
+    message: "History file renamed or replaced"
+    args:
+    - index: 0
+      type: "int"
+    - index: 1
+      type: "string"
+    - index: 2
+      type: "int"
+    - index: 3
+      type: "string"
+    selectors:
+    - matchArgs:
+      - index: 1
+        operator: "Postfix"
+        values:
+        - "_history"
+    - matchArgs:
+      - index: 3
+        operator: "Postfix"
+        values:
+        - "_history"
+    tags: ["mitre.defense_evasion", "T1070.003"]
+  - call: "sys_symlinkat"
+    syscall: true
+    message: "History file replaced by a symbolic link"
+    args:
+    - index: 0
+      type: "string"
+    - index: 1
+      type: "int"
+    - index: 2
+      type: "string"
+    selectors:
+    - matchArgs:
+      - index: 2
+        operator: "Postfix"
+        values:
+        - "_history"
+    tags: ["mitre.defense_evasion", "T1070.003"]
+  - call: "security_file_truncate"
+    syscall: false
+    message: "History or log file truncated"
+    args:
+    - index: 0
+      type: "file"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "_history"
+    - matchArgs:
+      - index: 0
+        operator: "Prefix"
+        values:
+        - "/var/log/"
+      matchBinaries:
+      - operator: "NotIn"
+        values:
+        - "/usr/sbin/logrotate"
+        - "/sbin/logrotate"
+        - "/usr/bin/savelog"
+        - "/bin/savelog"
+        - "/usr/sbin/rsyslogd"
+    ignore:
+      callNotFound: true
+    tags: ["mitre.defense_evasion", "T1070.003", "T1070.002"]

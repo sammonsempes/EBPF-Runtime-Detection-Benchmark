@@ -1,0 +1,18 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-interpreter-spawned-shell"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/dash", "fromSource": [{"path": "/usr/bin/python3"}, {"path": "/usr/bin/python3.12"}, {"path": "/usr/bin/perl"}, {"path": "/usr/bin/ruby"}, {"path": "/usr/bin/php"}, {"path": "/usr/bin/node"}]},
+        {"path": "/usr/bin/bash", "fromSource": [{"path": "/usr/bin/python3"}, {"path": "/usr/bin/python3.12"}, {"path": "/usr/bin/perl"}, {"path": "/usr/bin/ruby"}, {"path": "/usr/bin/php"}, {"path": "/usr/bin/node"}]},
+        {"path": "/bin/sh", "fromSource": [{"path": "/usr/bin/python3"}, {"path": "/usr/bin/python3.12"}, {"path": "/usr/bin/perl"}, {"path": "/usr/bin/ruby"}, {"path": "/usr/bin/php"}, {"path": "/usr/bin/node"}]}
+      ]
+    },
+    "message": "Scripting interpreter spawned a shell",
+    "severity": 7,
+    "tags": ["MITRE", "MITRE_T1059.006_python", "MITRE_TA0002_execution"],
+    "action": "Block"
+  }
+}

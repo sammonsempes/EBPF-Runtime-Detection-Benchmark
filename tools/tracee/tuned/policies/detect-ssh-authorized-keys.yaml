@@ -1,0 +1,14 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-ssh-authorized-keys
+  annotations:
+    description: T1098.004 write access to an SSH authorized_keys file
+spec:
+  scope:
+    - container
+  rules:
+    - event: security_file_open
+      filters:
+        - data.pathname=*/.ssh/authorized_keys,*/.ssh/authorized_keys2
+        - data.flags=O_WRONLY*,O_RDWR*

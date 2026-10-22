@@ -1,0 +1,18 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-log-tampering
+  annotations:
+    description: T1070.002 system logs overwritten or truncated by generic tools instead of the log rotation tooling
+spec:
+  scope:
+    - container
+  rules:
+    - event: security_file_open
+      filters:
+        - data.pathname=/var/log/*
+        - data.flags=O_WRONLY|O_TRUNC*,O_RDWR|O_TRUNC*,O_WRONLY|O_CREAT|O_TRUNC*,O_RDWR|O_CREAT|O_TRUNC*
+        - comm=truncate,sh,dash,bash,shred,tee,cp,sed
+    - event: sched_process_exec
+      filters:
+        - data.pathname=/usr/bin/truncate

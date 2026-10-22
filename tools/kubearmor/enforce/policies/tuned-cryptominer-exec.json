@@ -1,0 +1,22 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-cryptominer-exec"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"execname": "xmrig"},
+        {"execname": "xmr-stak"},
+        {"execname": "minerd"},
+        {"execname": "cpuminer"},
+        {"execname": "ethminer"},
+        {"execname": "t-rex"},
+        {"execname": "nbminer"}
+      ]
+    },
+    "message": "Known cryptocurrency miner executed",
+    "severity": 9,
+    "tags": ["MITRE", "MITRE_T1496_resource_hijacking", "MITRE_TA0040_impact"],
+    "action": "Block"
+  }
+}

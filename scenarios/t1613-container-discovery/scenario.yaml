@@ -1,0 +1,13 @@
+id: t1613-container-discovery
+name: Container environment enumeration
+kind: attack
+tactic: discovery
+technique: T1613
+description: >-
+  Enumerates the container environment the way breakout tooling such as deepce or
+  amicontained does: /.dockerenv, /proc/1/cgroup and /proc/self/cgroup, the cgroup
+  filesystem, /proc/self/mountinfo, the capability sets in /proc/self/status decoded
+  with capsh, seccomp and no_new_privs status, PID 1 command line and container
+  related environment variables.
+timeout: 30
+requires: []

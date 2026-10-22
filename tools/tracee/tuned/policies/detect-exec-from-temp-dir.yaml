@@ -1,0 +1,13 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-exec-from-temp-dir
+  annotations:
+    description: T1105 T1036.005 execution of a binary located in a world writable temporary directory
+spec:
+  scope:
+    - container
+  rules:
+    - event: sched_process_exec
+      filters:
+        - data.pathname=/tmp/*,/var/tmp/*,/dev/shm/*

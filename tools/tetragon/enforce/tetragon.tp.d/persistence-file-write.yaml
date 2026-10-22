@@ -1,0 +1,109 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "persistence-file-write"
+  annotations:
+    description: "Deny and kill writes from containers to cron, systemd and init definitions, SSH authorized_keys and the local account databases"
+spec:
+  kprobes:
+  - call: "security_file_permission"
+    syscall: false
+    message: "Persistence location written"
+    args:
+    - index: 0
+      type: "file"
+    - index: 1
+      type: "int"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "Prefix"
+        values:
+        - "/etc/cron"
+        - "/var/spool/cron/"
+      - index: 1
+        operator: "Equal"
+        values:
+        - "2"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 0
+        operator: "Prefix"
+        values:
+        - "/etc/systemd/system/"
+        - "/lib/systemd/system/"
+        - "/usr/lib/systemd/system/"
+        - "/etc/init.d/"
+        - "/etc/rc.local"
+      - index: 1
+        operator: "Equal"
+        values:
+        - "2"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "/.ssh/authorized_keys"
+        - "/.ssh/authorized_keys2"
+      - index: 1
+        operator: "Equal"
+        values:
+        - "2"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 0
+        operator: "Prefix"
+        values:
+        - "/etc/passwd"
+        - "/etc/shadow"
+        - "/etc/group"
+        - "/etc/gshadow"
+        - "/etc/sudoers"
+      - index: 1
+        operator: "Equal"
+        values:
+        - "2"
+      matchBinaries:
+      - operator: "NotIn"
+        values:
+        - "/usr/bin/dpkg"
+        - "/usr/bin/apt"
+        - "/usr/bin/apt-get"
+        - "/usr/bin/rpm"
+        - "/usr/bin/dnf"
+        - "/usr/bin/yum"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    tags: ["mitre.persistence", "T1053.003", "T1543.002", "T1098.004", "T1136.001"]

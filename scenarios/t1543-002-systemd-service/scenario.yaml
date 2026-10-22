@@ -1,0 +1,12 @@
+id: t1543-002-systemd-service
+name: Systemd service unit created and enabled
+kind: attack
+tactic: persistence
+technique: T1543.002
+description: >-
+  Creates /etc/systemd/system/bench-<marker>.service with Restart=always and enables it
+  the way systemctl enable does, by symlinking it into multi-user.target.wants. systemd
+  is not running in the container; the unit file write and symlink are the behavior.
+  Both are removed afterwards.
+timeout: 30
+requires: []

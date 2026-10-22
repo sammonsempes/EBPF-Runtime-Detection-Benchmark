@@ -1,0 +1,13 @@
+json_output: true
+json_include_output_property: true
+json_include_output_fields_property: true
+json_include_tags_property: true
+buffered_outputs: false
+stdout_output:
+  enabled: true
+syslog_output:
+  enabled: false
+log_stderr: true
+log_syslog: false
+engine:
+  kind: modern_ebpf

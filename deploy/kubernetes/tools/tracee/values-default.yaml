@@ -1,0 +1,6 @@
+image:
+  tag: "0.24.1"
+  pullPolicy: IfNotPresent
+defaultPolicy: false
+operator:
+  create: false

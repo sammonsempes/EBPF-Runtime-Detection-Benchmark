@@ -1,0 +1,11 @@
+id: t1485-data-destruction
+name: Files shredded and deleted
+kind: attack
+tactic: impact
+technique: T1485
+description: >-
+  Creates /tmp/bench-destruction-<marker>/documents with 20 random 4 KiB files, then
+  overwrites and unlinks them with shred -u -z -n 1 and removes the directory tree with
+  rm -rf. Only files created by the script itself are destroyed.
+timeout: 30
+requires: []

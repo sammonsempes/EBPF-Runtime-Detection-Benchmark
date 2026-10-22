@@ -1,0 +1,16 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-cryptominer
+  annotations:
+    description: T1496 execution or network activity of a known cryptocurrency miner
+spec:
+  scope:
+    - container
+  rules:
+    - event: sched_process_exec
+      filters:
+        - comm=xmrig,xmr-stak,minerd,cpuminer,ethminer,t-rex,nbminer
+    - event: security_socket_connect
+      filters:
+        - comm=xmrig,xmr-stak,minerd,cpuminer,ethminer,t-rex,nbminer

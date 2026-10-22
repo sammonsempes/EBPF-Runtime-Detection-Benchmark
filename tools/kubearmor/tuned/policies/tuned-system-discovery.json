@@ -1,0 +1,24 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-system-discovery"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/uname"},
+        {"path": "/usr/bin/hostnamectl"},
+        {"path": "/usr/bin/lscpu"},
+        {"path": "/usr/bin/lsb_release"},
+        {"path": "/usr/sbin/dmidecode"},
+        {"path": "/usr/bin/lsmod"},
+        {"path": "/usr/sbin/lsmod"},
+        {"path": "/usr/bin/lspci"},
+        {"path": "/usr/bin/lsblk"}
+      ]
+    },
+    "message": "System information discovery",
+    "severity": 3,
+    "tags": ["MITRE", "MITRE_T1082_system_information_discovery", "MITRE_TA0007_discovery"],
+    "action": "Audit"
+  }
+}

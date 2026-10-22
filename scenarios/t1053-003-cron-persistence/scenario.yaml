@@ -1,0 +1,11 @@
+id: t1053-003-cron-persistence
+name: Cron job dropped in /etc/cron.d
+kind: attack
+tactic: persistence
+technique: T1053.003
+description: >-
+  Writes /etc/cron.d/bench-<marker> containing a job running every minute as root,
+  prints it, then removes it. The cron daemon is not started, the file creation in
+  /etc/cron.d is the behavior.
+timeout: 30
+requires: []

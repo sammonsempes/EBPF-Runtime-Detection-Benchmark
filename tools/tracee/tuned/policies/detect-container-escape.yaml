@@ -1,0 +1,14 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-container-escape
+  annotations:
+    description: T1611 namespace switching tools or filesystem mounts from inside a container
+spec:
+  scope:
+    - container
+  rules:
+    - event: sched_process_exec
+      filters:
+        - data.pathname=/usr/bin/nsenter,/usr/bin/unshare,/usr/sbin/chroot,/usr/bin/mknod
+    - event: security_sb_mount

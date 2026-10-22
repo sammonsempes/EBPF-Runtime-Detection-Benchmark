@@ -1,0 +1,29 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-container-discovery"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/sbin/capsh"},
+        {"path": "/usr/bin/capsh"},
+        {"path": "/usr/sbin/getpcaps"},
+        {"path": "/usr/bin/amicontained"},
+        {"path": "/usr/bin/deepce"}
+      ]
+    },
+    "file": {
+      "matchPaths": [
+        {"path": "/.dockerenv"},
+        {"path": "/run/.containerenv"},
+        {"path": "/proc/1/cgroup"},
+        {"path": "/proc/1/environ"},
+        {"path": "/proc/self/cgroup", "fromSource": [{"path": "/usr/bin/cat"}, {"path": "/usr/bin/grep"}, {"path": "/usr/bin/head"}, {"path": "/usr/bin/awk"}, {"path": "/usr/bin/mawk"}]}
+      ]
+    },
+    "message": "Container environment discovery",
+    "severity": 4,
+    "tags": ["MITRE", "MITRE_T1613_container_and_resource_discovery", "MITRE_TA0007_discovery"],
+    "action": "Audit"
+  }
+}

@@ -1,0 +1,47 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "netcat-outbound-connect"
+  annotations:
+    description: "Kill netcat inside containers when it opens outbound TCP connections; observe it on the host"
+spec:
+  kprobes:
+  - call: "tcp_connect"
+    syscall: false
+    message: "Netcat opened an outbound TCP connection"
+    args:
+    - index: 0
+      type: "sock"
+    selectors:
+    - matchBinaries:
+      - operator: "In"
+        values:
+        - "/bin/nc"
+        - "/usr/bin/nc"
+        - "/bin/nc.openbsd"
+        - "/usr/bin/nc.openbsd"
+        - "/bin/nc.traditional"
+        - "/usr/bin/nc.traditional"
+        - "/bin/netcat"
+        - "/usr/bin/netcat"
+        - "/usr/bin/ncat"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Sigkill
+    - matchBinaries:
+      - operator: "In"
+        values:
+        - "/bin/nc"
+        - "/usr/bin/nc"
+        - "/bin/nc.openbsd"
+        - "/usr/bin/nc.openbsd"
+        - "/bin/nc.traditional"
+        - "/usr/bin/nc.traditional"
+        - "/bin/netcat"
+        - "/usr/bin/netcat"
+        - "/usr/bin/ncat"
+    tags: ["mitre.discovery", "T1046"]

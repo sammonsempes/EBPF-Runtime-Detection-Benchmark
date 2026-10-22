@@ -1,0 +1,26 @@
+tool: tracee
+namespace: ebpf-bench-tracee
+release: tracee
+install:
+  type: helm
+  repo: https://aquasecurity.github.io/helm-charts
+  chart: tracee
+  version: 0.24.1
+  values:
+    default: values-default.yaml
+    tuned: values-tuned.yaml
+  set_file:
+    configFile: config.yaml
+agent:
+  selector: app.kubernetes.io/name=tracee,app.kubernetes.io/instance=tracee
+  log_containers: [tracee]
+  alerts_container: tracee
+  ready_pattern: adapter
+custom_resources:
+  - source: policies
+    format: manifest
+    group: tracee.aquasec.com
+    version: v1beta1
+    plural: policies
+    namespaced: false
+restart_after_resources: true

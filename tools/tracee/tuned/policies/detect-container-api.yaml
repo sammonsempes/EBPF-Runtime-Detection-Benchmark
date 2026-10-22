@@ -1,0 +1,14 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-container-api
+  annotations:
+    description: T1552.007 T1528 service account token read or container runtime socket access
+spec:
+  scope:
+    - container
+  rules:
+    - event: k8s_service_account_token
+    - event: security_file_open
+      filters:
+        - data.pathname=*/secrets/kubernetes.io/serviceaccount/token,*/docker.sock,*/containerd.sock,*/crio.sock

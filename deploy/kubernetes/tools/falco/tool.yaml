@@ -1,0 +1,22 @@
+tool: falco
+namespace: ebpf-bench-falco
+release: falco
+install:
+  type: helm
+  repo: https://falcosecurity.github.io/charts
+  chart: falco
+  version: 9.1.0
+  values:
+    default: values-default.yaml
+    tuned: values-tuned.yaml
+agent:
+  selector: app.kubernetes.io/name=falco,app.kubernetes.io/instance=falco
+  log_containers: [falco]
+  alerts_container: falco
+  ready_pattern: adapter
+configmaps:
+  - name: bench-falco-config
+    source: falco.bench.yaml
+  - name: bench-falco-rules
+    source: rules.d
+    optional: true

@@ -1,0 +1,18 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-block-exec-inside-tmp"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchDirectories": [
+        {"dir": "/tmp/", "recursive": true},
+        {"dir": "/var/tmp/", "recursive": true},
+        {"dir": "/dev/shm/", "recursive": true}
+      ]
+    },
+    "message": "Alert! Execution attempted inside tmp folder",
+    "severity": 6,
+    "tags": ["CIS", "CIS-control-1.1.5", "MITRE", "MITRE_T1105_ingress_tool_transfer", "MITRE_T1036.005_match_legitimate_name_or_location"],
+    "action": "Audit"
+  }
+}

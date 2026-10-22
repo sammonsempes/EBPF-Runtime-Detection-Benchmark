@@ -1,0 +1,13 @@
+id: t1059-004-reverse-shell
+name: Reverse shell with bash /dev/tcp
+kind: attack
+tactic: execution
+technique: T1059.004
+description: >-
+  Starts an interactive bash whose stdin, stdout and stderr are redirected to a TCP
+  socket opened with the bash /dev/tcp pseudo device towards $BENCH_ATTACKER:4444.
+  The attacker sink sends id, uname -a, hostname and exit, then closes. The shell
+  history is disabled so the scenario leaves no trace. BENCH_MARKER is the $0 of the
+  outer bash -c.
+timeout: 30
+requires: [attacker]

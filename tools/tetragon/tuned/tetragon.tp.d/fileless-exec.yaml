@@ -1,0 +1,30 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "fileless-exec"
+  annotations:
+    description: "execveat on a file descriptor with AT_EMPTY_PATH inside a container, the fexecve pattern used to run memfd_create payloads"
+spec:
+  kprobes:
+  - call: "sys_execveat"
+    syscall: true
+    message: "Program executed from a file descriptor"
+    args:
+    - index: 0
+      type: "int"
+    - index: 1
+      type: "string"
+    - index: 4
+      type: "int"
+    selectors:
+    - matchArgs:
+      - index: 4
+        operator: "Mask"
+        values:
+        - "4096"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+    tags: ["mitre.defense_evasion", "T1620"]

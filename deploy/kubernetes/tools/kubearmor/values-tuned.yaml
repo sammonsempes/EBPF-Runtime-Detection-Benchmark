@@ -1,0 +1,18 @@
+environment:
+  name: generic
+kubearmorRelay:
+  enabled: false
+kubearmorInit:
+  image:
+    tag: v1.7.5
+  imagePullPolicy: IfNotPresent
+kubearmorController:
+  image:
+    tag: v1.7.5
+  imagePullPolicy: IfNotPresent
+kubearmor:
+  image:
+    tag: v1.7.5
+  imagePullPolicy: IfNotPresent
+  args:
+    - "-logPath=/dev/stdout"

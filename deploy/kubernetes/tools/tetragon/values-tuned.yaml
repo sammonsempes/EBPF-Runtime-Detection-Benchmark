@@ -1,0 +1,13 @@
+imagePullPolicy: IfNotPresent
+tetragon:
+  hostProcPath: /procHost
+  enableK8sAPI: true
+  exportDenyList: |-
+    {"health_check":true}
+tetragonOperator:
+  image:
+    pullPolicy: IfNotPresent
+  tracingPolicy:
+    enabled: true
+export:
+  mode: stdout

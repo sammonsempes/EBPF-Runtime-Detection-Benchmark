@@ -1,0 +1,41 @@
+tool: pulsar
+version: "0.10.1"
+license: Apache-2.0 AND GPL-2.0
+deployment:
+  linux: official multi-arch image ghcr.io/exein-io/pulsar:v0.10.1 (entrypoint pulsard) run privileged with host PID namespace, /sys/kernel/debug, /sys/kernel/btf, /sys/fs/bpf and /var/lib/docker mounted
+  kubernetes: none upstream
+  steps: 2
+rules:
+  language: YAML rule files (name, type, category, severity, description, condition) with a typed condition DSL over event header and payload (==, !=, <, >, STARTS_WITH, ENDS_WITH, CONTAINS, IN, AND/OR/NOT, is_some())
+  custom_rules: true
+  hot_reload: true
+output:
+  formats: [json, plaintext, syslog]
+  enrichment: [container, image, user]
+  attack_mapping: false
+response:
+  blocking: false
+  mechanisms: []
+  synchronous: null
+  notes: >-
+    v0.10.1 has no response or enforcement capability: the modules are process-monitor, file-system-monitor,
+    network-monitor, rules-engine, threat-logger, desktop-notifier and smtp-notifier, and rules only have name, type,
+    category, severity, description and condition fields (no action). A matching rule only emits a threat event, so no
+    enforce profile is provided.
+scores:
+  deployment: 4
+  rule_customization: 4
+  output_quality: 4
+notes: >-
+  Deployment 4: upstream publishes release binaries (pulsard-<arch>[-static], pulsar-<arch>[-static], pulsar-install.sh)
+  and the release workflow pushes ghcr.io/exein-io/pulsar:<tag> built from .github/docker/Dockerfile with the default
+  config and rules baked in; the quickstart is 2 commands (install script, `pulsard`), and the image only needs the usual
+  eBPF privileges and mounts plus /var/lib/docker for container enrichment. No Helm chart or manifest upstream.
+  Rule customization 4: 47 default YAML rule files in rules/ (Elastic detection-rules based) loaded recursively from
+  /var/lib/pulsar/rules; the DSL is declarative and typed but has no regex, no process ancestry and only per-event fields.
+  hot_reload is true because the rules-engine on_config_change hook rebuilds the engine from disk when its configuration
+  is changed at runtime through `pulsar config` / the engine API (no file watcher); this was removed after 0.10.1.
+  Output quality 4: threat-logger prints threat events as JSON (`output_format=json`) with header (image, pid, parent_pid,
+  uid, gid, container id/name/image/image_digest/layers, threat source/description/extra) and the typed payload; the rule
+  name is threat.description and extra holds category, severity, description and condition. No ATT&CK ids (only a
+  category), no ancestry beyond parent_pid, timestamps are serialized as secs/nanos since epoch.

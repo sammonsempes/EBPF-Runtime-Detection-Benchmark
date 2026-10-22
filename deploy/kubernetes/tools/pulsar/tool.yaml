@@ -1,0 +1,13 @@
+tool: pulsar
+namespace: ebpf-bench-pulsar
+release: pulsar
+install:
+  type: manifests
+  manifests: [daemonset.yaml]
+  container: pulsar
+  from_adapter: true
+agent:
+  selector: app.kubernetes.io/name=pulsar
+  log_containers: [pulsar]
+  alerts_container: pulsar
+  ready_pattern: adapter

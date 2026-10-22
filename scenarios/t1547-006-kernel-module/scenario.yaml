@@ -1,0 +1,13 @@
+id: t1547-006-kernel-module
+name: Kernel module load attempt with insmod
+kind: attack
+tactic: persistence
+technique: T1547.006
+description: >-
+  Writes a dummy, non ELF file /tmp/bench-module-<marker>.ko and calls insmod on it,
+  which issues the finit_module syscall. The kernel always rejects the file
+  (ENOEXEC "Invalid module format", or EPERM without CAP_SYS_MODULE), so nothing is
+  ever loaded; the load attempt itself is the behavior. The scenario exits 0 when
+  insmod reports that the kernel refused the module, i.e. the syscall was issued.
+timeout: 30
+requires: [privileged]

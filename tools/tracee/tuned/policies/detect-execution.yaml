@@ -1,0 +1,13 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-shell-network-connect
+  annotations:
+    description: T1059.004 a shell process opens an outbound network connection (bash /dev/tcp reverse shell)
+spec:
+  scope:
+    - container
+  rules:
+    - event: security_socket_connect
+      filters:
+        - comm=bash,sh,dash,zsh,ash

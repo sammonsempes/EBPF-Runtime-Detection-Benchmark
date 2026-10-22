@@ -1,0 +1,10 @@
+id: t1222-002-permission-modification
+name: World writable /etc/shadow
+kind: attack
+tactic: defense-evasion
+technique: T1222.002
+description: >-
+  Records the mode of /etc/shadow, runs chmod 777 on it, shows the new mode and
+  restores the original mode on exit.
+timeout: 30
+requires: []

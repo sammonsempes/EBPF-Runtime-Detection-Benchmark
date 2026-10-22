@@ -1,0 +1,32 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-account-manipulation"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/sbin/useradd"},
+        {"path": "/usr/sbin/adduser"},
+        {"path": "/usr/sbin/usermod"},
+        {"path": "/usr/sbin/groupadd"},
+        {"path": "/usr/sbin/chpasswd"},
+        {"path": "/usr/bin/passwd"},
+        {"path": "/usr/bin/gpasswd"}
+      ]
+    },
+    "file": {
+      "matchPaths": [
+        {"path": "/etc/passwd", "readOnly": true},
+        {"path": "/etc/group", "readOnly": true},
+        {"path": "/etc/sudoers", "readOnly": true}
+      ],
+      "matchDirectories": [
+        {"dir": "/etc/sudoers.d/", "readOnly": true, "recursive": true}
+      ]
+    },
+    "message": "Local account created or modified",
+    "severity": 7,
+    "tags": ["MITRE", "MITRE_T1136.001_local_account", "MITRE_TA0003_persistence"],
+    "action": "Audit"
+  }
+}

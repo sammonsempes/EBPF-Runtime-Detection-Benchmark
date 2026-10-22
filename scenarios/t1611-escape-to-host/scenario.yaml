@@ -1,0 +1,16 @@
+id: t1611-escape-to-host
+name: Host filesystem mounted from a privileged container
+kind: attack
+tactic: privilege-escalation
+technique: T1611
+description: >-
+  From the privileged victim, finds the host block device backing /etc/hostname in
+  /proc/self/mountinfo, creates a device node with mknod when /dev does not expose it,
+  and mounts that host filesystem under /tmp/bench-hostfs-<marker>. The mount is read
+  only (ro, or a rw mount of the already mounted superblock immediately remounted
+  bind,ro when the kernel refuses to change the superblock read only state). It lists
+  the host root and Docker container directory, then unmounts and removes everything.
+  It also runs nsenter into the namespaces of PID 1. Nothing is ever written to the
+  host filesystem. Exits 0 when the host filesystem was mounted and listed.
+timeout: 60
+requires: [privileged]

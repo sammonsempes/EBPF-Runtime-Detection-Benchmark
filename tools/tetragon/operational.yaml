@@ -1,0 +1,42 @@
+tool: tetragon
+version: "1.7.1"
+license: Apache-2.0
+deployment:
+  linux: Official quay.io/cilium/tetragon:v1.7.1 image as one privileged container (host PID, cgroup and network namespaces) with BTF, bpffs and host /proc mounted, TracingPolicies loaded from a mounted tetragon.tp.d and JSON events exported to a bind-mounted file
+  kubernetes: Official Helm chart cilium/tetragon (agent DaemonSet, operator installing the TracingPolicy CRDs, export-stdout sidecar)
+  steps: 2
+rules:
+  language: TracingPolicy YAML (Kubernetes CRD format) attaching kprobes, tracepoints, uprobes or LSM hooks with in-kernel selectors (matchArgs, matchBinaries, matchNamespaces, matchCapabilities) and actions
+  custom_rules: true
+  hot_reload: true
+output:
+  formats: [json]
+  enrichment: [container, kubernetes]
+  attack_mapping: false
+response:
+  blocking: true
+  mechanisms: [sigkill, override]
+  synchronous: true
+  notes: >
+    Selectors can carry Sigkill, Signal and Override actions executed synchronously in the kernel
+    (docs/content/en/docs/concepts/enforcement/_index.md). Override returns an error from syscalls and security_*
+    hooks without running them and requires bpf_override_return support (CONFIG_BPF_KPROBE_OVERRIDE); Sigkill works on
+    any hook but does not guarantee the in-flight operation is stopped. Enforcement events are regular process_kprobe
+    events whose action field is KPROBE_ACTION_SIGKILL or KPROBE_ACTION_OVERRIDE, and the killed process ends with a
+    process_exit carrying signal SIGKILL.
+scores:
+  deployment: 5
+  rule_customization: 4
+  output_quality: 4
+notes: >
+  Deployment 5: docs/content/en/docs/installation/container.md runs the stable image with a single privileged docker run
+  (only the BTF file is mounted) and the Helm chart installs with defaults; the benchmark adds bpffs, /procRoot and an export
+  file location, mirroring the chart's tetragon_configmap.yaml (procfs /procRoot, export-filename).
+  Rule customization 4: policies are declarative and can be added or removed at runtime (TracingPolicy CRDs, tetra
+  tracingpolicy add), but they are low level: authors must know kernel function or syscall names and argument types, a hook
+  takes at most 5 selectors and 5 argument filters, integer filters accept at most 4 values (pkg/selectors/kernel.go), a
+  policy referencing a missing symbol fails unless ignore.callNotFound is set, and there is no correlation across events.
+  Output quality 4: JSON events carry process and parent (binary, arguments, uid, exec_id, start time), optional full
+  ancestry (enable-ancestors), pod/container/workload metadata on Kubernetes and the cgroup-derived container id ("docker")
+  elsewhere, plus policy_name, message and user-defined tags; there is no built-in ATT&CK mapping or severity, and outside
+  Kubernetes the container name and image are not resolved.

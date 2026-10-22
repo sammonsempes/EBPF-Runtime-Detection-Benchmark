@@ -1,0 +1,13 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-data-destruction
+  annotations:
+    description: T1485 secure deletion tools executed in a container
+spec:
+  scope:
+    - container
+  rules:
+    - event: sched_process_exec
+      filters:
+        - data.pathname=/usr/bin/shred,/usr/bin/wipe,/usr/bin/srm,/usr/sbin/wipefs

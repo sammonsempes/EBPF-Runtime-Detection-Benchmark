@@ -1,0 +1,12 @@
+id: t1070-003-clear-history
+name: Shell history cleared
+kind: attack
+tactic: defense-evasion
+technique: T1070.003
+description: >-
+  Clears /root/.bash_history (seeded by the victim image) with the usual sequence:
+  bash history -c / history -w, truncate -s 0, rm -f, then replaces it with a symlink
+  to /dev/null. The original history is backed up to /tmp/bench-history-<marker>.bak
+  first and restored on exit.
+timeout: 30
+requires: []

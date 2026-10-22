@@ -1,0 +1,48 @@
+tool: kubearmor
+version: "1.7.5"
+license: Apache-2.0
+deployment:
+  linux: single privileged container kubearmor/kubearmor:v1.7.5 in non-Kubernetes mode (k8s=false, container policies only, config via KUBEARMOR_CFG), docker socket, bpffs and securityfs mounted, policies restored from /opt/kubearmor/policies, alerts written as JSON lines with -logPath; blocking needs a BPF-LSM enabled host kernel
+  kubernetes: official Helm chart (deployments/helm, kubearmor-operator) or karmor install, policies as KubeArmorPolicy CRDs
+  steps: 2
+rules:
+  language: declarative KubeArmorPolicy YAML (process, file, network, capabilities, syscalls and presets rules with matchPaths, matchDirectories, matchPatterns, fromSource, Allow/Audit/Block actions)
+  custom_rules: true
+  hot_reload: true
+output:
+  formats: [json]
+  enrichment: [container, kubernetes]
+  attack_mapping: false
+response:
+  blocking: true
+  mechanisms: [bpf-lsm, apparmor, selinux-host-only, presets]
+  synchronous: true
+  notes: >-
+    Block rules are enforced in the kernel by the LSM picked from the lsm order (enforcer/runtimeEnforcer.go selectLsm):
+    BPF-LSM needs CONFIG_BPF_LSM and "bpf" in /sys/kernel/security/lsm (boot parameter lsm=...,bpf, getting-started/FAQ.md);
+    it attaches to already running containers through their pid/mnt namespaces, so it works for unorchestrated Docker
+    containers without runner changes. AppArmor enforcement needs host AppArmor, apparmor_parser and /etc/apparmor.d, and
+    the workload must run under the KubeArmor generated profile kubearmor_<container> (docker --security-opt apparmor=...),
+    which the benchmark victims do not; SELinux is only used for host policies outside Kubernetes. The enforce profile pins
+    lsm=bpf; on hosts without BPF-LSM KubeArmor silently falls back to another or no enforcer and Block rules become alerts
+    with Result Passed (getting-started/FAQ.md, "If Block policy is used and there are no supported enforcement mechanism").
+    A blocked operation is reported as action Block with Result "Permission denied" (or another errno text such as
+    "Operation not permitted") and Enforcer BPFLSM. Presets (filelessExec, anonymousMapExec...) require BPF-LSM. WSL2 has no
+    securityfs, so no blocking there.
+scores:
+  deployment: 3
+  rule_customization: 4
+  output_quality: 4
+notes: >-
+  deployment 3: outside Kubernetes the daemon must be started with k8s=false and policy flags (deployments/podman/docker-compose.yaml,
+  KubeArmor/packaging/kubearmor.yaml), upstream pairs it with the kubearmor-init container that compiles the eBPF objects against the
+  host kernel (Dockerfile.init, build/compile.sh), it needs the container runtime socket, bpffs, securityfs and debugfs, and policies
+  can only be fed through the gRPC PolicyService (karmor vm policy add) or the JSON backup directory /opt/kubearmor/policies read at
+  startup (core/unorchestratedUpdates.go restoreKubeArmorPolicies). Helm and the operator make the Kubernetes path simpler.
+  rule_customization 4: policies are declarative and applied live (CRD watchers in Kubernetes, gRPC PolicyService outside), but
+  expressiveness is limited to paths, directories, glob patterns, source binaries and protocols; arguments can only be matched for
+  Allow lists (matchArgs) and there is no correlation; Audit rules need visibility enabled (getting-started/kubearmor_visibility.md).
+  output_quality 4: JSON per event (types/types.go Log struct) with container id/name/image, pod, namespace, labels, host and
+  container pids, parent process name, source command line, policy name, severity, tags, message, action and result; ATT&CK mapping
+  only exists when the policy author puts MITRE tags in the policy (hardening templates do), there is no built-in technique field
+  and no ancestry beyond the parent.

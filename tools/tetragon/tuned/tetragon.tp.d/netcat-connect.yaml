@@ -1,0 +1,28 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "netcat-outbound-connect"
+  annotations:
+    description: "Netcat opening outbound TCP connections, used for port scans, reverse shells and ad-hoc transfers"
+spec:
+  kprobes:
+  - call: "tcp_connect"
+    syscall: false
+    message: "Netcat opened an outbound TCP connection"
+    args:
+    - index: 0
+      type: "sock"
+    selectors:
+    - matchBinaries:
+      - operator: "In"
+        values:
+        - "/bin/nc"
+        - "/usr/bin/nc"
+        - "/bin/nc.openbsd"
+        - "/usr/bin/nc.openbsd"
+        - "/bin/nc.traditional"
+        - "/usr/bin/nc.traditional"
+        - "/bin/netcat"
+        - "/usr/bin/netcat"
+        - "/usr/bin/ncat"
+    tags: ["mitre.discovery", "T1046"]

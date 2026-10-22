@@ -1,0 +1,11 @@
+id: t1136-001-create-account
+name: Local account created with useradd
+kind: attack
+tactic: persistence
+technique: T1136.001
+description: >-
+  Creates a local account named bench<sanitized marker> with useradd (home directory,
+  bash shell, GECOS comment "bench <marker>"), sets its password with chpasswd, then
+  deletes it with userdel -r. Writes /etc/passwd, /etc/shadow and /etc/group.
+timeout: 30
+requires: []

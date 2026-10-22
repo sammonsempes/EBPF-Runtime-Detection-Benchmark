@@ -1,0 +1,39 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "harden-network-service-scanning"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/netstat"},
+        {"path": "/bin/netstat"},
+        {"path": "/usr/sbin/ip"},
+        {"path": "/usr/bin/ip"},
+        {"path": "/sbin/ip"},
+        {"path": "/bin/ip"},
+        {"path": "/usr/sbin/iw"},
+        {"path": "/sbin/iw"},
+        {"path": "/usr/sbin/ethtool"},
+        {"path": "/sbin/ethtool"},
+        {"path": "/usr/sbin/ifconfig"},
+        {"path": "/sbin/ifconfig"},
+        {"path": "/usr/sbin/arp"},
+        {"path": "/sbin/arp"},
+        {"path": "/usr/sbin/iwconfig"},
+        {"path": "/sbin/iwconfig"},
+        {"path": "/usr/bin/nc"},
+        {"path": "/usr/bin/nc.openbsd"},
+        {"path": "/usr/bin/nc.traditional"},
+        {"path": "/usr/bin/ncat"},
+        {"path": "/usr/bin/netcat"},
+        {"path": "/usr/bin/nmap"},
+        {"path": "/usr/bin/masscan"},
+        {"path": "/usr/bin/ss"}
+      ]
+    },
+    "message": "Network service has been scanned!",
+    "severity": 5,
+    "tags": ["MITRE", "FGT1046", "CIS", "MITRE_T1046_network_service_discovery"],
+    "action": "Block"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-data-destruction"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/shred"},
+        {"path": "/usr/bin/wipe"},
+        {"path": "/usr/bin/srm"},
+        {"path": "/usr/sbin/wipefs"},
+        {"path": "/usr/bin/wipefs"}
+      ]
+    },
+    "message": "Secure deletion tool executed",
+    "severity": 8,
+    "tags": ["MITRE", "MITRE_T1485_data_destruction", "MITRE_TA0040_impact"],
+    "action": "Block"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-systemd-unit-mod"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchDirectories": [
+        {"dir": "/etc/systemd/system/", "readOnly": true, "recursive": true},
+        {"dir": "/usr/lib/systemd/system/", "readOnly": true, "recursive": true},
+        {"dir": "/lib/systemd/system/", "readOnly": true, "recursive": true},
+        {"dir": "/etc/init.d/", "readOnly": true, "recursive": true}
+      ]
+    },
+    "message": "System service unit created or modified",
+    "severity": 7,
+    "tags": ["MITRE", "MITRE_T1543.002_systemd_service", "MITRE_TA0003_persistence"],
+    "action": "Audit"
+  }
+}

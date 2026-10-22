@@ -1,0 +1,13 @@
+id: t1082-system-discovery
+name: System information discovery
+kind: attack
+tactic: discovery
+technique: T1082
+description: >-
+  Collects host information the way a post exploitation survey script does: uname -a,
+  /proc/version, /etc/os-release, hostname, machine id, lscpu and /proc/cpuinfo,
+  /proc/meminfo, uptime, network interfaces and routes with ip, mounted filesystems,
+  and a walk over /proc/<pid>/comm and cmdline for every process (hostnamectl style
+  inventory without systemd).
+timeout: 30
+requires: []

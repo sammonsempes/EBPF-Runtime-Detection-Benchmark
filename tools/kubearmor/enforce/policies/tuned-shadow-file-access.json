@@ -1,0 +1,19 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-shadow-file-access"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchPaths": [
+        {"path": "/etc/shadow"},
+        {"path": "/etc/gshadow"},
+        {"path": "/etc/shadow-"},
+        {"path": "/etc/gshadow-"}
+      ]
+    },
+    "message": "Access to password hashes",
+    "severity": 8,
+    "tags": ["MITRE", "MITRE_T1003.008_etc_passwd_and_etc_shadow", "MITRE_TA0006_credential_access"],
+    "action": "Block"
+  }
+}

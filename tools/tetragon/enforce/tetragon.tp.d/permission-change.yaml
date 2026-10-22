@@ -1,0 +1,202 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "permission-change"
+  annotations:
+    description: "Deny and kill chmod calls from containers adding setuid or setgid bits, touching account databases, or making temporary files executable"
+spec:
+  kprobes:
+  - call: "sys_fchmodat"
+    syscall: true
+    message: "Suspicious permission change"
+    args:
+    - index: 0
+      type: "int"
+    - index: 1
+      type: "string"
+    - index: 2
+      type: "int"
+    selectors:
+    - matchArgs:
+      - index: 2
+        operator: "Mask"
+        values:
+        - "3072"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 1
+        operator: "Equal"
+        values:
+        - "/etc/shadow"
+        - "/etc/gshadow"
+        - "/etc/passwd"
+        - "/etc/group"
+        - "/etc/sudoers"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 1
+        operator: "Prefix"
+        values:
+        - "/tmp/"
+        - "/var/tmp/"
+        - "/dev/shm/"
+      - index: 2
+        operator: "Mask"
+        values:
+        - "64"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    tags: ["mitre.privilege_escalation", "mitre.defense_evasion", "T1548.001", "T1222.002", "T1105"]
+  - call: "sys_fchmodat2"
+    syscall: true
+    message: "Suspicious permission change"
+    args:
+    - index: 0
+      type: "int"
+    - index: 1
+      type: "string"
+    - index: 2
+      type: "int"
+    selectors:
+    - matchArgs:
+      - index: 2
+        operator: "Mask"
+        values:
+        - "3072"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 1
+        operator: "Equal"
+        values:
+        - "/etc/shadow"
+        - "/etc/gshadow"
+        - "/etc/passwd"
+        - "/etc/group"
+        - "/etc/sudoers"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 1
+        operator: "Prefix"
+        values:
+        - "/tmp/"
+        - "/var/tmp/"
+        - "/dev/shm/"
+      - index: 2
+        operator: "Mask"
+        values:
+        - "64"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    ignore:
+      callNotFound: true
+    tags: ["mitre.privilege_escalation", "mitre.defense_evasion", "T1548.001", "T1222.002", "T1105"]
+  - call: "sys_chmod"
+    syscall: true
+    message: "Suspicious permission change"
+    args:
+    - index: 0
+      type: "string"
+    - index: 1
+      type: "int"
+    selectors:
+    - matchArgs:
+      - index: 1
+        operator: "Mask"
+        values:
+        - "3072"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 0
+        operator: "Equal"
+        values:
+        - "/etc/shadow"
+        - "/etc/gshadow"
+        - "/etc/passwd"
+        - "/etc/group"
+        - "/etc/sudoers"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    - matchArgs:
+      - index: 0
+        operator: "Prefix"
+        values:
+        - "/tmp/"
+        - "/var/tmp/"
+        - "/dev/shm/"
+      - index: 1
+        operator: "Mask"
+        values:
+        - "64"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    ignore:
+      callNotFound: true
+    tags: ["mitre.privilege_escalation", "mitre.defense_evasion", "T1548.001", "T1222.002", "T1105"]

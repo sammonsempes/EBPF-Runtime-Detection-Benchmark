@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bench-victim-priv
+  namespace: ebpf-bench
+  labels:
+    ebpf-bench.role: victim
+    kubearmor.io/container.name: bench-victim
+spec:
+  hostname: bench-victim-priv
+  automountServiceAccountToken: false
+  enableServiceLinks: false
+  terminationGracePeriodSeconds: 2
+  restartPolicy: Never
+  containers:
+    - name: bench-victim-priv
+      image: ebpf-bench/victim:latest
+      imagePullPolicy: IfNotPresent
+      command: ["sleep", "infinity"]
+      securityContext:
+        privileged: true

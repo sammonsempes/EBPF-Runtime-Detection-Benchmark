@@ -1,0 +1,39 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "interpreter-spawns-shell"
+  annotations:
+    description: "Scripting language interpreter executing a shell, as done by python -c os.system or subprocess one-liners"
+spec:
+  kprobes:
+  - call: "security_bprm_check"
+    syscall: false
+    message: "Script interpreter executed a shell"
+    args:
+    - index: 0
+      type: "linux_binprm"
+    selectors:
+    - matchBinaries:
+      - operator: "Prefix"
+        values:
+        - "/usr/bin/python"
+        - "/bin/python"
+        - "/usr/local/bin/python"
+        - "/usr/bin/perl"
+        - "/bin/perl"
+        - "/usr/bin/ruby"
+        - "/usr/bin/node"
+        - "/usr/local/bin/node"
+        - "/usr/bin/php"
+        - "/usr/bin/lua"
+      matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "/sh"
+        - "/bash"
+        - "/dash"
+        - "/zsh"
+        - "/ksh"
+        - "/ash"
+    tags: ["mitre.execution", "T1059.006"]

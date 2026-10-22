@@ -1,0 +1,12 @@
+id: t1620-fileless-exec
+name: Fileless execution from memfd_create
+kind: attack
+tactic: defense-evasion
+technique: T1620
+description: >-
+  A python3 process creates an anonymous memory file with os.memfd_create named
+  bench-memfd-<marker>, copies the /bin/sh binary into it and executes it with
+  os.execve on the file descriptor (execveat with AT_EMPTY_PATH). The executed image
+  has no path on disk (/memfd:bench-memfd-<marker> (deleted)) and runs echo and id.
+timeout: 30
+requires: []

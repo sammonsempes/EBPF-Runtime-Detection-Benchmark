@@ -1,0 +1,11 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: tracee-startup
+  annotations:
+    description: emits the tracee_info event at startup, used by the benchmark as readiness marker, never an alert
+spec:
+  scope:
+    - global
+  rules:
+    - event: tracee_info

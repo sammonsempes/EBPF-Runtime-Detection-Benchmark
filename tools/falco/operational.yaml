@@ -1,0 +1,37 @@
+tool: falco
+version: "0.45.0"
+license: Apache-2.0
+deployment:
+  linux: Official falcosecurity/falco:0.45.0 image as one privileged container (host PID and network) using the modern eBPF probe built into the binary, with host /proc, /etc and docker.sock mounted for the bundled container plugin
+  kubernetes: Official Helm chart falcosecurity/falco (DaemonSet, driver.kind=modern_ebpf or auto, container plugin and optional k8s-metacollector)
+  steps: 2
+rules:
+  language: YAML rules, macros and lists whose conditions use the Falco filter language over syscall and plugin fields, with exceptions, append and override
+  custom_rules: true
+  hot_reload: true
+output:
+  formats: [json, text]
+  enrichment: [container, kubernetes]
+  attack_mapping: true
+response:
+  blocking: false
+  mechanisms: []
+  notes: >
+    Falco is detection only: rules emit alerts and never act on the event in the kernel. Response is delegated to
+    separate projects fed by Falco outputs (Falcosidekick forwarding, Falco Talon actions such as killing a pod);
+    they react after the fact and are out of scope here, so Falco has no enforce profile.
+scores:
+  deployment: 5
+  rule_customization: 5
+  output_quality: 5
+notes: >
+  Deployment 5: the image runs with defaults (docker/falco/Dockerfile ships /usr/bin/falco as CMD, its usage label is a single
+  privileged docker run, falco.yaml defaults engine.kind to modern_ebpf which needs no kernel headers or driver loader, and the
+  container plugin is enabled by the packaged config.d/falco.container_plugin.yaml); on Kubernetes the chart README documents
+  a plain "helm install falco falcosecurity/falco". The only benchmark change is a config.d drop-in enabling json_output and
+  disabling syslog. Modern eBPF still requires a BTF-enabled kernel.
+  Rule customization 5: declarative YAML rules loaded from rules_files and rules.d, rule enable/disable by name or tag in
+  falco.yaml, and watch_config_files: true reloads configuration and rules on change (plus SIGHUP and the 0.45 reload API).
+  Output quality 5: json_output emits rule, priority, time, source, hostname, tags and output_fields (formats.cpp); upstream
+  stable rules carry mitre_* and Txxxx tags, the container plugin adds container.* and k8s.pod.* fields, and parent/ancestor
+  fields (proc.pname, proc.aname) are available, although ancestry depth depends on each rule's output template.

@@ -1,0 +1,19 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-fileless-exec"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "presets": [
+      {"name": "filelessExec", "action": "Audit"}
+    ],
+    "process": {
+      "matchPatterns": [
+        {"pattern": "/memfd:*"}
+      ]
+    },
+    "message": "Fileless execution from an anonymous memory file",
+    "severity": 8,
+    "tags": ["MITRE", "MITRE_T1620_reflective_code_loading", "MITRE_TA0005_defense_evasion"],
+    "action": "Audit"
+  }
+}

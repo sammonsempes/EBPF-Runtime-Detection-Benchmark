@@ -1,0 +1,18 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-permission-modification"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/chattr"},
+        {"path": "/usr/bin/setfacl"},
+        {"path": "/usr/sbin/setcap"}
+      ]
+    },
+    "message": "File attribute, ACL or capability modification",
+    "severity": 5,
+    "tags": ["MITRE", "MITRE_T1222.002_linux_file_permissions_modification", "MITRE_TA0005_defense_evasion"],
+    "action": "Audit"
+  }
+}

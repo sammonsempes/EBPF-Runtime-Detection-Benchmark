@@ -1,0 +1,17 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-history-clearing
+  annotations:
+    description: T1070.003 shell history file truncated, overwritten or deleted
+spec:
+  scope:
+    - container
+  rules:
+    - event: security_file_open
+      filters:
+        - data.pathname=*_history
+        - data.flags=O_WRONLY*,O_RDWR*
+    - event: security_inode_unlink
+      filters:
+        - data.pathname=*_history

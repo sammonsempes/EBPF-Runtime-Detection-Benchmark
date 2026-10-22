@@ -1,0 +1,11 @@
+id: t1548-001-setuid-binary
+name: Setuid copy of a binary
+kind: attack
+tactic: privilege-escalation
+technique: T1548.001
+description: >-
+  Copies /usr/bin/id to /tmp/bench-suid-<marker>, sets the setuid bit with chmod u+s,
+  then runs it as nobody through setpriv to show the effective uid 0. The copy is
+  removed afterwards.
+timeout: 30
+requires: []

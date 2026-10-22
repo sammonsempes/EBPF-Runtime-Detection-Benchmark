@@ -1,0 +1,13 @@
+id: t1552-001-credentials-in-files
+name: Credential files searched and read
+kind: attack
+tactic: credential-access
+technique: T1552.001
+description: >-
+  Searches /root, /home, /opt and /srv with find (names credentials, id_rsa*, *.pem,
+  .env) and grep (aws_secret_access_key, PRIVATE KEY, PASSWORD) and reads every hit.
+  The victim image seeds honey files: /root/.aws/credentials, /root/.ssh/id_rsa and
+  /opt/app/.env. The hit list is staged in /tmp/bench-credential-hits-<marker> and
+  removed afterwards. Exits 0 when at least one credential file was read.
+timeout: 30
+requires: []

@@ -1,0 +1,23 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "exec-from-temp-dir"
+  annotations:
+    description: "Execution of a binary or script located in a world-writable temporary directory"
+spec:
+  kprobes:
+  - call: "security_bprm_check"
+    syscall: false
+    message: "Program executed from a temporary directory"
+    args:
+    - index: 0
+      type: "linux_binprm"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "Prefix"
+        values:
+        - "/tmp/"
+        - "/var/tmp/"
+        - "/dev/shm/"
+    tags: ["mitre.execution", "T1105", "T1036.005"]

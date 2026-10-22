@@ -1,0 +1,17 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-account-creation
+  annotations:
+    description: T1136.001 local account management tools executed or account databases written
+spec:
+  scope:
+    - container
+  rules:
+    - event: sched_process_exec
+      filters:
+        - data.pathname=/usr/sbin/useradd,/usr/sbin/adduser,/usr/sbin/usermod,/usr/sbin/groupadd,/usr/sbin/chpasswd
+    - event: security_file_open
+      filters:
+        - data.pathname=/etc/passwd,/etc/group,/etc/passwd+,/etc/group+
+        - data.flags=O_WRONLY*,O_RDWR*

@@ -1,0 +1,51 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "system-binary-masquerading"
+  annotations:
+    description: "Deny and kill binaries named like well-known system daemons executed from outside the standard system directories inside containers"
+spec:
+  kprobes:
+  - call: "security_bprm_check"
+    syscall: false
+    message: "System daemon name used by a binary outside system paths"
+    args:
+    - index: 0
+      type: "linux_binprm"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "Postfix"
+        values:
+        - "/sshd"
+        - "/systemd"
+        - "/init"
+        - "/cron"
+        - "/crond"
+        - "/rsyslogd"
+        - "/syslogd"
+        - "/dbus-daemon"
+        - "/kworker"
+        - "/kthreadd"
+        - "/udevd"
+        - "/containerd"
+        - "/dockerd"
+        - "/kubelet"
+      - index: 0
+        operator: "NotPrefix"
+        values:
+        - "/usr/"
+        - "/bin/"
+        - "/sbin/"
+        - "/lib/"
+        - "/opt/"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    tags: ["mitre.defense_evasion", "T1036.005"]

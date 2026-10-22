@@ -1,0 +1,28 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "harden-shell-history-mod"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchPaths": [
+        {"path": "/root/.bash_history", "readOnly": true},
+        {"path": "/root/.zsh_history", "readOnly": true},
+        {"path": "/root/.ash_history", "readOnly": true},
+        {"path": "/root/.python_history", "readOnly": true}
+      ],
+      "matchPatterns": [
+        {"pattern": "/home/*/.*_history", "readOnly": true}
+      ]
+    },
+    "syscalls": {
+      "matchPaths": [
+        {"path": "/root/.bash_history", "syscall": ["unlink", "unlinkat"]},
+        {"path": "/root/.zsh_history", "syscall": ["unlink", "unlinkat"]}
+      ]
+    },
+    "message": "Alert! shell history modification or deletion detected",
+    "severity": 5,
+    "tags": ["CIS", "NIST_800-53", "NIST_800-53_CM-5", "NIST_800-53_AU-6(8)", "MITRE_T1070_indicator_removal_on_host", "MITRE", "MITRE_T1070.003_clear_command_history"],
+    "action": "Audit"
+  }
+}

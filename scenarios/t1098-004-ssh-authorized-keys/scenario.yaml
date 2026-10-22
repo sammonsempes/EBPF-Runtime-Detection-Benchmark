@@ -1,0 +1,11 @@
+id: t1098-004-ssh-authorized-keys
+name: SSH key appended to root authorized_keys
+kind: attack
+tactic: persistence
+technique: T1098.004
+description: >-
+  Appends a fake ed25519 public key whose comment is bench-<marker> to
+  /root/.ssh/authorized_keys (the victim image seeds this file with a honey admin key).
+  Afterwards the injected line is removed in place, keeping the original content and inode.
+timeout: 30
+requires: []

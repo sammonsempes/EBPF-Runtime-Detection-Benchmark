@@ -1,0 +1,22 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-scheduled-task-mod"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchDirectories": [
+        {"dir": "/etc/cron.d/", "readOnly": true, "recursive": true},
+        {"dir": "/etc/cron.hourly/", "readOnly": true, "recursive": true},
+        {"dir": "/etc/cron.daily/", "readOnly": true, "recursive": true},
+        {"dir": "/var/spool/cron/", "readOnly": true, "recursive": true}
+      ],
+      "matchPaths": [
+        {"path": "/etc/crontab", "readOnly": true}
+      ]
+    },
+    "message": "Cron job created or modified",
+    "severity": 7,
+    "tags": ["MITRE", "MITRE_T1053.003_cron", "MITRE_TA0003_persistence"],
+    "action": "Block"
+  }
+}

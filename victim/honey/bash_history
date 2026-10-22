@@ -1,0 +1,5 @@
+ls -la /opt/app
+cat /opt/app/.env
+mysql -h db.internal -u app -p
+systemctl status app
+tail -f /var/log/auth.log

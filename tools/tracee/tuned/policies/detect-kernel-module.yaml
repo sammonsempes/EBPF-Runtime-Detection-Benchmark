@@ -1,0 +1,15 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-kernel-module
+  annotations:
+    description: T1547.006 kernel module load attempt from a container, successful or not
+spec:
+  scope:
+    - container
+  rules:
+    - event: init_module
+    - event: finit_module
+    - event: sched_process_exec
+      filters:
+        - data.pathname=/usr/sbin/insmod,/usr/sbin/modprobe,/usr/bin/kmod,/sbin/insmod,/sbin/modprobe

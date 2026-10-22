@@ -1,0 +1,398 @@
+- list: custom_package_managers
+  items: [dpkg, apt, apt-get, aptitude, unattended-upgr, rpm, yum, dnf, microdnf, apk, zypper]
+
+- list: custom_interpreter_names
+  items: [python, python2, python3, python3.8, python3.9, python3.10, python3.11, python3.12, python3.13, perl, ruby, node, php, lua]
+
+- list: custom_file_reader_tools
+  items: [cat, tac, head, tail, less, more, grep, egrep, fgrep, rg, strings, base64, xxd, od, hexdump, awk, gawk, mawk, sed, cut, cp, scp, curl, wget, nc, ncat, netcat, nc.openbsd, socat]
+
+- list: custom_log_rotation_tools
+  items: [logrotate, savelog, gzip, bzip2, xz, zstd, rsyslogd, systemd-journal]
+
+- list: custom_system_daemon_names
+  items: [sshd, systemd, init, cron, crond, rsyslogd, syslogd, dbus-daemon, kworker, kthreadd, ksoftirqd, udevd, systemd-udevd, containerd, dockerd, kubelet]
+
+- list: custom_netcat_names
+  items: [nc, ncat, netcat, nc.openbsd, nc.traditional]
+
+- list: custom_scanner_names
+  items: [nmap, masscan, zmap, rustscan, naabu, unicornscan, hping3]
+
+- list: custom_miner_names
+  items: [xmrig, xmr-stak, minerd, cpuminer, cpuminer-multi, ccminer, cgminer, bfgminer, ethminer, nbminer, t-rex, lolminer, phoenixminer, nanominer]
+
+- list: custom_miner_ports
+  items: [3333, 3334, 3335, 3336, 3357, 4444, 5555, 5556, 5588, 5730, 6099, 7777, 7778, 14433, 14444, 45560, 45700]
+
+- list: custom_container_tools
+  items: [docker, kubectl, crictl, ctr, nerdctl, podman, amicontained, deepce, cdk, capsh, botb]
+
+- list: custom_sysinfo_tools
+  items: [lscpu, lsb_release, dmidecode, lshw, hostnamectl, lsmod, lspci, lsusb, systemd-detect-virt, virt-what]
+
+- list: custom_sensitive_files
+  items: [/etc/shadow, /etc/gshadow, /etc/passwd, /etc/group, /etc/sudoers]
+
+- macro: custom_ip_connect
+  condition: >
+    evt.type = connect and evt.dir = < and (fd.typechar = 4 or fd.typechar = 6)
+    and (evt.rawres >= 0 or evt.res = EINPROGRESS)
+    and not fd.snet in ("127.0.0.0/8")
+
+- macro: custom_exec_from_tmp
+  condition: >
+    (proc.exepath startswith "/tmp/" or proc.exepath startswith "/var/tmp/" or proc.exepath startswith "/dev/shm/"
+    or proc.exe startswith "/tmp/" or proc.exe startswith "/var/tmp/" or proc.exe startswith "/dev/shm/"
+    or ((proc.exepath endswith "sh" or proc.exepath contains "/python")
+        and (proc.args startswith "/tmp/" or proc.args startswith "/var/tmp/" or proc.args startswith "/dev/shm/")))
+
+- macro: custom_chmod
+  condition: (evt.type in (chmod, fchmod, fchmodat) and evt.dir = <)
+
+- rule: Outbound Connection From Shell Process
+  desc: >
+    A shell interpreter inside a container opened an outbound TCP/UDP connection. Shells rarely
+    connect to the network themselves; this is the typical footprint of bash /dev/tcp reverse shells.
+  condition: custom_ip_connect and container and proc.name in (shell_binaries)
+  output: >
+    Shell process opened an outbound network connection (connection=%fd.name user=%user.name process=%proc.name
+    exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline container_id=%container.id
+    container_name=%container.name image=%container.image.repository)
+  priority: CRITICAL
+  tags: [custom, container, network, mitre_execution, T1059.004]
+
+- rule: Shell Spawned by Script Interpreter
+  desc: >
+    A scripting language interpreter (python, perl, ruby, node, php, lua) spawned a shell inside a
+    container, as done by one-liners such as python -c with os.system or subprocess.
+  condition: spawned_process and container and proc.name in (shell_binaries) and proc.pname in (custom_interpreter_names)
+  output: >
+    Shell spawned by a script interpreter (user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline parent_command=%proc.pcmdline container_id=%container.id
+    container_name=%container.name image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, container, process, mitre_execution, T1059.006]
+
+- rule: Execution From Temporary Directory
+  desc: >
+    A binary or script located in /tmp, /var/tmp or /dev/shm was executed inside a container.
+    Dropped payloads and masqueraded binaries are commonly staged in world-writable directories.
+  condition: spawned_process and container and custom_exec_from_tmp
+  output: >
+    Program executed from a temporary directory (user=%user.name process=%proc.name exe=%proc.exe
+    exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline container_id=%container.id
+    container_name=%container.name image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, container, process, mitre_execution, T1105, T1036.005]
+
+- rule: Executable Bit Set on File in Temporary Directory
+  desc: A file located in a world-writable temporary directory was made executable inside a container.
+  condition: >
+    custom_chmod and evt.rawres = 0 and container and evt.arg.mode contains S_IXUSR
+    and (evt.arg.filename startswith "/tmp/" or evt.arg.filename startswith "/var/tmp/" or evt.arg.filename startswith "/dev/shm/")
+  output: >
+    Executable permission set on a temporary file (file=%evt.arg.filename mode=%evt.arg.mode user=%user.name
+    process=%proc.name command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: NOTICE
+  tags: [custom, container, filesystem, mitre_command_and_control, T1105]
+
+- rule: Write Below Cron Directories
+  desc: A file under /etc/cron* or /var/spool/cron was opened for writing by a process that is not a package manager.
+  condition: >
+    open_write and (fd.name startswith "/etc/cron" or fd.name startswith "/var/spool/cron/")
+    and not proc.name in (custom_package_managers)
+  output: >
+    Cron configuration written (file=%fd.name user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, filesystem, mitre_persistence, T1053.003]
+
+- rule: Write Below Systemd Unit Directories
+  desc: A systemd unit or SysV init script was created or modified by a process that is not a package manager or systemd itself.
+  condition: >
+    open_write and (fd.name startswith "/etc/systemd/system/" or fd.name startswith "/lib/systemd/system/"
+    or fd.name startswith "/usr/lib/systemd/system/" or fd.name startswith "/etc/init.d/" or fd.name = "/etc/rc.local")
+    and not proc.name in (custom_package_managers, systemd, systemctl)
+  output: >
+    Service definition written (file=%fd.name user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, filesystem, mitre_persistence, T1543.002]
+
+- rule: SSH Authorized Keys Modified
+  desc: An SSH authorized_keys file was opened for writing, which grants persistent remote access to whoever owns the added key.
+  condition: >
+    open_write and (fd.name endswith "/.ssh/authorized_keys" or fd.name endswith "/.ssh/authorized_keys2")
+    and not proc.name in (custom_package_managers)
+  output: >
+    SSH authorized_keys written (file=%fd.name user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, filesystem, mitre_persistence, T1098.004]
+
+- rule: User Account Management Command
+  desc: A command that creates or modifies local user accounts or groups was executed.
+  condition: >
+    spawned_process and proc.name in (useradd, adduser, usermod, userdel, groupadd, groupmod, chpasswd, newusers)
+  output: >
+    Account management command executed (user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: NOTICE
+  tags: [custom, process, mitre_persistence, T1136.001]
+
+- rule: Write to User Database File
+  desc: The local user, group, shadow or sudoers databases were opened for writing by a process that is not a package manager.
+  condition: >
+    open_write and (fd.name startswith "/etc/passwd" or fd.name startswith "/etc/shadow" or fd.name startswith "/etc/group"
+    or fd.name startswith "/etc/gshadow" or fd.name startswith "/etc/sudoers")
+    and not proc.name in (custom_package_managers)
+  output: >
+    User database file written (file=%fd.name user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, filesystem, mitre_persistence, T1136.001]
+
+- rule: Kernel Module Load Attempt
+  desc: >
+    A process attempted to load a kernel module, successfully or not, or a module loading tool was
+    started inside a container.
+  condition: >
+    (evt.type in (init_module, finit_module) and evt.dir = <)
+    or (spawned_process and container and proc.name in (insmod, modprobe))
+  output: >
+    Kernel module load attempted (syscall=%evt.type result=%evt.res user=%user.name process=%proc.name
+    parent=%proc.pname command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: CRITICAL
+  tags: [custom, process, mitre_persistence, T1547.006]
+
+- rule: Setuid or Setgid Bit Set
+  desc: The setuid or setgid bit was added to a file by a process that is not a package manager.
+  condition: >
+    custom_chmod and evt.rawres = 0 and (evt.arg.mode contains S_ISUID or evt.arg.mode contains S_ISGID)
+    and not proc.name in (custom_package_managers)
+  output: >
+    Setuid or setgid bit set (file=%evt.arg.filename fd=%fd.name mode=%evt.arg.mode user=%user.name
+    process=%proc.name command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, filesystem, mitre_privilege_escalation, T1548.001]
+
+- rule: Permission Change on Sensitive File
+  desc: The permissions of the user, shadow or sudoers databases were changed by a process that is not a package manager.
+  condition: >
+    custom_chmod and (evt.arg.filename in (custom_sensitive_files) or fd.name in (custom_sensitive_files)
+    or evt.arg.filename startswith "/etc/sudoers.d/")
+    and not proc.name in (custom_package_managers)
+  output: >
+    Permissions of a sensitive file changed (file=%evt.arg.filename fd=%fd.name mode=%evt.arg.mode
+    user=%user.name process=%proc.name command=%proc.cmdline container_id=%container.id
+    container_name=%container.name image=%container.image.repository)
+  priority: ERROR
+  tags: [custom, filesystem, mitre_defense_evasion, T1222.002]
+
+- rule: Block Device Mounted in Container
+  desc: >
+    A host disk block device was mounted from inside a container, which exposes the host filesystem.
+    Both the mount(2) system call and the mount command are covered, since recent util-linux versions
+    use the fsopen/fsconfig mount API.
+  condition: >
+    container
+    and ((evt.type = mount and evt.dir = <
+          and (evt.arg.dev startswith "/dev/sd" or evt.arg.dev startswith "/dev/vd" or evt.arg.dev startswith "/dev/xvd"
+          or evt.arg.dev startswith "/dev/nvme" or evt.arg.dev startswith "/dev/hd" or evt.arg.dev startswith "/dev/dm-"
+          or evt.arg.dev startswith "/dev/mapper/" or evt.arg.type in (ext2, ext3, ext4, xfs, btrfs, vfat, ntfs, ntfs3)))
+         or (spawned_process and proc.name = mount
+          and (proc.args contains "/dev/sd" or proc.args contains "/dev/vd" or proc.args contains "/dev/xvd"
+          or proc.args contains "/dev/nvme" or proc.args contains "/dev/hd" or proc.args contains "/dev/dm-"
+          or proc.args contains "/dev/mapper/" or proc.args contains "-t ext4" or proc.args contains "-t ext3"
+          or proc.args contains "-t ext2" or proc.args contains "-t xfs" or proc.args contains "-t btrfs"
+          or proc.args contains "-t vfat" or proc.args contains "-t ntfs")))
+  output: >
+    Block device mounted in container (device=%evt.arg.dev dir=%evt.arg.dir type=%evt.arg.type result=%evt.res
+    user=%user.name process=%proc.name command=%proc.cmdline container_id=%container.id
+    container_name=%container.name image=%container.image.repository)
+  priority: CRITICAL
+  tags: [custom, container, mitre_privilege_escalation, T1611]
+
+- rule: Container Process Entering Other Namespaces
+  desc: >
+    A process inside a container called setns or started nsenter, unshare or chroot, which is how
+    privileged containers break out into the host namespaces or filesystem.
+  condition: >
+    container and not proc.name startswith "runc"
+    and ((evt.type = setns and evt.dir = <) or (spawned_process and proc.name in (nsenter, unshare, chroot)))
+  output: >
+    Namespace or root change from container (syscall=%evt.type user=%user.name process=%proc.name
+    parent=%proc.pname command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: CRITICAL
+  tags: [custom, container, mitre_privilege_escalation, T1611]
+
+- rule: Shell History Tampering
+  desc: A shell history file was deleted, renamed, truncated or replaced with a symbolic link.
+  condition: >
+    (evt.type in (unlink, unlinkat, rename, renameat, renameat2)
+     and (evt.arg.name endswith "_history" or evt.arg.path endswith "_history" or evt.arg.oldpath endswith "_history"))
+    or (open_write and fd.name endswith "_history" and evt.arg.flags contains O_TRUNC)
+    or (evt.type in (symlink, symlinkat) and evt.arg.linkpath endswith "_history")
+  output: >
+    Shell history tampered with (syscall=%evt.type file=%fd.name args=%evt.args user=%user.name process=%proc.name
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, filesystem, mitre_defense_evasion, T1070.003]
+
+- rule: Log File Deleted or Truncated
+  desc: A file under /var/log was deleted, or truncated with the truncate utility, by a process that is not a log rotation tool.
+  condition: >
+    ((evt.type in (unlink, unlinkat) and not evt.arg.flags contains AT_REMOVEDIR
+      and (evt.arg.name startswith "/var/log/" or evt.arg.path startswith "/var/log/"))
+     or (spawned_process and proc.name = truncate and proc.args contains "/var/log/"))
+    and not proc.name in (custom_log_rotation_tools)
+  output: >
+    Log file removed or truncated (syscall=%evt.type args=%evt.args user=%user.name process=%proc.name
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, filesystem, mitre_defense_evasion, T1070.002]
+
+- rule: System Process Name Executed From Unexpected Path
+  desc: A process named like a well-known system daemon was executed from outside the standard system directories.
+  condition: >
+    spawned_process and proc.name in (custom_system_daemon_names)
+    and not (proc.exepath startswith "/usr/" or proc.exepath startswith "/bin/" or proc.exepath startswith "/sbin/"
+    or proc.exepath startswith "/lib/" or proc.exepath startswith "/opt/")
+  output: >
+    System daemon name used by a binary outside system paths (process=%proc.name exepath=%proc.exepath
+    user=%user.name parent=%proc.pname command=%proc.cmdline container_id=%container.id
+    container_name=%container.name image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, process, mitre_defense_evasion, T1036.005]
+
+- rule: Read Credential Files With Interactive Tool
+  desc: >
+    Cloud, SSH, registry, git or application credential files were read inside a container by a
+    generic file viewing or transfer tool rather than by the application that owns them.
+  condition: >
+    open_read and container and proc.name in (custom_file_reader_tools)
+    and (fd.name endswith "/.aws/credentials" or fd.name endswith "/.aws/config" or fd.name endswith "/.ssh/id_rsa"
+    or fd.name endswith "/.ssh/id_dsa" or fd.name endswith "/.ssh/id_ecdsa" or fd.name endswith "/.ssh/id_ed25519"
+    or fd.name endswith "/.docker/config.json" or fd.name endswith "/.kube/config" or fd.name endswith "/.git-credentials"
+    or fd.name endswith "/.netrc" or fd.name endswith "/.pgpass" or fd.name endswith "/.env")
+  output: >
+    Credential file read (file=%fd.name user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, container, filesystem, mitre_credential_access, T1552.001]
+
+- rule: Read Kubernetes Service Account Token
+  desc: The mounted Kubernetes service account token was read by a generic file viewing or transfer tool inside a container.
+  condition: >
+    open_read and container and proc.name in (custom_file_reader_tools)
+    and (fd.name startswith "/var/run/secrets/kubernetes.io/serviceaccount" or fd.name startswith "/run/secrets/kubernetes.io/serviceaccount")
+  output: >
+    Service account token read (file=%fd.name user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, container, filesystem, mitre_credential_access, T1552.007]
+
+- rule: Container Runtime Socket Access From Container
+  desc: A process inside a container connected to, or referenced on its command line, a container runtime API socket.
+  condition: >
+    container
+    and ((evt.type = connect and evt.dir = < and fd.typechar = u
+          and (fd.name contains "docker.sock" or fd.name contains "containerd.sock" or fd.name contains "crio.sock" or fd.name contains "podman.sock"))
+         or (spawned_process and (proc.args contains "docker.sock" or proc.args contains "containerd.sock" or proc.args contains "crio.sock")))
+  output: >
+    Container runtime socket accessed from a container (connection=%fd.name user=%user.name process=%proc.name
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, container, mitre_credential_access, T1552.007]
+
+- rule: Container Environment Discovery
+  desc: >
+    A container management or container breakout reconnaissance tool was started inside a container,
+    or the container cgroup, mount or init environment information was read with a generic file viewer.
+  condition: >
+    container
+    and ((spawned_process and proc.name in (custom_container_tools))
+         or (open_read and proc.name in (custom_file_reader_tools) and fd.name startswith "/proc/"
+             and (fd.name endswith "/cgroup" or fd.name endswith "/mountinfo" or fd.name endswith "/environ"))
+         or (open_read and proc.name in (custom_file_reader_tools) and fd.name = "/.dockerenv"))
+  output: >
+    Container environment discovery (file=%fd.name user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: NOTICE
+  tags: [custom, container, mitre_discovery, T1613]
+
+- rule: System Information Discovery
+  desc: >
+    A hardware, kernel or virtualization inventory command, or uname -a, was started inside a
+    container. Reading /etc/os-release is deliberately not covered because it is routine admin activity.
+  condition: >
+    spawned_process and container
+    and (proc.name in (custom_sysinfo_tools) or (proc.name = uname and proc.args contains "-a"))
+  output: >
+    System information discovery (file=%fd.name user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: NOTICE
+  tags: [custom, container, mitre_discovery, T1082]
+
+- rule: Network Scanning Tool Executed
+  desc: A port scanner, or netcat in zero-I/O scanning mode, was started inside a container.
+  condition: >
+    spawned_process and container
+    and (proc.name in (custom_scanner_names) or (proc.name in (custom_netcat_names) and proc.args contains "-z"))
+  output: >
+    Network scan started (user=%user.name process=%proc.name parent=%proc.pname command=%proc.cmdline
+    container_id=%container.id container_name=%container.name image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, container, network, mitre_discovery, T1046]
+
+- rule: Data Upload With Command-Line HTTP Client
+  desc: curl or wget was started inside a container with options that send a local file or request body to a remote server.
+  condition: >
+    spawned_process and container and proc.name in (curl, wget)
+    and (proc.args contains "--data" or proc.args contains "-d " or proc.args contains "-d@" or proc.args contains "--upload-file"
+    or proc.args contains "-T " or proc.args contains "--form" or proc.args contains "-F " or proc.args contains "-X POST"
+    or proc.args contains "-XPOST" or proc.args contains "--request POST" or proc.args contains "-X PUT"
+    or proc.args contains "--post-file" or proc.args contains "--post-data" or proc.args contains "--body-file")
+  output: >
+    Data upload with command-line HTTP client (user=%user.name process=%proc.name parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [custom, container, network, mitre_exfiltration, T1048]
+
+- rule: Cryptominer Pool Port Connection
+  desc: A process inside a container connected to a port commonly used by cryptocurrency mining pools (stratum).
+  condition: custom_ip_connect and container and fd.sport in (custom_miner_ports)
+  output: >
+    Connection to a mining pool port (connection=%fd.name user=%user.name process=%proc.name
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: CRITICAL
+  tags: [custom, container, network, mitre_impact, T1496]
+
+- rule: Known Cryptominer Process Launched
+  desc: A process named like a well-known cryptocurrency miner was started.
+  condition: spawned_process and proc.name in (custom_miner_names)
+  output: >
+    Cryptominer process started (user=%user.name process=%proc.name exepath=%proc.exepath parent=%proc.pname
+    command=%proc.cmdline container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: CRITICAL
+  tags: [custom, process, mitre_impact, T1496]

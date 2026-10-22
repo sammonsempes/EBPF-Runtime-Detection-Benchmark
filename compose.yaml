@@ -1,0 +1,60 @@
+name: ebpf-bench
+
+x-runner: &runner
+  build:
+    context: ./runner
+    additional_contexts:
+      certs: ${BENCH_CA_DIR:-./runner/certs}
+  image: ebpf-bench/runner:latest
+  working_dir: /bench
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - .:/bench
+  environment:
+    BENCH_HOST_ROOT: ${PWD}
+    PYTHONPATH: /bench/runner
+
+services:
+  bench:
+    <<: *runner
+    pid: host
+    network_mode: host
+    init: true
+    stop_grace_period: 60s
+    command: ["run", "--config", "bench.yaml"]
+
+  bench-k8s:
+    <<: *runner
+    network_mode: host
+    init: true
+    stop_grace_period: 120s
+    volumes:
+      - .:/bench
+      - ${KUBECONFIG_DIR:-${HOME}/.kube}:/root/.kube:ro
+    environment:
+      BENCH_HOST_ROOT: ${PWD}
+      PYTHONPATH: /bench/runner
+      KUBECONFIG: /root/.kube/${KUBECONFIG_FILE:-config}
+    command: ["run", "--config", "bench.yaml", "--backend", "kubernetes"]
+
+  tests:
+    <<: *runner
+    entrypoint: ["pytest", "-q", "-p", "no:cacheprovider", "runner/tests"]
+    command: []
+
+  victim:
+    build:
+      context: .
+      dockerfile: victim/Dockerfile
+    image: ebpf-bench/victim:latest
+    entrypoint: ["true"]
+    command: []
+    restart: "no"
+
+  attacker:
+    build:
+      context: ./attacker
+    image: ebpf-bench/attacker:latest
+    entrypoint: ["true"]
+    command: []
+    restart: "no"

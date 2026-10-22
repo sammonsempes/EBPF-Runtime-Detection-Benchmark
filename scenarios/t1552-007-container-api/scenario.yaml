@@ -1,0 +1,14 @@
+id: t1552-007-container-api
+name: Kubernetes token and Docker socket probing
+kind: attack
+tactic: credential-access
+technique: T1552.007
+description: >-
+  Lists and reads the Kubernetes service account directory
+  /var/run/secrets/kubernetes.io/serviceaccount (the victim image seeds a honey token,
+  real pods get the projected one), checks KUBERNETES_SERVICE_HOST, then probes
+  /var/run/docker.sock and calls the Docker API /containers/json through it with
+  curl --unix-socket. The socket is normally absent; the access attempts are the
+  behavior, so the scenario exits 0 once the token path was opened.
+timeout: 30
+requires: []

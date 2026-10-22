@@ -1,0 +1,11 @@
+id: benign-compile
+name: Compile and run a C program
+kind: benign
+tactic: null
+technique: null
+description: >-
+  Writes a small C program in /root/workspace/bench-<marker>, compiles it with gcc
+  (cc1, as and collect2/ld child processes, new executable written to disk) and runs
+  the produced binary. The workspace is removed afterwards.
+timeout: 60
+requires: []

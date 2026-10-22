@@ -1,0 +1,11 @@
+id: benign-web-server
+name: Local Python web server queried with curl
+kind: benign
+tactic: null
+technique: null
+description: >-
+  Starts python3 -m http.server bound to 127.0.0.1:18080 serving a static directory
+  /tmp/bench-site-<marker>, waits until it answers, fetches the index page with curl,
+  then stops the server and removes the directory. Loopback traffic only.
+timeout: 30
+requires: []

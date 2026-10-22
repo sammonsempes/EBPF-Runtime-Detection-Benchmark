@@ -1,0 +1,13 @@
+id: t1046-network-scan
+name: TCP port scan of the attacker with netcat
+kind: attack
+tactic: discovery
+technique: T1046
+description: >-
+  Runs nc -z (connect scan) against $BENCH_ATTACKER on ports 1-1024, 3300-3400 and
+  8000-8100, i.e. about 1200 TCP connection attempts in a few seconds, most of them
+  refused. Port 4444 is deliberately skipped so the reverse shell sink is not
+  triggered. Exits 0 when the scan found at least one open port (8080 is always open),
+  which proves the scan reached the attacker.
+timeout: 60
+requires: [attacker]

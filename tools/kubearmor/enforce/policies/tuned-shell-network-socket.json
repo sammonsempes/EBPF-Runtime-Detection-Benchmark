@@ -1,0 +1,17 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-shell-network-socket"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "network": {
+      "matchProtocols": [
+        {"protocol": "tcp", "fromSource": [{"path": "/usr/bin/bash"}, {"path": "/bin/bash"}, {"path": "/usr/bin/dash"}, {"path": "/bin/dash"}, {"path": "/usr/bin/sh"}, {"path": "/bin/sh"}]},
+        {"protocol": "udp", "fromSource": [{"path": "/usr/bin/bash"}, {"path": "/bin/bash"}, {"path": "/usr/bin/dash"}, {"path": "/bin/dash"}, {"path": "/usr/bin/sh"}, {"path": "/bin/sh"}]}
+      ]
+    },
+    "message": "Shell opened a network socket (reverse shell)",
+    "severity": 9,
+    "tags": ["MITRE", "MITRE_T1059.004_unix_shell", "MITRE_TA0011_command_and_control"],
+    "action": "Block"
+  }
+}

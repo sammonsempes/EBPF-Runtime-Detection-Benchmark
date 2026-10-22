@@ -1,0 +1,14 @@
+id: t1496-cryptominer
+name: Simulated xmrig miner talking stratum
+kind: attack
+tactic: impact
+technique: T1496
+description: >-
+  Copies the python3 interpreter to /tmp/bench-miner-<marker>/xmrig and runs it with
+  xmrig style arguments (--url stratum+tcp://$BENCH_ATTACKER:3333 --user
+  bench-<marker> --donate-level 1). The process, named xmrig, connects to the attacker
+  stratum sink, sends a JSON-RPC login with agent xmrig/6.21.0, burns CPU for about
+  three seconds computing SHA-256 hashes (no real mining) and submits a fake share.
+  The directory is removed afterwards.
+timeout: 30
+requires: [attacker]

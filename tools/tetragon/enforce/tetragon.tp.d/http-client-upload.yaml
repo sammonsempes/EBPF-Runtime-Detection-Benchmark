@@ -1,0 +1,40 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "http-client-upload"
+  annotations:
+    description: "Deny and kill curl or wget inside containers when they send a payload larger than a typical request header"
+spec:
+  kprobes:
+  - call: "security_socket_sendmsg"
+    syscall: false
+    message: "Command-line HTTP client sent a large payload"
+    args:
+    - index: 0
+      type: "socket"
+    - index: 2
+      type: "int"
+    selectors:
+    - matchBinaries:
+      - operator: "In"
+        values:
+        - "/bin/curl"
+        - "/usr/bin/curl"
+        - "/usr/local/bin/curl"
+        - "/bin/wget"
+        - "/usr/bin/wget"
+      matchArgs:
+      - index: 2
+        operator: "GT"
+        values:
+        - "512"
+      matchNamespaces:
+      - namespace: Mnt
+        operator: NotIn
+        values:
+        - "host_ns"
+      matchActions:
+      - action: Override
+        argError: -1
+      - action: Sigkill
+    tags: ["mitre.exfiltration", "T1048"]

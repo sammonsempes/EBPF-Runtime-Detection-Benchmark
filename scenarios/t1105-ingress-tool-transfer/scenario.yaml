@@ -1,0 +1,11 @@
+id: t1105-ingress-tool-transfer
+name: Download and execute a script with curl
+kind: attack
+tactic: command-and-control
+technique: T1105
+description: >-
+  Downloads a shell script from http://$BENCH_ATTACKER:8080/payload.sh with curl,
+  writes it to /tmp/bench-payload-<marker>.sh, makes it executable and runs it.
+  The payload is harmless (prints id and uname). The file is removed afterwards.
+timeout: 30
+requires: [attacker]

@@ -1,0 +1,10 @@
+id: benign-admin-commands
+name: Routine administration commands
+kind: benign
+tactic: null
+technique: null
+description: >-
+  Runs the commands an operator types when checking a machine: id, ps aux, ls -la /,
+  df -h, free -m, cat /etc/os-release and uptime. Read only, local only.
+timeout: 30
+requires: []

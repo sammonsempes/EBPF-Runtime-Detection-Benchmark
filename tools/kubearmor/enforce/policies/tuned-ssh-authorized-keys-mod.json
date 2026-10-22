@@ -1,0 +1,20 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-ssh-authorized-keys-mod"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchPaths": [
+        {"path": "/root/.ssh/authorized_keys", "readOnly": true},
+        {"path": "/root/.ssh/authorized_keys2", "readOnly": true}
+      ],
+      "matchPatterns": [
+        {"pattern": "/home/*/.ssh/authorized_keys*", "readOnly": true}
+      ]
+    },
+    "message": "SSH authorized_keys modified",
+    "severity": 8,
+    "tags": ["MITRE", "MITRE_T1098.004_ssh_authorized_keys", "MITRE_TA0003_persistence"],
+    "action": "Block"
+  }
+}

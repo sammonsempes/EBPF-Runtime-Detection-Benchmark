@@ -1,0 +1,13 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-sensitive-permission-change
+  annotations:
+    description: T1222.002 permission change on credential or authorization files
+spec:
+  scope:
+    - container
+  rules:
+    - event: chmod_common
+      filters:
+        - data.pathname=/etc/shadow,/etc/gshadow,/etc/passwd,/etc/sudoers,/etc/group

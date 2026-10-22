@@ -1,0 +1,11 @@
+id: t1003-008-shadow-read
+name: Read /etc/shadow
+kind: attack
+tactic: credential-access
+technique: T1003.008
+description: >-
+  Reads /etc/shadow with cat and copies it to /tmp/bench-shadow-<marker> with dd, the
+  way a credential dumper stages hashes for offline cracking. Prints only account
+  names. The copy is removed afterwards.
+timeout: 30
+requires: []

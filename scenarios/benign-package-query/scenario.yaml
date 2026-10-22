@@ -1,0 +1,11 @@
+id: benign-package-query
+name: Installed package queries
+kind: benign
+tactic: null
+technique: null
+description: >-
+  Queries the local package database without network access: dpkg -l, dpkg -s
+  coreutils, dpkg -L bash and apt-cache policy for bash and python3 (reads the apt
+  lists kept in the victim image).
+timeout: 30
+requires: []

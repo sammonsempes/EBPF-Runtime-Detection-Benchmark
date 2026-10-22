@@ -1,0 +1,678 @@
+name: exec.shell.dev_tcp_redirection
+type: detection
+meta:
+  tags: [ 'os:linux', 'execution' ]
+  attack: [ T1059.004 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $devtcp: .data.command_line ~= '/dev/(tcp|udp)/'
+condition: $devtcp
+severity: 9
+actions: [ kill ]
+
+---
+
+name: net.shell.outbound_connection
+type: detection
+meta:
+  tags: [ 'os:linux', 'execution', 'command_and_control' ]
+  attack: [ T1059.004 ]
+match-on:
+  events:
+    kunai: [ connect ]
+matches:
+  $shell: .data.exe.path ~= '/(ba|da|z|k|tc|c|fi|a)?sh$'
+condition: $shell
+severity: 8
+actions: [ kill ]
+
+---
+
+name: exec.interpreter.spawns_shell
+type: detection
+meta:
+  tags: [ 'os:linux', 'execution' ]
+  attack: [ T1059.006 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $interpreter: .data.parent_exe ~= '/(python[0-9.]*|perl[0-9.]*|ruby[0-9.]*|php[0-9.]*|node|lua[0-9.]*)$'
+  $shell: .data.exe.path ~= '/(ba|da|z|k|a)?sh$'
+condition: $interpreter and $shell
+severity: 6
+actions: [ kill ]
+
+---
+
+name: exec.interpreter.inline_code_shell
+type: detection
+meta:
+  tags: [ 'os:linux', 'execution' ]
+  attack: [ T1059.006 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $inline: .data.parent_command_line ~= '^(\S*/)?(python[0-9.]*|perl|ruby|php)\s+(-\S+\s+)*-(c|e|r)\s'
+  $shell: .data.exe.path ~= '/(ba|da|z|k|a)?sh$'
+condition: $inline and $shell
+severity: 7
+actions: [ kill ]
+
+---
+
+name: exec.from.tmpfs
+type: detection
+meta:
+  tags: [ 'os:linux', 'execution' ]
+  attack: [ T1105, T1036.005 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $exe: .data.exe.path ~= '^/(tmp|dev/shm|var/tmp|run/shm)/'
+condition: $exe
+severity: 6
+
+---
+
+name: download.to.tmpfs
+type: detection
+meta:
+  tags: [ 'os:linux', 'command_and_control' ]
+  attack: [ T1105 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $tool: .data.exe.path ~= '/(curl|wget|busybox)$'
+  $out: .data.command_line ~= '(\s-o|\s-O|\s--output|\s--output-document|\s-P)(\s+|=)/(tmp|dev/shm|var/tmp)/'
+condition: $tool and $out
+severity: 5
+
+---
+
+name: chmod.exec.in.tmpfs
+type: detection
+meta:
+  tags: [ 'os:linux', 'execution' ]
+  attack: [ T1105, T1222.002 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $chmod: .data.exe.path ~= '/chmod$'
+  $exec: .data.command_line ~= '\s([ugoa]*\+[rwX]*x[rwX]*|0?[0-7]?[1357][0-7][0-7]|0?[0-7][0-7]?[1357][0-7])\s+(\S+\s+)*/(tmp|dev/shm|var/tmp)/'
+condition: $chmod and $exec
+severity: 4
+
+---
+
+name: persistence.cron.write
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1053.003 ]
+match-on:
+  events:
+    kunai: [ write_config, file_create, write_close ]
+matches:
+  $cron: .data.path ~= '^/(etc/cron(tab$|\.d/|\.daily/|\.hourly/|\.weekly/|\.monthly/)|var/spool/cron/)'
+condition: $cron
+severity: 6
+actions: [ kill ]
+
+---
+
+name: persistence.cron.rename
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1053.003 ]
+match-on:
+  events:
+    kunai: [ file_rename ]
+matches:
+  $cron: .data.new ~= '^/(etc/cron(tab$|\.d/|\.daily/|\.hourly/|\.weekly/|\.monthly/)|var/spool/cron/)'
+condition: $cron
+severity: 6
+actions: [ kill ]
+
+---
+
+name: persistence.crontab.exec
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1053.003 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $crontab: .data.exe.path ~= '/crontab$'
+  $list: .data.command_line ~= '\s-l(\s|$)'
+condition: $crontab and not $list
+severity: 5
+actions: [ kill ]
+
+---
+
+name: persistence.systemd.unit.write
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1543.002 ]
+match-on:
+  events:
+    kunai: [ write_config, file_create, write_close ]
+matches:
+  $unit: .data.path ~= '^/(etc/systemd/(system|user)/|usr/lib/systemd/(system|user)/|lib/systemd/(system|user)/|root/\.config/systemd/user/|home/[^/]+/\.config/systemd/user/)'
+condition: $unit
+severity: 6
+actions: [ kill ]
+
+---
+
+name: persistence.systemd.unit.rename
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1543.002 ]
+match-on:
+  events:
+    kunai: [ file_rename ]
+matches:
+  $unit: .data.new ~= '^/(etc/systemd/(system|user)/|usr/lib/systemd/(system|user)/|lib/systemd/(system|user)/)'
+condition: $unit
+severity: 6
+actions: [ kill ]
+
+---
+
+name: persistence.ssh.authorized_keys.write
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1098.004 ]
+match-on:
+  events:
+    kunai: [ write_config, file_create, write_close ]
+matches:
+  $keys: .data.path ~= '/\.ssh/authorized_keys2?$'
+condition: $keys
+severity: 7
+actions: [ kill ]
+
+---
+
+name: persistence.ssh.authorized_keys.rename
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1098.004 ]
+match-on:
+  events:
+    kunai: [ file_rename ]
+matches:
+  $keys: .data.new ~= '/\.ssh/authorized_keys2?$'
+condition: $keys
+severity: 7
+actions: [ kill ]
+
+---
+
+name: persistence.ssh.authorized_keys.cmdline
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1098.004 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $keys: .data.command_line ~= '\.ssh/authorized_keys'
+  $sshd: .data.exe.path ~= '/(sshd|ssh-keygen)$'
+condition: $keys and not $sshd
+severity: 5
+actions: [ kill ]
+
+---
+
+name: persistence.account.create
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1136.001 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $tool: .data.exe.path ~= '/(useradd|adduser|newusers|chpasswd)$'
+condition: $tool
+severity: 5
+actions: [ kill ]
+
+---
+
+name: persistence.kernel_module.load
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1547.006 ]
+match-on:
+  events:
+    kunai: [ init_module ]
+severity: 8
+actions: [ kill ]
+
+---
+
+name: persistence.kernel_module.insmod
+type: detection
+meta:
+  tags: [ 'os:linux', 'persistence' ]
+  attack: [ T1547.006 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $insmod: .data.exe.path ~= '/insmod$'
+  $modprobe: .data.exe.path ~= '/modprobe$'
+  $remove: .data.command_line ~= '\s(-r|--remove|-n|--dry-run|--show-depends|-c|--showconfig)(\s|$)'
+condition: $insmod or ($modprobe and not $remove)
+severity: 6
+actions: [ kill ]
+
+---
+
+name: privesc.setuid.chmod
+type: detection
+meta:
+  tags: [ 'os:linux', 'privilege_escalation' ]
+  attack: [ T1548.001 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $chmod: .data.exe.path ~= '/chmod$'
+  $suid: .data.command_line ~= '\s([ugoa]*\+[rwxXt]*s[rwxXt]*|0?[2467][0-7]{3})(\s|,)'
+condition: $chmod and $suid
+severity: 7
+actions: [ kill ]
+
+---
+
+name: defense_evasion.sensitive_file.permissions
+type: detection
+meta:
+  tags: [ 'os:linux', 'defense_evasion' ]
+  attack: [ T1222.002 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $tool: .data.exe.path ~= '/(chmod|chown|chgrp|setfacl)$'
+  $target: .data.command_line ~= '\s/etc/(shadow|gshadow|passwd|group|sudoers)(\s|$)'
+condition: $tool and $target
+severity: 7
+actions: [ kill ]
+
+---
+
+name: privesc.escape.nsenter_host
+type: detection
+meta:
+  tags: [ 'os:linux', 'privilege_escalation' ]
+  attack: [ T1611 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $nsenter: .data.exe.path ~= '/nsenter$'
+  $target: .data.command_line ~= '(\s-t|\s--target)(\s+|=)1(\s|$)|\s-[a-zA-Z]*t\s*1(\s|$)'
+condition: $nsenter and $target
+severity: 8
+actions: [ kill ]
+
+---
+
+name: privesc.escape.mount_block_device
+type: detection
+meta:
+  tags: [ 'os:linux', 'privilege_escalation' ]
+  attack: [ T1611 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $mount: .data.exe.path ~= '/mount$'
+  $device: .data.command_line ~= '\s/dev/(sd[a-z]|vd[a-z]|xvd[a-z]|hd[a-z]|nvme[0-9]|mmcblk[0-9]|dm-[0-9]|mapper/)'
+condition: $mount and $device
+severity: 8
+actions: [ kill ]
+
+---
+
+name: privesc.escape.chroot_host
+type: detection
+meta:
+  tags: [ 'os:linux', 'privilege_escalation' ]
+  attack: [ T1611 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $chroot: .data.exe.path ~= '/chroot$'
+  $host: .data.command_line ~= '\s/(host|mnt|media)(/\S*)?(\s|$)'
+condition: $chroot and $host
+severity: 7
+actions: [ kill ]
+
+---
+
+name: defense_evasion.history.delete
+type: detection
+meta:
+  tags: [ 'os:linux', 'defense_evasion' ]
+  attack: [ T1070.003 ]
+match-on:
+  events:
+    kunai: [ file_unlink ]
+matches:
+  $history: .data.path ~= '/\.(bash|zsh|sh|ash|mysql|psql|python)_history$|/fish_history$'
+condition: $history
+severity: 6
+actions: [ kill ]
+
+---
+
+name: defense_evasion.history.tamper_cmdline
+type: detection
+meta:
+  tags: [ 'os:linux', 'defense_evasion' ]
+  attack: [ T1070.003 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $tool: .data.command_line ~= '(^|/|\s)(rm|shred|truncate|unlink|ln|cp|mv|wipe)\s.*_history(\s|$)'
+  $histfile: .data.command_line ~= '(unset\s+HISTFILE|HISTFILE=/dev/null|HISTSIZE=0|history\s+-c)'
+condition: $tool or $histfile
+severity: 6
+actions: [ kill ]
+
+---
+
+name: defense_evasion.logs.clear
+type: detection
+meta:
+  tags: [ 'os:linux', 'defense_evasion' ]
+  attack: [ T1070.002 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $tool: .data.command_line ~= '(^|/|\s)(truncate|shred|wipe)\s.*/var/log/'
+  $redirect: .data.command_line ~= '(:|true|cat\s+/dev/null|echo(\s+-n)?)\s*>\s*/var/log/'
+  $journal: .data.command_line ~= 'journalctl\s.*--vacuum-(time|size|files)'
+condition: $tool or $redirect or $journal
+severity: 6
+
+---
+
+name: defense_evasion.logs.delete
+type: detection
+meta:
+  tags: [ 'os:linux', 'defense_evasion' ]
+  attack: [ T1070.002 ]
+match-on:
+  events:
+    kunai: [ file_unlink ]
+matches:
+  $log: .data.path ~= '^/var/(log/(wtmp|btmp|lastlog|faillog|auth\.log|secure|syslog|messages|kern\.log|audit/audit\.log)|run/utmp)$'
+condition: $log
+severity: 6
+
+---
+
+name: defense_evasion.masquerading.system_binary_name
+type: detection
+meta:
+  tags: [ 'os:linux', 'defense_evasion' ]
+  attack: [ T1036.005 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $name: .data.exe.path ~= '/(sshd|systemd[a-z-]*|crond?|atd|kworker[^/]*|kthreadd|ksoftirqd[^/]*|init|dbus-daemon|rsyslogd|syslogd|agetty|udevd|containerd|dockerd|kubelet)$'
+  $system: .data.exe.path ~= '^/(usr/)?(s?bin|lib|lib64|libexec|lib/systemd)/'
+condition: $name and not $system
+severity: 8
+actions: [ kill ]
+
+---
+
+name: defense_evasion.exec.hidden_path
+type: detection
+meta:
+  tags: [ 'os:linux', 'defense_evasion' ]
+  attack: [ T1564.001, T1036.005 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $hidden: .data.exe.path ~= '^/(tmp|dev/shm|var/tmp|run)/(.*/)?\.[^/]+/'
+condition: $hidden
+severity: 6
+actions: [ kill ]
+
+---
+
+name: defense_evasion.fileless.memfd_exec
+type: detection
+meta:
+  tags: [ 'os:linux', 'defense_evasion' ]
+  attack: [ T1620 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $memfd: .data.exe.path ~= '^/?memfd:'
+  $fd: .data.exe.path ~= '^/(proc/(self|[0-9]+)/fd|dev/fd)/[0-9]+'
+condition: $memfd or $fd
+severity: 9
+actions: [ kill ]
+
+---
+
+name: credential_access.shadow.read
+type: detection
+meta:
+  tags: [ 'os:linux', 'credential_access' ]
+  attack: [ T1003.008 ]
+match-on:
+  events:
+    kunai: [ read_config ]
+matches:
+  $shadow: .data.path ~= '^/etc/(shadow|gshadow|security/opasswd)$'
+  $legit: .data.exe.path ~= '/(sshd|login|su|sudo|passwd|unix_chkpwd|chage|useradd|usermod|userdel|groupadd|groupmod|pwck|grpck|chpasswd|newusers|cron|crond|systemd|systemd-[a-z-]+)$'
+condition: $shadow and not $legit
+severity: 7
+actions: [ kill ]
+
+---
+
+name: credential_access.shadow.cmdline
+type: detection
+meta:
+  tags: [ 'os:linux', 'credential_access' ]
+  attack: [ T1003.008 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $shadow: .data.command_line ~= '(^|\s)/etc/(shadow|gshadow)(\s|$)'
+  $perm: .data.exe.path ~= '/(chmod|chown|chgrp|setfacl)$'
+condition: $shadow and not $perm
+severity: 7
+actions: [ kill ]
+
+---
+
+name: credential_access.credential_files.cmdline
+type: detection
+meta:
+  tags: [ 'os:linux', 'credential_access' ]
+  attack: [ T1552.001 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $files: .data.command_line ~= '\.aws/credentials|\.ssh/id_(rsa|dsa|ecdsa|ed25519)|(^|\s|/)id_(rsa|dsa|ecdsa|ed25519)(\s|$)|\.git-credentials|\.docker/config\.json|\.kube/config|\.netrc|\.pgpass|\.config/gcloud/(credentials|access_tokens)'
+  $ssh: .data.exe.path ~= '/(ssh|scp|sftp|ssh-add|ssh-keygen|ssh-agent|git|aws|kubectl|docker)$'
+condition: $files and not $ssh
+severity: 6
+actions: [ kill ]
+
+---
+
+name: credential_access.container_api.cmdline
+type: detection
+meta:
+  tags: [ 'os:linux', 'credential_access', 'container' ]
+  attack: [ T1552.007 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $token: .data.command_line ~= '/run/secrets/kubernetes\.io/serviceaccount'
+  $socket: .data.command_line ~= '(docker|containerd|crio|podman)\.sock'
+  $api: .data.command_line ~= ':(2375|2376|10250|10255)(/|\s|$)'
+  $daemon: .data.exe.path ~= '/(dockerd|containerd|containerd-shim[a-z0-9-]*|runc|kubelet)$'
+condition: ($token or $socket or $api) and not $daemon
+severity: 6
+actions: [ kill ]
+
+---
+
+name: discovery.container.environment
+type: detection
+meta:
+  tags: [ 'os:linux', 'discovery', 'container' ]
+  attack: [ T1613 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $tool: .data.exe.path ~= '/(docker|crictl|ctr|nerdctl|kubectl|podman|capsh|amicontained|deepce|cdk|botb)$'
+  $files: .data.command_line ~= '/\.dockerenv|/run/\.containerenv|/proc/(1|self)/(cgroup|mountinfo)|/proc/1/environ|/sys/fs/cgroup/.*release_agent'
+condition: $tool or $files
+severity: 3
+
+---
+
+name: discovery.system.information
+type: detection
+meta:
+  tags: [ 'os:linux', 'discovery' ]
+  attack: [ T1082 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $tool: .data.exe.path ~= '/(uname|lscpu|lsb_release|hostnamectl|dmidecode|lshw|lsblk|lspci|lsmod|getconf|virt-what|systemd-detect-virt)$'
+  $files: .data.command_line ~= '/etc/(os-release|lsb-release|issue|redhat-release|debian_version)|/proc/(version|cpuinfo|meminfo|modules)'
+condition: $tool or $files
+severity: 2
+
+---
+
+name: discovery.network.port_scan
+type: detection
+meta:
+  tags: [ 'os:linux', 'discovery' ]
+  attack: [ T1046 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $nc: .data.exe.path ~= '/(nc|ncat|netcat|nc\.openbsd|nc\.traditional|busybox)$'
+  $scan: .data.command_line ~= '\s-[a-zA-Z]*z|\s[0-9]+-[0-9]+(\s|$)'
+  $scanner: .data.exe.path ~= '/(nmap|masscan|zmap|rustscan|naabu|unicornscan|hping3)$'
+condition: ($nc and $scan) or $scanner
+severity: 5
+actions: [ kill ]
+
+---
+
+name: exfiltration.http.upload
+type: detection
+meta:
+  tags: [ 'os:linux', 'exfiltration' ]
+  attack: [ T1048 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $tool: .data.exe.path ~= '/(curl|wget)$'
+  $upload: .data.command_line ~= '(\s-d|\s--data[a-z-]*|\s-F|\s--form)(\s+|=)\S*@|\s(-T|--upload-file|--post-file)(\s|=)'
+condition: $tool and $upload
+severity: 6
+actions: [ kill ]
+
+---
+
+name: impact.cryptominer.process
+type: detection
+meta:
+  tags: [ 'os:linux', 'impact' ]
+  attack: [ T1496 ]
+match-on:
+  events:
+    kunai: [ execve, execve_script ]
+matches:
+  $exe: .data.exe.path ~= '/(xmrig[^/]*|xmr-stak[^/]*|minerd|cpuminer[^/]*|ccminer|ethminer|nbminer|t-rex|lolminer|kdevtmpfsi|kinsing)$'
+  $stratum: .data.command_line ~= 'stratum\+(tcp|ssl|tls)://|--donate-level|\s-o\s+\S+:(3333|4444|5555|7777|14444|45700)(\s|$)'
+condition: $exe or $stratum
+severity: 8
+actions: [ kill ]
+
+---
+
+name: impact.cryptominer.connection
+type: detection
+meta:
+  tags: [ 'os:linux', 'impact' ]
+  attack: [ T1496 ]
+match-on:
+  events:
+    kunai: [ connect ]
+matches:
+  $exe: .data.exe.path ~= '/(xmrig[^/]*|xmr-stak[^/]*|minerd|cpuminer[^/]*|ccminer|ethminer|nbminer|t-rex|lolminer)$'
+  $p3333: .data.dst.port == '3333'
+  $p14444: .data.dst.port == '14444'
+  $p14433: .data.dst.port == '14433'
+  $p45700: .data.dst.port == '45700'
+condition: $exe or $p3333 or $p14444 or $p14433 or $p45700
+severity: 7
+actions: [ kill ]
+
+---
+
+name: impact.data_destruction
+type: detection
+meta:
+  tags: [ 'os:linux', 'impact' ]
+  attack: [ T1485 ]
+match-on:
+  events:
+    kunai: [ execve ]
+matches:
+  $tool: .data.exe.path ~= '/(shred|wipe|srm|wipefs)$'
+  $dd: .data.command_line ~= '(^|/|\s)dd\s.*if=/dev/(zero|urandom|random).*of=/'
+condition: $tool or $dd
+severity: 6
+actions: [ kill ]

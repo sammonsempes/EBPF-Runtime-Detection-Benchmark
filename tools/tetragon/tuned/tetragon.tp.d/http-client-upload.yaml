@@ -1,0 +1,31 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: "http-client-upload"
+  annotations:
+    description: "curl or wget sending a payload larger than a typical request header, as done when uploading archives"
+spec:
+  kprobes:
+  - call: "tcp_sendmsg"
+    syscall: false
+    message: "Command-line HTTP client sent a large payload"
+    args:
+    - index: 0
+      type: "sock"
+    - index: 2
+      type: "size_t"
+    selectors:
+    - matchBinaries:
+      - operator: "In"
+        values:
+        - "/bin/curl"
+        - "/usr/bin/curl"
+        - "/usr/local/bin/curl"
+        - "/bin/wget"
+        - "/usr/bin/wget"
+      matchArgs:
+      - index: 2
+        operator: "GT"
+        values:
+        - "512"
+    tags: ["mitre.exfiltration", "T1048"]

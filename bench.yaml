@@ -1,0 +1,37 @@
+tools:
+  - falco
+  - tetragon
+  - tracee
+  - kubearmor
+  - kunai
+  - pulsar
+
+profiles:
+  - default
+  - tuned
+  - enforce
+
+scenarios: all
+
+repetitions: 5
+grace_seconds: 10
+idle_seconds: 3
+control_scenarios: true
+
+overhead:
+  duration_seconds: 30
+  repetitions: 3
+  workloads:
+    - syscall
+    - exec
+    - fileio
+
+results_dir: results
+
+backend: docker
+
+kubernetes:
+  kubeconfig: null
+  context: kind-ebpf-bench
+  namespace: ebpf-bench
+  node: null

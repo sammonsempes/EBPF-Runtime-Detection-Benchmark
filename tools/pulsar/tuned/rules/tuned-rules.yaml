@@ -1,0 +1,271 @@
+- name: Shell outbound network connection
+  type: Connect
+  category: execution
+  severity: high
+  description: A shell process opened an outbound network connection, typical of /dev/tcp reverse shells.
+  condition: |
+    header.image ENDS_WITH "/bash" OR header.image ENDS_WITH "/sh" OR header.image ENDS_WITH "/dash"
+    OR header.image ENDS_WITH "/zsh" OR header.image ENDS_WITH "/ksh" OR header.image ENDS_WITH "/ash"
+
+- name: Interpreter inline code execution
+  type: Exec
+  category: execution
+  severity: medium
+  description: A script interpreter was started with inline code, a common way to spawn shells and run payloads without files.
+  condition: |
+    (payload.filename CONTAINS "/python" OR payload.filename CONTAINS "/perl" OR payload.filename CONTAINS "/ruby" OR payload.filename CONTAINS "/php")
+    AND (payload.argv CONTAINS "-c" OR payload.argv CONTAINS "-e" OR payload.argv CONTAINS "-r")
+
+- name: Execution from temporary directory
+  type: Exec
+  category: execution
+  severity: medium
+  description: A binary located in a world writable temporary directory was executed.
+  condition: |
+    payload.filename STARTS_WITH "/tmp/" OR payload.filename STARTS_WITH "/dev/shm/" OR payload.filename STARTS_WITH "/var/tmp/"
+    OR payload.filename STARTS_WITH "/run/shm/"
+
+- name: Executable bit set on file
+  type: Exec
+  category: execution
+  severity: low
+  description: chmod was used to make a file executable, often done right after downloading a tool.
+  condition: |
+    payload.filename ENDS_WITH "/chmod"
+    AND (payload.argv CONTAINS "+x" OR payload.argv CONTAINS "u+x" OR payload.argv CONTAINS "a+x" OR payload.argv CONTAINS "755" OR payload.argv CONTAINS "777" OR payload.argv CONTAINS "700")
+
+- name: User crontab modification
+  type: FileOpened
+  category: persistence
+  severity: medium
+  description: A file under /var/spool/cron was opened for writing.
+  condition: |
+    payload.filename STARTS_WITH "/var/spool/cron" AND (payload.flags CONTAINS "O_WRONLY" OR payload.flags CONTAINS "O_RDWR")
+
+- name: Cron file created
+  type: FileCreated
+  category: persistence
+  severity: medium
+  description: A file was created in a cron directory.
+  condition: |
+    payload.filename STARTS_WITH "/etc/cron" OR payload.filename STARTS_WITH "/var/spool/cron"
+
+- name: Systemd unit file modification
+  type: FileOpened
+  category: persistence
+  severity: high
+  description: A systemd unit file was opened for writing.
+  condition: |
+    (payload.filename STARTS_WITH "/etc/systemd/system/" OR payload.filename STARTS_WITH "/etc/systemd/user/"
+    OR payload.filename STARTS_WITH "/usr/lib/systemd/system/" OR payload.filename STARTS_WITH "/lib/systemd/system/"
+    OR payload.filename CONTAINS "/.config/systemd/user/")
+    AND (payload.flags CONTAINS "O_WRONLY" OR payload.flags CONTAINS "O_RDWR")
+
+- name: Systemd unit file renamed into place
+  type: FileRename
+  category: persistence
+  severity: high
+  description: A file was renamed into a systemd unit directory.
+  condition: |
+    payload.destination STARTS_WITH "/etc/systemd/system/" OR payload.destination STARTS_WITH "/usr/lib/systemd/system/"
+    OR payload.destination STARTS_WITH "/lib/systemd/system/"
+
+- name: SSH authorized_keys modification
+  type: FileOpened
+  category: persistence
+  severity: high
+  description: An authorized_keys file was opened for writing by a process other than the SSH tooling.
+  condition: |
+    (payload.filename ENDS_WITH "/.ssh/authorized_keys" OR payload.filename ENDS_WITH "/.ssh/authorized_keys2")
+    AND (payload.flags CONTAINS "O_WRONLY" OR payload.flags CONTAINS "O_RDWR")
+    AND NOT header.image IN ["/usr/sbin/sshd", "/usr/bin/ssh-copy-id"]
+
+- name: Local account creation
+  type: Exec
+  category: persistence
+  severity: medium
+  description: A local user account management binary was executed.
+  condition: |
+    payload.filename ENDS_WITH "/useradd" OR payload.filename ENDS_WITH "/adduser" OR payload.filename ENDS_WITH "/newusers"
+    OR payload.filename ENDS_WITH "/chpasswd"
+
+- name: Setuid or setgid bit set
+  type: Exec
+  category: privilege_escalation
+  severity: high
+  description: chmod was used to set the setuid or setgid bit on a file.
+  condition: |
+    payload.filename ENDS_WITH "/chmod"
+    AND (payload.argv CONTAINS "u+s" OR payload.argv CONTAINS "g+s" OR payload.argv CONTAINS "+s" OR payload.argv CONTAINS "a+s"
+    OR payload.argv CONTAINS "4755" OR payload.argv CONTAINS "4777" OR payload.argv CONTAINS "4711" OR payload.argv CONTAINS "4750"
+    OR payload.argv CONTAINS "6755" OR payload.argv CONTAINS "2755" OR payload.argv CONTAINS "04755" OR payload.argv CONTAINS "06755")
+
+- name: Permission change on sensitive account file
+  type: Exec
+  category: defense_evasion
+  severity: high
+  description: The permissions or owner of an account database file were changed.
+  condition: |
+    (payload.filename ENDS_WITH "/chmod" OR payload.filename ENDS_WITH "/chown" OR payload.filename ENDS_WITH "/chgrp" OR payload.filename ENDS_WITH "/setfacl")
+    AND (payload.argv CONTAINS "/etc/shadow" OR payload.argv CONTAINS "/etc/gshadow" OR payload.argv CONTAINS "/etc/passwd"
+    OR payload.argv CONTAINS "/etc/sudoers")
+
+- name: Namespace entry into host init process
+  type: Exec
+  category: privilege_escalation
+  severity: critical
+  description: nsenter was used to enter the namespaces of PID 1, a container escape technique when run from a privileged container.
+  condition: |
+    payload.filename ENDS_WITH "/nsenter"
+    AND (payload.argv CONTAINS "1" OR payload.argv CONTAINS "--target=1" OR payload.argv CONTAINS "-t1")
+
+- name: Mount executed in container
+  type: Exec
+  category: privilege_escalation
+  severity: high
+  description: mount was executed inside a container, which can expose the host filesystem from a privileged container.
+  condition: |
+    header.container.is_some() AND payload.filename ENDS_WITH "/mount" AND payload.argc > 1
+
+- name: Fileless execution from memory file descriptor
+  type: Exec
+  category: defense_evasion
+  severity: critical
+  description: A program was executed from an anonymous memory file descriptor, typical of memfd_create based fileless malware.
+  condition: |
+    payload.filename STARTS_WITH "/proc/self/fd/" OR payload.filename STARTS_WITH "/dev/fd/" OR payload.filename STARTS_WITH "memfd:"
+    OR payload.filename STARTS_WITH "/memfd:"
+
+- name: Process masquerading as system daemon
+  type: Exec
+  category: defense_evasion
+  severity: high
+  description: A binary named like a system daemon was executed from outside the system binary directories.
+  condition: |
+    (payload.filename ENDS_WITH "/sshd" OR payload.filename ENDS_WITH "/crond" OR payload.filename ENDS_WITH "/cron"
+    OR payload.filename ENDS_WITH "/systemd" OR payload.filename ENDS_WITH "/kworker" OR payload.filename ENDS_WITH "/dbus-daemon"
+    OR payload.filename ENDS_WITH "/rsyslogd" OR payload.filename ENDS_WITH "/kthreadd")
+    AND NOT (payload.filename STARTS_WITH "/usr/sbin/" OR payload.filename STARTS_WITH "/usr/bin/" OR payload.filename STARTS_WITH "/sbin/"
+    OR payload.filename STARTS_WITH "/bin/" OR payload.filename STARTS_WITH "/usr/lib/" OR payload.filename STARTS_WITH "/lib/")
+
+- name: Log file truncation command
+  type: Exec
+  category: defense_evasion
+  severity: medium
+  description: truncate or shred was run against a file, a common way to clear logs.
+  condition: |
+    (payload.filename ENDS_WITH "/truncate" OR payload.filename ENDS_WITH "/shred")
+    AND (payload.argv CONTAINS "/var/log/syslog" OR payload.argv CONTAINS "/var/log/auth.log" OR payload.argv CONTAINS "/var/log/messages"
+    OR payload.argv CONTAINS "/var/log/secure" OR payload.argv CONTAINS "/var/log/wtmp" OR payload.argv CONTAINS "/var/log/btmp"
+    OR payload.argv CONTAINS "/var/log/lastlog" OR payload.argv CONTAINS "-s" OR payload.argv CONTAINS "--size=0")
+
+- name: Credential file access
+  type: FileOpened
+  category: credential_access
+  severity: medium
+  description: A credential store file was opened by a process that is not its usual consumer.
+  condition: |
+    (payload.filename ENDS_WITH "/.aws/credentials" OR payload.filename ENDS_WITH "/.ssh/id_rsa" OR payload.filename ENDS_WITH "/.ssh/id_ed25519"
+    OR payload.filename ENDS_WITH "/.ssh/id_ecdsa" OR payload.filename ENDS_WITH "/.ssh/id_dsa" OR payload.filename ENDS_WITH "/.git-credentials"
+    OR payload.filename ENDS_WITH "/.docker/config.json" OR payload.filename ENDS_WITH "/.kube/config" OR payload.filename ENDS_WITH "/.netrc")
+    AND NOT header.image IN ["/usr/bin/ssh", "/usr/bin/scp", "/usr/bin/sftp", "/usr/bin/ssh-add", "/usr/bin/ssh-keygen", "/usr/bin/git",
+    "/usr/bin/aws", "/usr/local/bin/aws", "/usr/bin/kubectl", "/usr/local/bin/kubectl", "/usr/bin/docker"]
+
+- name: Service account token access
+  type: FileOpened
+  category: credential_access
+  severity: high
+  description: A Kubernetes service account token or certificate was read.
+  condition: |
+    payload.filename STARTS_WITH "/var/run/secrets/kubernetes.io/serviceaccount" OR payload.filename STARTS_WITH "/run/secrets/kubernetes.io/serviceaccount"
+
+- name: Container runtime socket access
+  type: Exec
+  category: credential_access
+  severity: high
+  description: A command referenced a container runtime API socket.
+  condition: |
+    payload.argv CONTAINS "/var/run/docker.sock" OR payload.argv CONTAINS "/run/docker.sock" OR payload.argv CONTAINS "/run/containerd/containerd.sock"
+    OR payload.argv CONTAINS "unix:///var/run/docker.sock" OR payload.argv CONTAINS "/var/run/crio/crio.sock"
+
+- name: Container environment discovery
+  type: Exec
+  category: discovery
+  severity: low
+  description: A container discovery tool was executed or container markers were inspected.
+  condition: |
+    payload.filename ENDS_WITH "/capsh" OR payload.filename ENDS_WITH "/amicontained" OR payload.filename ENDS_WITH "/deepce"
+    OR payload.filename ENDS_WITH "/cdk" OR payload.filename ENDS_WITH "/crictl" OR payload.filename ENDS_WITH "/kubectl"
+    OR payload.filename ENDS_WITH "/docker" OR payload.filename ENDS_WITH "/ctr" OR payload.filename ENDS_WITH "/nerdctl"
+    OR payload.argv CONTAINS "/.dockerenv" OR payload.argv CONTAINS "/run/.containerenv" OR payload.argv CONTAINS "/proc/1/cgroup"
+    OR payload.argv CONTAINS "/proc/self/cgroup" OR payload.argv CONTAINS "/proc/1/mountinfo" OR payload.argv CONTAINS "/proc/self/mountinfo"
+
+- name: Container marker file access
+  type: FileOpened
+  category: discovery
+  severity: low
+  description: A container marker file was opened.
+  condition: |
+    payload.filename IN ["/.dockerenv", "/run/.containerenv"]
+
+- name: System information discovery
+  type: Exec
+  category: discovery
+  severity: low
+  description: A system information discovery utility was executed.
+  condition: |
+    payload.filename ENDS_WITH "/uname" OR payload.filename ENDS_WITH "/lscpu" OR payload.filename ENDS_WITH "/lsb_release"
+    OR payload.filename ENDS_WITH "/hostnamectl" OR payload.filename ENDS_WITH "/dmidecode" OR payload.filename ENDS_WITH "/lshw"
+    OR payload.argv CONTAINS "/etc/os-release" OR payload.argv CONTAINS "/proc/version" OR payload.argv CONTAINS "/proc/cpuinfo"
+    OR payload.argv CONTAINS "/etc/lsb-release" OR payload.argv CONTAINS "/etc/issue"
+
+- name: Network port scan
+  type: Exec
+  category: discovery
+  severity: medium
+  description: A netcat port scan or a dedicated network scanner was executed.
+  condition: |
+    ((payload.filename ENDS_WITH "/nc" OR payload.filename ENDS_WITH "/ncat" OR payload.filename ENDS_WITH "/netcat"
+    OR payload.filename ENDS_WITH "/nc.openbsd" OR payload.filename ENDS_WITH "/nc.traditional")
+    AND (payload.argv CONTAINS "-z" OR payload.argv CONTAINS "-zv" OR payload.argv CONTAINS "-vz" OR payload.argv CONTAINS "-zn"
+    OR payload.argv CONTAINS "-nz" OR payload.argv CONTAINS "-zvn" OR payload.argv CONTAINS "-nvz" OR payload.argv CONTAINS "-vnz"
+    OR payload.argv CONTAINS "-znv" OR payload.argv CONTAINS "-nzv" OR payload.argv CONTAINS "-vzn" OR payload.argv CONTAINS "-zw1"))
+    OR payload.filename ENDS_WITH "/nmap" OR payload.filename ENDS_WITH "/masscan" OR payload.filename ENDS_WITH "/zmap"
+
+- name: HTTP data upload
+  type: Exec
+  category: exfiltration
+  severity: medium
+  description: curl or wget was used to upload data to a remote server.
+  condition: |
+    (payload.filename ENDS_WITH "/curl" OR payload.filename ENDS_WITH "/wget")
+    AND (payload.argv CONTAINS "-T" OR payload.argv CONTAINS "--upload-file" OR payload.argv CONTAINS "-F" OR payload.argv CONTAINS "--form"
+    OR payload.argv CONTAINS "--data-binary" OR payload.argv CONTAINS "-d" OR payload.argv CONTAINS "--data" OR payload.argv CONTAINS "--data-raw"
+    OR payload.argv CONTAINS "--post-file" OR payload.argv CONTAINS "--post-data")
+
+- name: Cryptominer execution
+  type: Exec
+  category: impact
+  severity: high
+  description: A known cryptocurrency miner binary was executed.
+  condition: |
+    payload.filename ENDS_WITH "/xmrig" OR payload.filename ENDS_WITH "/xmr-stak" OR payload.filename ENDS_WITH "/minerd"
+    OR payload.filename ENDS_WITH "/cpuminer" OR payload.filename ENDS_WITH "/ccminer" OR payload.filename ENDS_WITH "/ethminer"
+    OR payload.filename ENDS_WITH "/nbminer" OR payload.filename ENDS_WITH "/lolminer" OR payload.argv CONTAINS "--donate-level"
+
+- name: Mining pool connection
+  type: Connect
+  category: impact
+  severity: high
+  description: A connection was opened to a port commonly used by cryptocurrency mining pools, or by a known miner binary.
+  condition: |
+    payload.destination.port IN [3333, 14433, 14444, 45700]
+    OR header.image ENDS_WITH "/xmrig" OR header.image ENDS_WITH "/minerd" OR header.image ENDS_WITH "/cpuminer"
+
+- name: Secure file deletion
+  type: Exec
+  category: impact
+  severity: medium
+  description: A secure deletion utility was executed, which destroys data beyond recovery.
+  condition: |
+    payload.filename ENDS_WITH "/shred" OR payload.filename ENDS_WITH "/wipe" OR payload.filename ENDS_WITH "/srm" OR payload.filename ENDS_WITH "/wipefs"

@@ -1,0 +1,16 @@
+apiVersion: tracee.aquasec.com/v1beta1
+kind: Policy
+metadata:
+  name: detect-container-discovery
+  annotations:
+    description: T1613 container environment and capability discovery
+spec:
+  scope:
+    - container
+  rules:
+    - event: sched_process_exec
+      filters:
+        - data.pathname=/usr/sbin/capsh,/usr/bin/capsh,/usr/sbin/getpcaps,/usr/bin/amicontained,/usr/bin/docker,/usr/bin/kubectl,/usr/bin/crictl
+    - event: security_file_open
+      filters:
+        - data.pathname=/.dockerenv,/run/.containerenv,/proc/1/cgroup,/proc/1/environ

@@ -1,0 +1,21 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "tuned-kernel-module-load"},
+  "spec": {
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/kmod"},
+        {"path": "/usr/sbin/insmod"},
+        {"path": "/usr/sbin/modprobe"},
+        {"path": "/usr/sbin/rmmod"},
+        {"path": "/sbin/insmod"},
+        {"path": "/sbin/modprobe"}
+      ]
+    },
+    "message": "Kernel module load attempt from a container",
+    "severity": 9,
+    "tags": ["MITRE", "MITRE_T1547.006_kernel_modules_and_extensions", "MITRE_TA0004_privilege_escalation"],
+    "action": "Audit"
+  }
+}

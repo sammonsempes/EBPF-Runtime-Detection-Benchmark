@@ -1,0 +1,11 @@
+id: t1036-005-masquerading
+name: Binary masquerading as sshd in a hidden directory
+kind: attack
+tactic: defense-evasion
+technique: T1036.005
+description: >-
+  Copies /usr/bin/sleep to the hidden directory /tmp/.X11-<marker>/sshd and runs it,
+  producing a process named sshd whose executable lives in /tmp and whose content is
+  not the OpenSSH daemon. The directory is removed afterwards.
+timeout: 30
+requires: []

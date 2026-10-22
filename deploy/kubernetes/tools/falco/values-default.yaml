@@ -1,0 +1,27 @@
+image:
+  tag: "0.45.0"
+  pullPolicy: IfNotPresent
+tty: true
+driver:
+  kind: modern_ebpf
+  loader:
+    enabled: false
+falcoctl:
+  artifact:
+    install:
+      enabled: false
+    follow:
+      enabled: false
+collectors:
+  kubernetes:
+    enabled: false
+mounts:
+  volumes:
+    - name: bench-config
+      configMap:
+        name: bench-falco-config
+  volumeMounts:
+    - name: bench-config
+      mountPath: /etc/falco/config.d/zz-bench.yaml
+      subPath: falco.bench.yaml
+      readOnly: true
