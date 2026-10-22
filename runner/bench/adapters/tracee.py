@@ -8,7 +8,6 @@ from bench.model import Alert
 
 PROFILE_DIR = "/tracee/profile"
 DETECTION_POLICY_PREFIX = "detect-"
-HEALTHZ_URL = "http://127.0.0.1:3366/healthz"
 SEVERITY_NAMES = {0: "info", 1: "low", 2: "medium", 3: "high", 4: "critical"}
 
 
@@ -86,7 +85,6 @@ class Adapter(ToolAdapter):
             ],
             environment={"LIBBPFGO_OSRELEASE_FILE": "/etc/os-release-host"},
             ready_pattern=r'"(eventName|name)":\s*"tracee_info"',
-            ready_url=HEALTHZ_URL,
             startup_timeout=300.0,
         )
 

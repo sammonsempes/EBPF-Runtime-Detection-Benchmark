@@ -58,3 +58,21 @@ services:
     entrypoint: ["true"]
     command: []
     restart: "no"
+
+  kunai:
+    build:
+      context: ./tools/kunai
+      additional_contexts:
+        certs: ${BENCH_CA_DIR:-./runner/certs}
+    image: ebpf-bench/kunai:0.6.2
+    entrypoint: ["true"]
+    command: []
+    restart: "no"
+
+  pulsar:
+    build:
+      context: ./tools/pulsar
+    image: ebpf-bench/pulsar:0.10.1
+    entrypoint: ["true"]
+    command: []
+    restart: "no"

@@ -12,6 +12,12 @@ VICTIM_ID = "c0ffee123456" + "0" * 52
 GRACE = 2.0
 
 
+def test_report_never_renders_host_hostname() -> None:
+    text = render_report({"run_id": "r1"}, {"host": {"hostname": "secret-laptop", "kernel": "6.6.87"}})
+    assert "host.kernel" in text and "6.6.87" in text
+    assert "hostname" not in text and "secret-laptop" not in text
+
+
 def write_jsonl(path: Path, records) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(asdict(record)) + "\n" for record in records), encoding="utf-8")

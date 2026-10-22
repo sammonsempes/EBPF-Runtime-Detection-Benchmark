@@ -15,15 +15,17 @@ output:
   attack_mapping: false
 response:
   blocking: true
-  mechanisms: [sigkill, override]
+  mechanisms: [sigkill]
   synchronous: true
   notes: >
     Selectors can carry Sigkill, Signal and Override actions executed synchronously in the kernel
-    (docs/content/en/docs/concepts/enforcement/_index.md). Override returns an error from syscalls and security_*
-    hooks without running them and requires bpf_override_return support (CONFIG_BPF_KPROBE_OVERRIDE); Sigkill works on
-    any hook but does not guarantee the in-flight operation is stopped. Enforcement events are regular process_kprobe
-    events whose action field is KPROBE_ACTION_SIGKILL or KPROBE_ACTION_OVERRIDE, and the killed process ends with a
-    process_exit carrying signal SIGKILL.
+    (docs/content/en/docs/concepts/enforcement/_index.md). The benchmark enforce profile uses Sigkill only, so it loads
+    on kernels without bpf_override_return (CONFIG_BPF_KPROBE_OVERRIDE unset, e.g. WSL2 6.6): the signal is raised
+    in-kernel at the hook, but without Override the in-flight syscall may still complete before the process dies (a
+    write, send or mount can take effect). A variant adding Override (returning an error from syscalls and security_*
+    hooks without running them) gives true denial on kernels built with CONFIG_BPF_KPROBE_OVERRIDE; it is not used here.
+    Enforcement events are regular process_kprobe events whose action field is KPROBE_ACTION_SIGKILL (or
+    KPROBE_ACTION_OVERRIDE for such a variant), and the killed process ends with a process_exit carrying signal SIGKILL.
 scores:
   deployment: 5
   rule_customization: 4

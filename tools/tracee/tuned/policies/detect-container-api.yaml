@@ -8,7 +8,6 @@ spec:
   scope:
     - container
   rules:
-    - event: k8s_service_account_token
     - event: security_file_open
       filters:
         - data.pathname=*/secrets/kubernetes.io/serviceaccount/token,*/docker.sock,*/containerd.sock,*/crio.sock

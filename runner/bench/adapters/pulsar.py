@@ -31,21 +31,20 @@ def _system_time(value: Any) -> float | None:
 class Adapter(ToolAdapter):
     name = "pulsar"
     version = "0.10.1"
-    image = "ghcr.io/exein-io/pulsar"
+    image = "ebpf-bench/pulsar"
     config_mount = "/etc/bench/pulsar"
     rules_root = "/var/lib/pulsar/rules"
 
     def container_spec(self, host_repo_root: Path, profile: str, host_output_dir: Path) -> ContainerSpec:
         profile_dir = Path(host_repo_root) / "tools" / self.name / profile
         return ContainerSpec(
-            image=f"{self.image}:v{self.version}",
+            image=f"{self.image}:{self.version}",
             command=["--config-file", f"{self.config_mount}/pulsar.ini"],
             mounts=[
                 Mount(source=str(profile_dir), target=self.config_mount),
                 Mount(source=str(profile_dir / "rules"), target=f"{self.rules_root}/bench-{profile}"),
                 Mount(source="/sys/kernel/debug", target="/sys/kernel/debug", read_only=False),
                 Mount(source="/sys/kernel/btf", target="/sys/kernel/btf"),
-                Mount(source="/sys/fs/bpf", target="/sys/fs/bpf", read_only=False),
                 Mount(source="/var/lib/docker", target="/var/lib/docker"),
             ],
             ready_pattern=r"Starting module rules-engine",

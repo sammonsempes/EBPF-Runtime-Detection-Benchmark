@@ -631,7 +631,6 @@ class DockerBackend(Backend):
             "architecture": info.get("Architecture") or platform.machine(),
             "cpus": info.get("NCPU") or os.cpu_count(),
             "memory_bytes": info.get("MemTotal"),
-            "hostname": info.get("Name"),
             "docker_version": version.get("Version"),
             "docker_api_version": version.get("ApiVersion"),
             "cgroup_version": info.get("CgroupVersion"),

@@ -1,4 +1,4 @@
-host_uuid: null
+host_uuid: 0b1e5c3a-7d2f-4e8b-9a61-5c4d3e2f1a0b
 max_buffered_events: 1024
 max_eps_fs: 2048
 workers: null

@@ -218,6 +218,16 @@ def test_host_cpu_sampler() -> None:
     assert len(samples) >= 3
 
 
+def test_host_info_does_not_record_hostname() -> None:
+    client = FakeClient()
+    client.info = lambda: {"KernelVersion": "6.6.87", "Name": "secret-laptop", "NCPU": 8, "Architecture": "x86_64"}
+    client.version = lambda: {"Version": "27.0", "ApiVersion": "1.46"}
+    info = DockerBackend(Path("/bench"), Path("/host"), client=client).host_info()
+    assert info["kernel"] == "6.6.87" and info["cpus"] == 8 and info["docker_version"] == "27.0"
+    assert "hostname" not in info
+    assert "secret-laptop" not in repr(info)
+
+
 class FakeResponse:
     def __init__(self, status: int) -> None:
         self.status = status

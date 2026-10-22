@@ -3,7 +3,7 @@ kind: TracingPolicy
 metadata:
   name: "history-and-log-tampering"
   annotations:
-    description: "Deny and kill deletion, renaming, truncation or symlinking of shell history files and deletion or truncation of /var/log files outside log rotation, inside containers"
+    description: "Kill deletion, renaming, truncation or symlinking of shell history files and deletion or truncation of /var/log files outside log rotation, inside containers"
 spec:
   kprobes:
   - call: "sys_unlinkat"
@@ -28,8 +28,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 1
@@ -59,8 +57,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     tags: ["mitre.defense_evasion", "T1070.003", "T1070.002"]
   - call: "sys_unlink"
@@ -81,8 +77,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -108,8 +102,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     ignore:
       callNotFound: true
@@ -138,8 +130,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 3
@@ -152,8 +142,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     tags: ["mitre.defense_evasion", "T1070.003"]
   - call: "sys_symlinkat"
@@ -178,8 +166,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     tags: ["mitre.defense_evasion", "T1070.003"]
   - call: "security_file_truncate"
@@ -200,8 +186,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -222,8 +206,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     ignore:
       callNotFound: true

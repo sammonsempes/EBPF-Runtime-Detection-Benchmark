@@ -91,7 +91,7 @@ def test_container_spec(adapter: Adapter) -> None:
         assert re.search(spec.ready_pattern, '{"eventName":"tracee_info","args":[]}')
         assert re.search(spec.ready_pattern, '{"name": "tracee_info"}')
         assert not re.search(spec.ready_pattern, '{"eventName":"container_create"}')
-        assert spec.ready_url == "http://127.0.0.1:3366/healthz"
+        assert spec.ready_url is None
         assert spec.network_mode == "host"
 
 

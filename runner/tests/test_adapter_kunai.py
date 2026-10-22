@@ -127,7 +127,7 @@ def test_profiles(adapter: Adapter) -> None:
 def test_container_spec(adapter: Adapter, profile: str, tmp_path: Path) -> None:
     root = Path("/srv/bench")
     spec = adapter.container_spec(root, profile, tmp_path)
-    assert spec.build_context == str(root / "tools" / "kunai")
+    assert spec.build_context is None
     assert spec.image == f"ebpf-bench/kunai:{adapter.version}"
     assert spec.privileged
     assert spec.pid_mode == "host"

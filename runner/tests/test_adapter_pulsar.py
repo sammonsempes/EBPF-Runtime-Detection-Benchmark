@@ -74,7 +74,7 @@ def test_non_alert_lines(adapter: Adapter) -> None:
 def test_container_spec(adapter: Adapter, profile: str, tmp_path: Path) -> None:
     root = Path("/srv/bench")
     spec = adapter.container_spec(root, profile, tmp_path)
-    assert spec.image == f"ghcr.io/exein-io/pulsar:v{adapter.version}"
+    assert spec.image == f"ebpf-bench/pulsar:{adapter.version}"
     assert spec.build_context is None
     assert spec.privileged
     assert spec.pid_mode == "host"
@@ -83,7 +83,8 @@ def test_container_spec(adapter: Adapter, profile: str, tmp_path: Path) -> None:
     assert mounts["/etc/bench/pulsar"].source == str(profile_dir)
     assert mounts["/etc/bench/pulsar"].read_only
     assert mounts[f"/var/lib/pulsar/rules/bench-{profile}"].source == str(profile_dir / "rules")
-    for target in ("/sys/kernel/debug", "/sys/kernel/btf", "/sys/fs/bpf", "/var/lib/docker"):
+    assert "/sys/fs/bpf" not in mounts
+    for target in ("/sys/kernel/debug", "/sys/kernel/btf", "/var/lib/docker"):
         assert mounts[target].source == target
     assert mounts["/var/lib/docker"].read_only
     assert spec.command == ["--config-file", "/etc/bench/pulsar/pulsar.ini"]

@@ -3,7 +3,7 @@ kind: TracingPolicy
 metadata:
   name: "interpreter-spawns-shell"
   annotations:
-    description: "Deny and kill shell executions started by scripting language interpreters inside containers"
+    description: "Kill shell executions started by scripting language interpreters inside containers"
 spec:
   kprobes:
   - call: "security_bprm_check"
@@ -42,7 +42,5 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     tags: ["mitre.execution", "T1059.006"]

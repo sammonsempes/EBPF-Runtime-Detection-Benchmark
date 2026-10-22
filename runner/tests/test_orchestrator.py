@@ -218,7 +218,7 @@ def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
-def make_orchestrator(repo, scenarios, backend, adapter, sleeps=None, **changes) -> Orchestrator:
+def make_orchestrator(repo, scenarios, backend, adapter, sleeps=None, hostname="", **changes) -> Orchestrator:
     return Orchestrator(
         make_config(**changes),
         scenarios,
@@ -230,6 +230,7 @@ def make_orchestrator(repo, scenarios, backend, adapter, sleeps=None, **changes)
         log=lambda message: None,
         finalize=False,
         run_id="20260101T000000Z",
+        hostname=hostname,
     )
 
 
@@ -412,6 +413,38 @@ class EnforcingAdapter(FakeAdapter):
 
     def confirmed_enforcements(self, log_lines: list[tuple[float, str]]) -> list[float]:
         return [stamp for stamp, line in log_lines if line.startswith("KILLED")]
+
+
+def test_host_hostname_is_redacted_from_alerts_and_logs(repo: Path, scenarios: list[Scenario]) -> None:
+    leaked = {"rule": "hit", "container": "app", "hostName": "Secret-Laptop", "nested": ["on secret-laptop.lan"]}
+    backend = FakeBackend(extra_logs=[json.dumps(leaked), "agent started on secret-laptop", "secret-laptops stay"])
+    results = make_orchestrator(
+        repo,
+        scenarios,
+        backend,
+        FakeAdapter(),
+        hostname="secret-laptop",
+        tools=("falco",),
+        profiles=("default",),
+        overhead=OverheadConfig(enabled=False),
+    ).run()
+    alerts = read_jsonl(results / "alerts" / "falco-default.jsonl")
+    redacted = next(alert for alert in alerts if "hostName" in alert["raw"])
+    assert redacted["raw"]["hostName"] == "host"
+    assert redacted["raw"]["nested"] == ["on host.lan"]
+    assert redacted["container_name"] == "app"
+    log = (results / "raw" / "falco-default" / "container.log").read_text()
+    assert "agent started on host\n" in log
+    assert "secret-laptops stay" in log
+    assert "secret-laptop\n" not in log and "Secret-Laptop" not in log
+    assert "secret-laptop" not in (results / "alerts" / "falco-default.jsonl").read_text().lower()
+
+
+def test_hostname_redaction_defaults_to_local_hostname(repo: Path, scenarios: list[Scenario], monkeypatch) -> None:
+    monkeypatch.setattr("bench.orchestrator.socket.gethostname", lambda: "box-1")
+    orchestrator = Orchestrator(make_config(), scenarios, FakeBackend(), repo, log=lambda message: None)
+    assert orchestrator.hostname_pattern.sub("host", "box-1 ran") == "host ran"
+    assert make_orchestrator(repo, scenarios, FakeBackend(), FakeAdapter()).hostname_pattern is None
 
 
 def test_parse_action_at() -> None:

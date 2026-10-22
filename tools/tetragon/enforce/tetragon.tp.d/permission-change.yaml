@@ -3,7 +3,7 @@ kind: TracingPolicy
 metadata:
   name: "permission-change"
   annotations:
-    description: "Deny and kill chmod calls from containers adding setuid or setgid bits, touching account databases, or making temporary files executable"
+    description: "Kill chmod calls from containers adding setuid or setgid bits, touching account databases, or making temporary files executable"
 spec:
   kprobes:
   - call: "sys_fchmodat"
@@ -28,8 +28,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 1
@@ -46,8 +44,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 1
@@ -66,8 +62,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     tags: ["mitre.privilege_escalation", "mitre.defense_evasion", "T1548.001", "T1222.002", "T1105"]
   - call: "sys_fchmodat2"
@@ -92,8 +86,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 1
@@ -110,8 +102,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 1
@@ -130,8 +120,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     ignore:
       callNotFound: true
@@ -156,8 +144,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -174,8 +160,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -194,8 +178,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     ignore:
       callNotFound: true

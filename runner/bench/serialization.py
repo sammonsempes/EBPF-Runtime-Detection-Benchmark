@@ -2,10 +2,33 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from dataclasses import asdict, is_dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Iterable
+
+REDACTED_HOST = "host"
+UNREDACTED_HOSTNAMES = frozenset({"", "localhost"})
+
+
+def hostname_pattern(hostname: str | None) -> re.Pattern[str] | None:
+    name = (hostname or "").strip()
+    if name.lower() in UNREDACTED_HOSTNAMES:
+        return None
+    return re.compile(rf"(?<![A-Za-z0-9-]){re.escape(name)}(?![A-Za-z0-9-])", re.IGNORECASE)
+
+
+def redact(value: Any, pattern: re.Pattern[str] | None, replacement: str = REDACTED_HOST) -> Any:
+    if pattern is None:
+        return value
+    if isinstance(value, str):
+        return pattern.sub(replacement, value)
+    if isinstance(value, dict):
+        return {key: redact(item, pattern, replacement) for key, item in value.items()}
+    if isinstance(value, list):
+        return [redact(item, pattern, replacement) for item in value]
+    return value
 
 
 def to_jsonable(value: Any) -> Any:

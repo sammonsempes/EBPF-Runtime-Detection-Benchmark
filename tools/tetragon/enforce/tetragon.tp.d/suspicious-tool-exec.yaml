@@ -3,7 +3,7 @@ kind: TracingPolicy
 metadata:
   name: "suspicious-tool-exec"
   annotations:
-    description: "Deny and kill account management, scanning, mining and data destruction tools inside containers; observe container and system inventory tools"
+    description: "Kill account management, scanning, mining and data destruction tools inside containers; observe container and system inventory tools"
 spec:
   kprobes:
   - call: "security_bprm_check"
@@ -31,8 +31,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -51,8 +49,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -77,8 +73,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -94,8 +88,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0

@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 import pytest
+import yaml
 
 from bench.adapters import get_adapter
 from bench.adapters.tetragon import Adapter
@@ -189,6 +190,50 @@ def test_enforce_actions_are_scoped_to_containers() -> None:
         enforce_lines = [line.rstrip() for line in (directory / name).read_text().splitlines()]
         default_path = REPO_ROOT / "tools" / "tetragon" / "default" / "tetragon.tp.d" / name
         assert enforce_lines == [line.rstrip() for line in default_path.read_text().splitlines()]
+
+
+def load_policies(profile: str) -> dict[str, dict]:
+    directory = REPO_ROOT / "tools" / "tetragon" / profile / "tetragon.tp.d"
+    return {path.name: yaml.safe_load(path.read_text()) for path in sorted(directory.glob("*.yaml"))}
+
+
+def hooks(policy: dict) -> list[dict]:
+    spec = policy.get("spec") or {}
+    return [hook for key in ("kprobes", "tracepoints", "lsmhooks", "uprobes") for hook in spec.get(key) or []]
+
+
+@needs_tools
+def test_enforce_policies_do_not_need_override_helper() -> None:
+    for name, policy in load_policies("enforce").items():
+        text = (REPO_ROOT / "tools" / "tetragon" / "enforce" / "tetragon.tp.d" / name).read_text()
+        assert "Override" not in text, name
+        assert "argError" not in text, name
+        assert "NotifyEnforcer" not in text, name
+        for hook in hooks(policy):
+            for selector in hook.get("selectors") or []:
+                assert "matchReturnActions" not in selector, name
+                actions = [action["action"] for action in selector.get("matchActions") or []]
+                if actions and name not in DEFAULT_POLICIES:
+                    assert "Sigkill" in actions, (name, hook.get("call") or hook.get("event"))
+
+
+@needs_tools
+@pytest.mark.parametrize("profile", ["default", "tuned", "enforce"])
+def test_tracepoint_syscall_lists_match_syscall64_args(profile: str) -> None:
+    checked = 0
+    for name, policy in load_policies(profile).items():
+        spec = policy.get("spec") or {}
+        syscall_lists = {entry["name"] for entry in spec.get("lists") or [] if entry.get("type") == "syscalls"}
+        for tracepoint in spec.get("tracepoints") or []:
+            args = tracepoint.get("args") or []
+            for selector in tracepoint.get("selectors") or []:
+                for match in selector.get("matchArgs") or []:
+                    values = [str(value) for value in match.get("values") or []]
+                    if any(value.startswith("list:") and value[len("list:"):] in syscall_lists for value in values):
+                        assert args[match["index"]]["type"] == "syscall64", (name, match)
+                        checked += 1
+    if profile != "default":
+        assert checked >= 1
 
 
 @needs_tools

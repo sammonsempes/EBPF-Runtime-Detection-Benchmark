@@ -364,6 +364,16 @@ def make_backend(repo_root: Path = REPO_ROOT, runner: FakeRunner | None = None):
     return backend, api, clock
 
 
+def test_host_info_keeps_only_kind_node_names() -> None:
+    backend, api, _ = make_backend()
+    info = backend.host_info()
+    assert info["kernel"] == "6.6.0" and info["cpus"] == 8
+    assert "hostname" not in info and info["node"] is None
+    assert "node-1" not in repr(info)
+    api.core.nodes[0].spec.provider_id = "kind://docker/ebpf-bench/ebpf-bench-control-plane"
+    assert backend.host_info()["node"] == "node-1"
+
+
 def test_strip_container_id_and_quantities() -> None:
     assert strip_container_id("containerd://abc") == "abc"
     assert strip_container_id("cri-o://xyz") == "xyz"

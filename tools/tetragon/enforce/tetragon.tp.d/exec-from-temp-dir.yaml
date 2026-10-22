@@ -3,7 +3,7 @@ kind: TracingPolicy
 metadata:
   name: "exec-from-temp-dir"
   annotations:
-    description: "Deny and kill execution of binaries or scripts located in world-writable temporary directories inside containers"
+    description: "Kill execution of binaries or scripts located in world-writable temporary directories inside containers"
 spec:
   kprobes:
   - call: "security_bprm_check"
@@ -26,8 +26,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0

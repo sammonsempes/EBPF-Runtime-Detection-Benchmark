@@ -5,7 +5,10 @@ ARG KUNAI_SHA256_AMD64=cfcd7ee3594e1136290ef3327f1b5bfe550af0cda4fdf5cea46645254
 ARG KUNAI_SHA256_ARM64=fb14ac760c460dee7d43ee938a66e6f9ad5dba85571bf95ff24482ab8744aaf0
 ARG TARGETARCH=amd64
 
-RUN apk add --no-cache curl \
+COPY --from=certs . /usr/local/share/ca-certificates/extra/
+RUN find /usr/local/share/ca-certificates/extra -type f \( -name '*.crt' -o -name '*.pem' \) -exec cat {} + >> /etc/ssl/certs/ca-certificates.crt \
+    && apk add --no-cache curl \
+    && find /usr/local/share/ca-certificates/extra -type f \( -name '*.crt' -o -name '*.pem' \) -exec cat {} + >> /etc/ssl/certs/ca-certificates.crt \
     && case "${TARGETARCH}" in \
          amd64) asset=kunai-amd64; sum="${KUNAI_SHA256_AMD64}" ;; \
          arm64) asset=kunai-aarch64; sum="${KUNAI_SHA256_ARM64}" ;; \

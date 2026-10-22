@@ -13,6 +13,7 @@ PREVENTED_ICON = "🛡️"
 UNVERIFIED_MARK = "†"
 INVALID_MARK = "(invalid)"
 MIB = 1024.0 * 1024.0
+PRIVATE_HOST_KEYS = frozenset({"hostname"})
 TACTIC_ORDER = (
     "reconnaissance",
     "resource-development",
@@ -182,7 +183,7 @@ def section_metadata(score: dict[str, Any], metadata: dict[str, Any]) -> list[st
     host = metadata.get("host") if isinstance(metadata.get("host"), dict) else {}
     config = metadata.get("config") if isinstance(metadata.get("config"), dict) else {}
     rows = [["run_id", score.get("run_id")], ["grace_seconds", score.get("grace_seconds")]]
-    rows.extend([f"host.{key}", fmt_value(value)] for key, value in sorted(host.items()))
+    rows.extend([f"host.{key}", fmt_value(value)] for key, value in sorted(host.items()) if key not in PRIVATE_HOST_KEYS)
     rows.extend([f"config.{key}", fmt_value(value)] for key, value in sorted(config.items()))
     lines.extend(table(["Key", "Value"], rows))
     lines.extend(["", "### Tools", ""])

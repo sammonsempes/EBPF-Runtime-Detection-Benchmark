@@ -39,6 +39,7 @@ TOOL_FILE = "tool.yaml"
 ROLE_LABEL = "ebpf-bench.role"
 ADAPTER = "adapter"
 ID_SCHEMES = ("containerd://", "docker://", "cri-o://")
+KIND_PROVIDER_PREFIX = "kind://"
 INSTALL_TYPES = ("helm", "manifests")
 POLL_SECONDS = 1.0
 TARGET_START_TIMEOUT = 180.0
@@ -250,6 +251,11 @@ def pod_metrics_sample(data: Any) -> tuple[str, float | None, float | None] | No
         sum(cpu_values) * 100.0 if cpu_values else None,
         sum(memory_values) if memory_values else None,
     )
+
+
+def is_kind_node(node: Any) -> bool:
+    provider = str(getattr(getattr(node, "spec", None), "provider_id", None) or "")
+    return provider.startswith(KIND_PROVIDER_PREFIX)
 
 
 def exec_command(command: list[str], environment: dict[str, str], timeout: float) -> list[str]:
@@ -1245,7 +1251,7 @@ class KubernetesBackend(Backend):
             "architecture": info.architecture,
             "cpus": int(cpus) if cpus is not None else None,
             "memory_bytes": parse_memory(capacity.get("memory")),
-            "hostname": node.metadata.name,
+            "node": node.metadata.name if is_kind_node(node) else None,
             "container_runtime": info.container_runtime_version,
             "kubelet_version": info.kubelet_version,
             "kubernetes_version": server,

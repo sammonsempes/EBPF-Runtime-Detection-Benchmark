@@ -3,11 +3,11 @@ kind: Policy
 metadata:
   name: detect-setuid-bit
   annotations:
-    description: T1548.001 setuid, setgid or sticky bit set on a file (mode 1024 and above)
+    description: T1548.001 setuid or setgid bit set on a file with a common privileged mode (04755, 04711, 04555, 04750, 06755, 02755); Tracee 0.24.1 data filters only support equality
 spec:
   scope:
     - container
   rules:
     - event: chmod_common
       filters:
-        - data.mode>=1024
+        - data.mode=2541,2505,2413,2536,3565,1517

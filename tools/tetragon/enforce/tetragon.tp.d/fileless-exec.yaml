@@ -3,7 +3,7 @@ kind: TracingPolicy
 metadata:
   name: "fileless-exec"
   annotations:
-    description: "Deny and kill execveat on a file descriptor with AT_EMPTY_PATH inside a container, the fexecve pattern used to run memfd_create payloads"
+    description: "Kill execveat on a file descriptor with AT_EMPTY_PATH inside a container, the fexecve pattern used to run memfd_create payloads"
 spec:
   kprobes:
   - call: "sys_execveat"
@@ -28,7 +28,5 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     tags: ["mitre.defense_evasion", "T1620"]

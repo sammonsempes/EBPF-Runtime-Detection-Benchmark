@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import socket
 import time
 import uuid
 from dataclasses import asdict, dataclass, field, replace
@@ -17,7 +18,7 @@ from bench.config import CONTROL_PROFILE, CONTROL_TOOL, ENFORCE_PROFILES, Config
 from bench.docker_backend import ATTACKER_NAME, Backend, ContainerRef, ExecResult, LineBuffer, Targets
 from bench.metrics import run_workload
 from bench.model import Alert, Scenario, ScenarioRun
-from bench.serialization import append_jsonl, to_jsonable, write_json, write_jsonl
+from bench.serialization import append_jsonl, hostname_pattern, redact, to_jsonable, write_json, write_jsonl
 
 MAX_OUTPUT_CHARS = 65536
 FILE_DRAIN_TIMEOUT = 10.0
@@ -110,8 +111,10 @@ class Orchestrator:
         log: Callable[[str], None] | None = None,
         finalize: bool = True,
         run_id: str | None = None,
+        hostname: str | None = None,
     ) -> None:
         self.config = config
+        self.hostname_pattern = hostname_pattern(socket.gethostname() if hostname is None else hostname)
         self.scenarios = list(scenarios)
         self.backend = backend
         self.repo_root = Path(repo_root)
@@ -507,7 +510,7 @@ class Orchestrator:
         deployment.alerts_file_bytes = byte_count(file_lines)
         with (raw_dir / "container.log").open("w", encoding="utf-8") as handle:
             for emitted_at, line in log_lines:
-                handle.write(f"{emitted_at:.6f} {line}\n")
+                handle.write(f"{emitted_at:.6f} {redact(line, self.hostname_pattern)}\n")
         source_lines = file_lines if alerts_source is not None else log_lines
         alerts: list[Alert] = []
         for emitted_at, line in source_lines:
@@ -521,7 +524,10 @@ class Orchestrator:
             if alert.action is None and self._is_enforcement(adapter, alert):
                 alert = replace(alert, action=ENFORCEMENT_LABEL)
             alerts.append(alert)
-        write_jsonl(self.alerts_path(f"{deployment.tool}-{deployment.profile}"), alerts)
+        write_jsonl(
+            self.alerts_path(f"{deployment.tool}-{deployment.profile}"),
+            [redact(to_jsonable(alert), self.hostname_pattern) for alert in alerts],
+        )
         deployment.alerts = len(alerts)
         deployment.enforcement_alerts = sum(1 for alert in alerts if alert.action is not None)
         if deployment.enforce:

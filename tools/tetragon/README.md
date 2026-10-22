@@ -30,15 +30,17 @@ A plain Tetragon install (Helm chart or container) ships **no TracingPolicy**: i
 
 | Policy | Action | Scope |
 | --- | --- | --- |
-| `shell-outbound-connect`, `netcat-outbound-connect`, `mining-pool-connect` | `Sigkill` (`tcp_connect` cannot be overridden) | container mount namespaces |
-| `http-client-upload` | `Override` -EPERM + `Sigkill` on `security_socket_sendmsg` | containers |
-| `interpreter-spawns-shell`, `exec-from-temp-dir`, `system-binary-masquerading`, `fileless-exec` | `Override` -EPERM + `Sigkill` | containers |
-| `suspicious-tool-exec` | `Override` + `Sigkill` for account management, scanners, miners, shred; discovery tools are only observed | containers |
-| `persistence-file-write`, `credential-file-read` | `Override` + `Sigkill` on `security_file_permission` | containers |
-| `permission-change`, `history-and-log-tampering`, `kernel-module-syscalls` | `Override` + `Sigkill` on the syscalls / `security_file_truncate` | containers |
-| `container-escape` | `Override` + `Sigkill` for disk mounts, `chroot` and `setns` by `nsenter`; other `setns` calls are observed | containers |
+| `shell-outbound-connect`, `netcat-outbound-connect`, `mining-pool-connect` | `Sigkill` on `tcp_connect` | container mount namespaces |
+| `http-client-upload` | `Sigkill` on `security_socket_sendmsg` | containers |
+| `interpreter-spawns-shell`, `exec-from-temp-dir`, `system-binary-masquerading`, `fileless-exec` | `Sigkill` | containers |
+| `suspicious-tool-exec` | `Sigkill` for account management, scanners, miners, shred; discovery tools are only observed | containers |
+| `persistence-file-write`, `credential-file-read` | `Sigkill` on `security_file_permission` | containers |
+| `permission-change`, `history-and-log-tampering`, `kernel-module-syscalls` | `Sigkill` on the syscalls / `security_file_truncate` | containers |
+| `container-escape` | `Sigkill` for disk mounts, `chroot` and `setns` by `nsenter`; other `setns` calls are observed | containers |
 
-Every enforcing selector carries `matchNamespaces: Mnt NotIn host_ns` (`Pid` for `setns`), so host processes are never killed; host matches are kept as plain observation selectors where the selector budget allows. The default policies stay observation only. Override needs `bpf_override_return` (`CONFIG_BPF_KPROBE_OVERRIDE`); on kernels without it the enforce policies fail to load and the profile is reported as failed. Sigkill on a write or send does not guarantee the in-flight operation is prevented (`docs/content/en/docs/concepts/enforcement/_index.md`), which is why it is paired with Override where the hook allows it. Killing a scenario step can also kill the scenario shell itself (for example a shell redirection into `/etc/cron.d`), so its exit trap may not run; scenario `cleanup.sh` scripts handle that.
+Every enforcing selector carries `matchNamespaces: Mnt NotIn host_ns` (`Pid` for `setns`), so host processes are never killed; host matches are kept as plain observation selectors where the selector budget allows. The default policies stay observation only.
+
+The profile uses `Sigkill` only, never `Override`, so it loads on kernels without `bpf_override_return` (`CONFIG_BPF_KPROBE_OVERRIDE` unset, as on the WSL2 6.6 kernel, where Tetragon rejects Override with `override action not supported on syscalls, bpf_override_return helper not available`). Sigkill is raised synchronously in the kernel at the hook, but without Override the in-flight syscall may still complete before the process dies: a write, send, chmod, unlink or mount can take effect (`docs/content/en/docs/concepts/enforcement/_index.md`). Measured blocking is therefore "process killed at the hook", not "operation denied". A variant adding `- action: Override` with `argError: -1` before `Sigkill` on the syscall and `security_*` selectors (not on `tcp_connect`) gives true denial on kernels built with `CONFIG_BPF_KPROBE_OVERRIDE`; it is not shipped so that one profile runs on every target host. Killing a scenario step can also kill the scenario shell itself (for example a shell redirection into `/etc/cron.d`), so its exit trap may not run; scenario `cleanup.sh` scripts handle that.
 
 ## What counts as an alert
 
@@ -55,7 +57,7 @@ An alert is any event produced by a TracingPolicy of the active profile: `proces
 | `command_line` | `process.binary` + `process.arguments` |
 | `raw` | the whole exported event |
 
-Enforcement is identified from upstream fields only: `raw.process_kprobe.action` (or the `action` of the other policy event types) is `KPROBE_ACTION_SIGKILL` or `KPROBE_ACTION_OVERRIDE` instead of `KPROBE_ACTION_POST`; the killed process later produces a `process_exit` with `signal: "SIGKILL"` (telemetry, not parsed as an alert).
+Enforcement is identified from upstream fields only: `raw.process_kprobe.action` (or the `action` of the other policy event types) is `KPROBE_ACTION_SIGKILL` (or `KPROBE_ACTION_OVERRIDE` for an Override variant) instead of `KPROBE_ACTION_POST`; the killed process later produces a `process_exit` with `signal: "SIGKILL"` (telemetry, not parsed as an alert).
 
 Alerts are read from the export file (`alerts_file`), so `emitted_at` is the runner read time. `ready_pattern` is `Listening for events\.\.\.`, logged by `pkg/observer/observer_linux.go` after the base sensor and all policies of `tracing-policy-dir` are loaded (`cmd/tetragon/main.go`).
 

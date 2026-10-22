@@ -31,7 +31,6 @@ class Adapter(ToolAdapter):
         tool_dir = Path(host_repo_root) / "tools" / self.name
         return ContainerSpec(
             image=f"ebpf-bench/{self.name}:{self.version}",
-            build_context=str(tool_dir),
             command=["run", "-c", f"{self.config_mount}/config.yaml"],
             mounts=[
                 Mount(source=str(tool_dir / profile), target=self.config_mount),

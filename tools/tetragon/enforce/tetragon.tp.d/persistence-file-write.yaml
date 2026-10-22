@@ -3,7 +3,7 @@ kind: TracingPolicy
 metadata:
   name: "persistence-file-write"
   annotations:
-    description: "Deny and kill writes from containers to cron, systemd and init definitions, SSH authorized_keys and the local account databases"
+    description: "Kill writes from containers to cron, systemd and init definitions, SSH authorized_keys and the local account databases"
 spec:
   kprobes:
   - call: "security_file_permission"
@@ -31,8 +31,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -53,8 +51,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -72,8 +68,6 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     - matchArgs:
       - index: 0
@@ -103,7 +97,5 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     tags: ["mitre.persistence", "T1053.003", "T1543.002", "T1098.004", "T1136.001"]

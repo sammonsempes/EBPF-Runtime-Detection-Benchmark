@@ -3,7 +3,7 @@ kind: TracingPolicy
 metadata:
   name: "system-binary-masquerading"
   annotations:
-    description: "Deny and kill binaries named like well-known system daemons executed from outside the standard system directories inside containers"
+    description: "Kill binaries named like well-known system daemons executed from outside the standard system directories inside containers"
 spec:
   kprobes:
   - call: "security_bprm_check"
@@ -45,7 +45,5 @@ spec:
         values:
         - "host_ns"
       matchActions:
-      - action: Override
-        argError: -1
       - action: Sigkill
     tags: ["mitre.defense_evasion", "T1036.005"]
