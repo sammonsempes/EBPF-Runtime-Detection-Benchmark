@@ -1,0 +1,16 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-privilege-escalation-shared-object"},
+  "spec": {
+    "tags": ["MITRE"],
+    "message": "ld.so.preload file accessed by unknown process",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchPaths": [
+        {"path": "/etc/ld.so.preload"}
+      ],
+      "action": "Audit",
+      "severity": 6
+    }
+  }
+}

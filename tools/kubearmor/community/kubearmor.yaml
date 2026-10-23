@@ -1,0 +1,14 @@
+cluster: "default"
+gRPC: "32767"
+k8s: false
+enableKubeArmorPolicy: true
+enableKubeArmorHostPolicy: false
+enableKubeArmorVm: false
+visibility: "process,file,network,capabilities"
+hostVisibility: "none"
+defaultFilePosture: "audit"
+defaultNetworkPosture: "audit"
+defaultCapabilitiesPosture: "audit"
+alertThrottling: true
+maxAlertPerSec: 10
+throttleSec: 30

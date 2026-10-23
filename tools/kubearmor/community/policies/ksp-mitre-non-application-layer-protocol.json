@@ -1,0 +1,16 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-non-application-layer-protocol"},
+  "spec": {
+    "tags": ["MITRE", "system", "ksp", "T1016"],
+    "message": "“Alert! audited the non-application layer protocol communication”",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "severity": 5,
+      "matchPaths": [
+        {"path": "/bin/ping"}
+      ],
+      "action": "Audit"
+    }
+  }
+}

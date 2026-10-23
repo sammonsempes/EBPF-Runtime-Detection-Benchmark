@@ -29,6 +29,7 @@ def spec_for(adapter: Adapter, profile: str):
 
 def test_identity(adapter: Adapter) -> None:
     assert adapter.name == "falco"
+    assert adapter.profiles == ("default", "tuned", "community")
     assert re.fullmatch(r"\d+\.\d+\.\d+", adapter.version)
     assert isinstance(get_adapter("falco"), Adapter)
 
@@ -97,7 +98,7 @@ def test_alert_count(adapter: Adapter, lines: list[str]) -> None:
     assert len(alerts) == 4
 
 
-@pytest.mark.parametrize("profile", ["default", "tuned"])
+@pytest.mark.parametrize("profile", ["default", "tuned", "community"])
 def test_container_spec(adapter: Adapter, profile: str) -> None:
     spec = spec_for(adapter, profile)
     assert spec.image == f"docker.io/falcosecurity/falco:{adapter.version}"
@@ -122,7 +123,7 @@ def test_ready_pattern(adapter: Adapter, lines: list[str]) -> None:
 
 
 @needs_tools
-@pytest.mark.parametrize("profile", ["default", "tuned"])
+@pytest.mark.parametrize("profile", ["default", "tuned", "community"])
 def test_profile_files_exist(profile: str) -> None:
     profile_dir = REPO_ROOT / "tools" / "falco" / profile
     drop_in = (profile_dir / "falco.bench.yaml").read_text()
@@ -139,3 +140,33 @@ def test_tuned_profile_loads_custom_rules() -> None:
     assert "BENCH_MARKER" not in rules
     assert "bench-" not in rules
     assert "attacker" not in rules
+
+
+@needs_tools
+def test_community_sources_are_pinned() -> None:
+    community = REPO_ROOT / "tools" / "falco" / "community"
+    entries = [line.split() for line in (community / "sources.txt").read_text().splitlines() if line.strip()]
+    assert len(entries) == 2
+    for checksum, url, dest in entries:
+        assert re.fullmatch(r"[0-9a-f]{64}", checksum)
+        assert re.fullmatch(r"https://raw\.githubusercontent\.com/falcosecurity/rules/[0-9a-f]{40}/rules/[\w.-]+\.yaml", url)
+        assert url.rsplit("/", 1)[1] == Path(dest).name
+        assert dest.startswith("rules.d/")
+        assert (community / dest).is_file()
+
+
+@needs_tools
+def test_community_profile_loads_upstream_rules_only() -> None:
+    community = REPO_ROOT / "tools" / "falco" / "community"
+    assert "/etc/falco/bench/rules.d" in (community / "falco.bench.yaml").read_text()
+    files = sorted(path.name for path in (community / "rules.d").iterdir())
+    assert files == ["falco-incubating_rules.yaml", "falco-sandbox_rules.yaml"]
+    expected = (
+        ("falco-incubating_rules.yaml", "maturity_incubating", 31),
+        ("falco-sandbox_rules.yaml", "maturity_sandbox", 39),
+    )
+    for name, maturity, count in expected:
+        rules = (community / "rules.d" / name).read_text()
+        assert rules.count("- rule: ") == count
+        assert rules.count(f"tags: [{maturity},") == count
+        assert "required_plugin_versions" in rules

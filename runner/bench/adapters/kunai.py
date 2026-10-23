@@ -24,7 +24,7 @@ def _section(value: Any, key: str) -> dict[str, Any]:
 class Adapter(ToolAdapter):
     name = "kunai"
     version = "0.6.2"
-    profiles = ("default", "tuned", "enforce")
+    profiles = ("default", "tuned", "enforce", "community")
     config_mount = "/etc/kunai"
 
     def container_spec(self, host_repo_root: Path, profile: str, host_output_dir: Path) -> ContainerSpec:

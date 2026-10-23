@@ -1,0 +1,2 @@
+47bf87041e2f39ca336e7acf1ae4e6183771a92e81031f367d01f2b49cabe1ac https://raw.githubusercontent.com/falcosecurity/rules/80880bd59906ee9619dedc6cd60f6603252052f6/rules/falco-incubating_rules.yaml rules.d/falco-incubating_rules.yaml
+f05ad34f07c43930932ea6dd84c08a37bc8e5ba9f88901ca091ff1b52b3f33d3 https://raw.githubusercontent.com/falcosecurity/rules/80880bd59906ee9619dedc6cd60f6603252052f6/rules/falco-sandbox_rules.yaml rules.d/falco-sandbox_rules.yaml

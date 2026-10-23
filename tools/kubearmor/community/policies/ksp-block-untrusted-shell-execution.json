@@ -1,0 +1,43 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-block-untrusted-shell-execution"},
+  "spec": {
+    "tags": ["MITRE", "D3fend", "Execution", "Unix Shell"],
+    "message": "Bash shells have been accessed",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "severity": 2,
+      "matchPaths": [
+        {"path": "/bin/bash"},
+        {"path": "/bin/sh"},
+        {"path": "/usr/bin/bash"},
+        {"path": "/usr/bin/env"},
+        {"path": "/usr/bin/shell"},
+        {"path": "/bin/ksh"},
+        {"path": "/etc/init.d"},
+        {"path": "/dev/tty"},
+        {"path": "/bin/zsh"},
+        {"path": "/bin/tcsh"},
+        {"path": "/bin/csh"}
+      ],
+      "action": "Audit"
+    },
+    "file": {
+      "severity": 10,
+      "matchPaths": [
+        {"path": "/bin/bash"},
+        {"path": "/bin/sh"},
+        {"path": "/usr/bin/bash"},
+        {"path": "/usr/bin/env"},
+        {"path": "/usr/bin/shell"},
+        {"path": "/bin/ksh"},
+        {"path": "/etc/init.d"},
+        {"path": "/dev/tty"},
+        {"path": "/bin/zsh"},
+        {"path": "/bin/tcsh"},
+        {"path": "/bin/csh", "fromSource": [{"path": "/bin/bash"}]}
+      ],
+      "action": "Audit"
+    }
+  }
+}

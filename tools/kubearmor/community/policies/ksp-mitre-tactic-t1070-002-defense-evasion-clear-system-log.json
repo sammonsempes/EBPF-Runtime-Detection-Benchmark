@@ -1,0 +1,16 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-t1070-002-defense-evasion-clear-system-log"},
+  "spec": {
+    "tags": ["MITRE", "T1070.002", "Defense Evasion", "Clear Log Activities", "Suspicious log manipulation"],
+    "message": "Defense evasion clear or manipulate system logs",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "severity": 2,
+      "matchDirectories": [
+        {"dir": "/var/log/", "recursive": true, "readOnly": true}
+      ],
+      "action": "Audit"
+    }
+  }
+}

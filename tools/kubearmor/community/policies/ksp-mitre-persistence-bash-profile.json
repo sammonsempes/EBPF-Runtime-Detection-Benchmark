@@ -1,0 +1,18 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-persistence-bash-profile"},
+  "spec": {
+    "tags": ["MITRE", "Persistence", "K8s"],
+    "message": "Warning! Someone accessed profile details",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchPaths": [
+        {"path": "/root/.bash_profile", "readOnly": true},
+        {"path": "/root/.bashrc", "readOnly": true},
+        {"path": "/etc/profile", "readOnly": true}
+      ],
+      "action": "Audit",
+      "severity": 4
+    }
+  }
+}

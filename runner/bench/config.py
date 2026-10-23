@@ -10,7 +10,7 @@ import yaml
 from bench.adapters import TOOLS
 
 DEFAULT_PROFILES = ("default", "tuned")
-ALL_PROFILES = ("default", "tuned", "enforce")
+ALL_PROFILES = ("default", "tuned", "enforce", "community")
 ENFORCE_PROFILES = ("enforce",)
 CONTROL_TOOL = "none"
 CONTROL_PROFILE = "control"

@@ -1,0 +1,39 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-persistence-blis-rc-scripts"},
+  "spec": {
+    "tags": ["MITRE", "system", "K8s", "T1037", "Persistence"],
+    "message": "Warning! someone accessed sensitive process or files",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/etc/rc.local"},
+        {"path": "/lib/systemd/system/rc-local.service"},
+        {"path": "/lib/systemd/system/rc.service"},
+        {"path": "/usr/lib/systemd/system/rc-local.service"},
+        {"path": "/usr/lib/systemd/system/rc.service"}
+      ],
+      "matchDirectories": [
+        {"dir": "/lib/systemd/system/rc-local.service.d/", "recursive": true},
+        {"dir": "/usr/lib/systemd/system/rc-local.service.d/", "recursive": true}
+      ],
+      "severity": 5,
+      "action": "Audit"
+    },
+    "file": {
+      "matchPaths": [
+        {"path": "/etc/rc.local"},
+        {"path": "/lib/systemd/system/rc-local.service"},
+        {"path": "/lib/systemd/system/rc.service"},
+        {"path": "/usr/lib/systemd/system/rc-local.service"},
+        {"path": "/usr/lib/systemd/system/rc.service"}
+      ],
+      "matchDirectories": [
+        {"dir": "/lib/systemd/system/rc-local.service.d/", "recursive": true, "readOnly": false},
+        {"dir": "/usr/lib/systemd/system/rc-local.service.d/", "recursive": true, "readOnly": false}
+      ],
+      "severity": 5,
+      "action": "Audit"
+    }
+  }
+}

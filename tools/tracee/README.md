@@ -71,6 +71,23 @@ No `enforce` profile: Tracee 0.24.1 has no blocking capability (policies have no
 only emit findings); response is limited to artifact capture and webhooks for an external responder
 (`operational.yaml` `response.blocking: false`).
 
+## No community profile
+
+Tracee 0.24.1 has no upstream community or extended rule set that a user can load without compiling code:
+
+- The only signatures published by Aqua for 0.24.1 are the built-in Go signatures of `signatures/golang` in
+  `aquasecurity/tracee` at tag `v0.24.1` (the directory holds only `golang` and `signaturestest`), already compiled into
+  the image and enabled by the `default` profile.
+- Custom signatures in 0.24.1 are Go code only (`docs/docs/events/custom/overview.md`: "Currently, custom events can be
+  implemented using Go"), loaded with `--signatures-dir` as Go plugins built against the exact Tracee build. Rego
+  signatures (former `tracee-rules`) are no longer part of the release.
+- The YAML/CEL detectors (`examples/detectors/`) exist only on the unreleased main branch and cannot be loaded by
+  0.24.1.
+- No separate signature repository is published by the `aquasecurity` organization; third-party repositories do not
+  qualify.
+
+Tracee therefore keeps the `default` and `tuned` profiles only.
+
 ## What counts as an alert
 
 `parse` returns an `Alert` only for:

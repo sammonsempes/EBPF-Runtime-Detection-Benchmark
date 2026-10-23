@@ -1,0 +1,20 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-defense-evasion-modify-system-image"},
+  "spec": {
+    "tags": ["MITRE", "system", "K8s", "T1601"],
+    "message": "Warning! someone modified system image file",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchPaths": [
+        {"path": "/etc/hostname"},
+        {"path": "/etc/hosts.allow"},
+        {"path": "/etc/hosts"},
+        {"path": "/etc/lsb-release"},
+        {"path": "/etc/networks"}
+      ],
+      "action": "Audit",
+      "severity": 6
+    }
+  }
+}

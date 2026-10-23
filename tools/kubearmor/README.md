@@ -101,6 +101,53 @@ Checked against the benign scripts in `scenarios/benign-*`: the log rotation sce
   rule had to stay in Audit. Residual risk: `harden-file-integrity-monitoring` makes /usr/lib read-only, a Python
   process writing a missing `__pycache__` file there would be denied (Python ignores that failure).
 
+- `community`: `default` plus the MITRE-mapped container policy templates of the upstream community repository, see
+  below.
+
+## Community profile
+
+Source: [kubearmor/policy-templates](https://github.com/kubearmor/policy-templates), the KubeArmor organization's
+community template repository (the one `karmor recommend` pulls from), commit
+`38005efe72fc72a7bfbe806cedd18cd2b3d681d3` (head of `main`, 2025-03-25), Apache-2.0
+(`tools/kubearmor/community/upstream/LICENSE`). The repository has no release tags, so the commit is the pin.
+
+Scope: the repository holds several hundred templates (CIS, NIST, STIG, PCI-DSS, CVE, malware and workload
+directories). Converting all of them by hand is not reasonable, so the profile takes the MITRE-mapped subset,
+`mitre/system/ksp-*.yaml` (56 KubeArmorPolicy templates). `mitre/system/hsp-*` are host policies (disabled here,
+see above) and `mitre/network/cnp-*` are Cilium network policies, not KubeArmor policies.
+
+- Included: 47 templates, every `ksp-*` file that applies to any Linux container.
+- Excluded (9, database-workload specific): `ksp-block-mysql-dump-in-pods`, `ksp-cs-restrict-access-mysql-config-policy`,
+  `ksp-mitre-restrict-access-mysql-server-config`, `ksp-mitre-pgsql-audit-non-pgsql`,
+  `ksp-mitre-postgres-block-password-dumping`, `ksp-mitre-postgres-cve-2016-1255`, `ksp-postgres-pg-dump`,
+  `ksp-postgresql-config-dir`, `ksp-psql-block-postgresql` (MySQL/PostgreSQL binaries, data and configuration paths).
+
+All 56 upstream files are fetched verbatim into `tools/kubearmor/community/upstream/` by `tools/fetch_community.py`
+(`tools/kubearmor/community/sources.txt`, raw URLs pinned to the commit, sha256 checked). `community/policies/`
+holds the nine default policies (byte-identical) and one JSON file per included template, produced by this exact
+transformation, nothing else:
+
+1. `kind` is kept; `metadata` becomes `{"namespaceName": "bench", "policyName": <upstream metadata.name>}` and the file
+   is named `<metadata.name>.json` (upstream file names and policy names differ, e.g. `ksp-base16or32.yaml` defines
+   `ksp-defense-evasion-deobfuscate`; `ksp-mitre-t1059.yaml` defines the name `ksp-mitre-t1059.yaml`, kept as is);
+2. `spec.selector` is replaced by `{"matchLabels": {"kubearmor.io/container.name": "bench-victim"}}`;
+3. every `action: Block` (spec, section or rule level) becomes `Audit`. Affected: `ksp-mitre-block-s-bit`
+   (`ksp-mitre-t1548-001-setuid-setgid`), `ksp-mitre-kinsing-cryptomining-malware-block` (process section),
+   `ksp-mitre-system-owner-user-discovery`, `ksp-system-owner-user-discovery`, `ksp-mitre-t1222-002`,
+   `ksp-mitre-t1610-tactic-execution-blocking-docker`, `ksp-unsecured_credentials_access`;
+4. every other spec field (tags, message, severity, rules, section-level `action`/`severity`, `readOnly`,
+   `ownerOnly`, `fromSource`, patterns) is copied unchanged, including upstream oddities (curly quotes in messages,
+   file paths listed under `process`, `/usr/bin/**` with `fromSource`, messages saying "blocked" on Audit rules).
+
+`runner/tests/test_adapter_kubearmor.py` re-applies this transformation to the downloaded YAML and requires the JSON
+files to be equal, so any drift from upstream fails the tests.
+
+Expected noise (kept, it is what the community set does): process rules on `bash`/`sh`/`env`, `ps`, `id`, `rm`,
+`chmod`/`chown`, `ip`/`netstat`, file rules on `/etc/passwd`, `/etc/ssl/` (every TLS client), `/var/log/` writes and
+`/etc/hostname` fire on benign scenarios and are scored as false positives. KubeArmor throttling
+(`maxAlertPerSec: 10`, `throttleSec: 30`) applies to the gRPC stream; the `-logPath` file read by the runner sees
+every match.
+
 ## Enforcement (enforce profile)
 
 Which enforcer works for Docker containers outside Kubernetes (`enforcer/runtimeEnforcer.go`, `selectLsm`):

@@ -1,0 +1,19 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-t1053-persistence-boot-or-logon-autostart-execution-kernel-modules-and-extensions"},
+  "spec": {
+    "tags": ["MITRE", "T1053"],
+    "message": "Kernel Modules and Extensions is Audited",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "severity": 2,
+      "matchPaths": [
+        {"path": "/usr/sbin/modprobe"},
+        {"path": "/usr/sbin/insmod"},
+        {"path": "/usr/sbin/modinfo"},
+        {"path": "/usr/sbin/lsmod"}
+      ],
+      "action": "Audit"
+    }
+  }
+}

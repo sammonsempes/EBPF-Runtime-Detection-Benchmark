@@ -100,7 +100,7 @@ def test_replace_revalidates() -> None:
 def test_control_scenarios_and_profiles() -> None:
     assert parse_config({}).control_scenarios is True
     assert parse_config({"control_scenarios": False}).control_scenarios is False
-    assert parse_config({"profiles": "all"}).profiles == ("default", "tuned", "enforce")
+    assert parse_config({"profiles": "all"}).profiles == ("default", "tuned", "enforce", "community")
     assert parse_config({}).profiles == ("default", "tuned")
     with pytest.raises(ValueError, match="control_scenarios"):
         parse_config({"control_scenarios": "yes"})
@@ -110,7 +110,7 @@ def test_repository_config_enables_enforce_and_control() -> None:
     if not REPO_CONFIG.is_file():
         pytest.skip("bench.yaml not present")
     config = load_config(REPO_CONFIG)
-    assert config.profiles == ("default", "tuned", "enforce")
+    assert config.profiles == ("default", "tuned", "enforce", "community")
     assert config.control_scenarios is True
 
 

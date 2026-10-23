@@ -1,0 +1,17 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-check-log-clearing"},
+  "spec": {
+    "tags": ["MITRE", "Defense Evasion"],
+    "message": "Defense evasion clear linux system logs",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "severity": 5,
+      "matchDirectories": [
+        {"dir": "/var/log/", "recursive": true, "readOnly": true},
+        {"dir": "/dev/log/", "recursive": true, "readOnly": true}
+      ],
+      "action": "Audit"
+    }
+  }
+}

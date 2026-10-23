@@ -31,6 +31,7 @@ def _container(value: Any) -> str | None:
 class Adapter(ToolAdapter):
     name = "falco"
     version = VERSION
+    profiles = ("default", "tuned", "community")
 
     def container_spec(self, host_repo_root: Path, profile: str, host_output_dir: Path) -> ContainerSpec:
         config_dir = self.config_dir(Path(host_repo_root), profile)

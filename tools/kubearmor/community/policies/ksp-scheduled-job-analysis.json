@@ -1,0 +1,19 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-scheduled-job-analysis"},
+  "spec": {
+    "tags": ["MITRE"],
+    "message": "Jobs accessed by unknown process",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/var/spool/cron/atjobs"},
+        {"path": "/var/spool/cron/atspool"},
+        {"path": "/proc/loadavg"},
+        {"path": "/var/run/utmp"}
+      ],
+      "action": "Audit",
+      "severity": 7
+    }
+  }
+}

@@ -53,6 +53,16 @@ Readiness: `pulsard` logs at INFO level on stderr and prints `Starting module <n
   token access, container socket and discovery, system discovery, port scans, HTTP upload, miners, secure deletion).
   They only use executable paths, argv elements, file paths, open flags and ports, never benchmark markers.
 
+## No community profile
+
+Exein publishes no rule set beyond the repository `rules/` folder, which is already the default profile (baked into
+the image). Checked for v0.10.1: the `exein-io` GitHub organization has no rule repository (its 18 repositories are
+Pulsar itself, Yocto/Buildroot layers, kepler, rlt, workshops and tooling), the `v0.10.1` tree has no other rule
+directory (`examples/` holds Rust embedding and extension examples, no rules), `rules/README.md` only credits the
+Elastic Detection Rules as inspiration and invites contributions to the same folder, and the documentation
+(https://pulsar.sh/docs, rules-engine module page) describes only user-written rules in `/var/lib/pulsar/rules`. A
+community profile would therefore be identical to `default`, so the adapter keeps `default` and `tuned`.
+
 ## Response
 
 Pulsar 0.10.1 cannot respond to or block a threat. Its modules are process-monitor, file-system-monitor,

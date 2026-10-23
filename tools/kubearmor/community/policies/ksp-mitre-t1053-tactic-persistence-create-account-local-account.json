@@ -1,0 +1,25 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-t1053-tactic-persistence-create-account-local-account"},
+  "spec": {
+    "tags": ["MITRE", "T1053"],
+    "message": "System owner discovery command is blocked",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "severity": 2,
+      "matchPaths": [
+        {"path": "/usr/sbin/adduser"},
+        {"path": "/usr/sbin/useradd"}
+      ],
+      "action": "Audit"
+    },
+    "file": {
+      "severity": 4,
+      "matchPaths": [
+        {"path": "/etc/passwd"},
+        {"path": "/etc/shadow"}
+      ],
+      "action": "Audit"
+    }
+  }
+}

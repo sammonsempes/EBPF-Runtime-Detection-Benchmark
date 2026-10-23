@@ -1,0 +1,17 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-system-file-analysis"},
+  "spec": {
+    "tags": ["MITRE"],
+    "message": "passwd or shadow file accessed",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/etc/passwd"},
+        {"path": "/etc/shadow"}
+      ],
+      "action": "Audit",
+      "severity": 7
+    }
+  }
+}

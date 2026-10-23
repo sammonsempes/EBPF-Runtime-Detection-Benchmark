@@ -1,0 +1,17 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-t1222-002"},
+  "spec": {
+    "message": "Blocking chmod and chown",
+    "tags": ["MITRE", "T1222.002"],
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPatterns": [
+        {"pattern": "/**/chmod"},
+        {"pattern": "/**/chown"}
+      ],
+      "severity": 2,
+      "action": "Audit"
+    }
+  }
+}

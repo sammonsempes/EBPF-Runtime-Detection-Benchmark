@@ -1,16 +1,33 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 import pytest
+import yaml
 
 from bench.adapters.kubearmor import Adapter
 
 FIXTURE = Path(__file__).parent / "fixtures" / "kubearmor" / "alerts.jsonl"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 needs_tools = pytest.mark.skipif(not (REPO_ROOT / "tools" / "kubearmor").is_dir(), reason="tools directory not available")
+COMMUNITY_DIR = REPO_ROOT / "tools" / "kubearmor" / "community"
+COMMUNITY_URL = re.compile(r"https://raw\.githubusercontent\.com/kubearmor/policy-templates/[0-9a-f]{40}/\S+")
+VICTIM_SELECTOR = {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}}
+COMMUNITY_EXCLUDED = {
+    "ksp-block-mysql-dump-in-pods.yaml",
+    "ksp-cs-restrict-access-mysql-config-policy.yaml",
+    "ksp-mitre-pgsql-audit-non-pgsql.yaml",
+    "ksp-mitre-postgres-block-password-dumping.yaml",
+    "ksp-mitre-postgres-cve-2016-1255.yaml",
+    "ksp-mitre-restrict-access-mysql-server-config.yaml",
+    "ksp-postgres-pg-dump.yaml",
+    "ksp-postgresql-config-dir.yaml",
+    "ksp-psql-block-postgresql.yaml",
+}
 
 
 @pytest.fixture(scope="module")
@@ -111,7 +128,7 @@ def test_container_spec(adapter: Adapter) -> None:
 
 
 def test_profiles(adapter: Adapter) -> None:
-    assert adapter.profiles == ("default", "tuned", "enforce")
+    assert adapter.profiles == ("default", "tuned", "enforce", "community")
 
 
 def test_block_identification(adapter: Adapter, lines: list[str]) -> None:
@@ -163,7 +180,7 @@ def test_enforce_profile_mirrors_tuned() -> None:
 
 
 @needs_tools
-@pytest.mark.parametrize("profile", ["default", "tuned", "enforce"])
+@pytest.mark.parametrize("profile", ["default", "tuned", "enforce", "community"])
 def test_policies_are_restorable(profile: str) -> None:
     expected_action = "Block" if profile == "enforce" else "Audit"
     profile_dir = REPO_ROOT / "tools" / "kubearmor" / profile
@@ -178,12 +195,102 @@ def test_policies_are_restorable(profile: str) -> None:
         assert policy["metadata"]["policyName"] == path.stem
         names.add(path.stem)
         spec = policy["spec"]
-        assert spec["action"] == expected_action
+        assert spec.get("action", expected_action) == expected_action
         assert spec["selector"]["matchLabels"] == {"kubearmor.io/container.name": "bench-victim"}
         for section in ("process", "file", "network"):
+            if section in spec:
+                assert spec[section].get("action", spec.get("action")) == expected_action, (path.name, section)
             for rules in spec.get(section, {}).values():
-                for rule in rules:
+                for rule in rules if isinstance(rules, list) else []:
                     assert rule.get("action", expected_action) == expected_action
         for preset in spec.get("presets", []):
             assert preset["action"] == expected_action
     assert len(names) == len(policies)
+
+
+def community_sources() -> list[tuple[str, ...]]:
+    entries = []
+    for line in (COMMUNITY_DIR / "sources.txt").read_text().splitlines():
+        fields = line.split()
+        if fields and not fields[0].startswith("#"):
+            entries.append(tuple(fields))
+    return entries
+
+
+def audited(node: Any) -> Any:
+    if isinstance(node, dict):
+        return {key: "Audit" if key == "action" and value == "Block" else audited(value) for key, value in node.items()}
+    if isinstance(node, list):
+        return [audited(value) for value in node]
+    return node
+
+
+def converted(upstream: dict) -> dict:
+    spec = dict(upstream["spec"])
+    spec["selector"] = VICTIM_SELECTOR
+    return {
+        "kind": upstream["kind"],
+        "metadata": {"namespaceName": "bench", "policyName": upstream["metadata"]["name"]},
+        "spec": audited(spec),
+    }
+
+
+def upstream_templates() -> dict[str, dict]:
+    templates = {}
+    for _, _, dest in community_sources():
+        if dest.endswith(".yaml") and Path(dest).name not in COMMUNITY_EXCLUDED:
+            templates[Path(dest).name] = yaml.safe_load((COMMUNITY_DIR / dest).read_text())
+    return templates
+
+
+@needs_tools
+def test_community_sources_are_pinned_and_downloaded() -> None:
+    entries = community_sources()
+    assert entries
+    for entry in entries:
+        assert len(entry) == 3, entry
+        checksum, url, dest = entry
+        assert re.fullmatch(r"[0-9a-f]{64}", checksum), entry
+        assert COMMUNITY_URL.fullmatch(url), entry
+        assert dest.startswith("upstream/"), entry
+        target = COMMUNITY_DIR / dest
+        assert target.is_file(), dest
+        assert hashlib.sha256(target.read_bytes()).hexdigest() == checksum, dest
+    names = {Path(dest).name for _, _, dest in entries}
+    assert COMMUNITY_EXCLUDED <= names
+
+
+@needs_tools
+def test_community_policies_are_default_plus_converted_templates() -> None:
+    policies = COMMUNITY_DIR / "policies"
+    default = REPO_ROOT / "tools" / "kubearmor" / "default"
+    default_names = {path.name for path in (default / "policies").glob("*.json")}
+    templates = upstream_templates()
+    assert templates
+    expected = {}
+    for template in templates.values():
+        assert template["kind"] == "KubeArmorPolicy"
+        expected[template["metadata"]["name"] + ".json"] = converted(template)
+    assert len(expected) == len(templates)
+    assert not default_names & set(expected)
+    assert {path.name for path in policies.iterdir()} == default_names | set(expected)
+    for name in default_names:
+        assert (policies / name).read_bytes() == (default / "policies" / name).read_bytes(), name
+    for name, policy in expected.items():
+        assert json.loads((policies / name).read_text()) == policy, name
+    assert (COMMUNITY_DIR / "kubearmor.yaml").read_bytes() == (default / "kubearmor.yaml").read_bytes()
+
+
+@needs_tools
+def test_community_policies_never_block() -> None:
+    def actions(node: Any) -> list[str]:
+        if isinstance(node, dict):
+            found = [str(value) for key, value in node.items() if key == "action"]
+            return found + [item for value in node.values() for item in actions(value)]
+        if isinstance(node, list):
+            return [item for value in node for item in actions(value)]
+        return []
+
+    for path in sorted((COMMUNITY_DIR / "policies").glob("*.json")):
+        found = actions(json.loads(path.read_text()))
+        assert found and set(found) == {"Audit"}, path.name

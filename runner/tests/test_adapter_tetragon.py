@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import re
 from pathlib import Path
 
@@ -13,6 +14,10 @@ FIXTURE = Path(__file__).parent / "fixtures" / "tetragon" / "alerts.jsonl"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 needs_tools = pytest.mark.skipif(not (REPO_ROOT / "tools" / "tetragon").is_dir(), reason="tools directory not available")
 DEFAULT_POLICIES = {"file_monitoring.yaml", "modules.yaml", "bpf.yaml", "privileges-raise.yaml"}
+COMMUNITY_DIR = REPO_ROOT / "tools" / "tetragon" / "community"
+COMMUNITY_URL = re.compile(r"https://raw\.githubusercontent\.com/cilium/tetragon/[0-9a-f]{40}/\S+")
+ENFORCING_ACTIONS = {"Override", "Sigkill", "Signal", "NotifyEnforcer"}
+HOOK_SECTIONS = ("kprobes", "tracepoints", "lsmhooks", "uprobes", "usdts")
 
 
 @pytest.fixture(scope="module")
@@ -85,7 +90,7 @@ def test_tracepoint_event_is_an_alert(adapter: Adapter, lines: list[str]) -> Non
 
 
 def test_profiles(adapter: Adapter) -> None:
-    assert adapter.profiles == ("default", "tuned", "enforce")
+    assert adapter.profiles == ("default", "tuned", "enforce", "community")
 
 
 @pytest.mark.parametrize("action", ["KPROBE_ACTION_SIGKILL", "KPROBE_ACTION_OVERRIDE"])
@@ -120,7 +125,7 @@ def test_non_event_lines_are_not_alerts(adapter: Adapter, lines: list[str]) -> N
         assert adapter.parse(line, 1.0) is None
 
 
-@pytest.mark.parametrize("profile", ["default", "tuned", "enforce"])
+@pytest.mark.parametrize("profile", ["default", "tuned", "enforce", "community"])
 def test_container_spec(adapter: Adapter, profile: str) -> None:
     spec = spec_for(adapter, profile)
     assert spec.image == f"quay.io/cilium/tetragon:v{adapter.version}"
@@ -149,7 +154,7 @@ def test_ready_pattern(adapter: Adapter) -> None:
 
 
 @needs_tools
-@pytest.mark.parametrize("profile", ["default", "tuned", "enforce"])
+@pytest.mark.parametrize("profile", ["default", "tuned", "enforce", "community"])
 def test_profile_configuration(profile: str) -> None:
     profile_dir = REPO_ROOT / "tools" / "tetragon" / profile
     conf = profile_dir / "tetragon.conf.d"
@@ -237,7 +242,7 @@ def test_tracepoint_syscall_lists_match_syscall64_args(profile: str) -> None:
 
 
 @needs_tools
-@pytest.mark.parametrize("profile", ["default", "tuned"])
+@pytest.mark.parametrize("profile", ["default", "tuned", "community"])
 def test_observation_profiles_do_not_enforce(profile: str) -> None:
     for path in (REPO_ROOT / "tools" / "tetragon" / profile / "tetragon.tp.d").glob("*.yaml"):
         text = path.read_text()
@@ -258,4 +263,68 @@ def test_tuned_policies_are_behavioural() -> None:
         match = re.search(r'^  name: "([^"]+)"', text, re.MULTILINE)
         assert match is not None
         names.add(match.group(1))
+    assert len(names) == len(policies)
+
+
+def community_sources() -> list[tuple[str, str, str]]:
+    entries = []
+    for line in (COMMUNITY_DIR / "sources.txt").read_text().splitlines():
+        fields = line.split()
+        if fields and not fields[0].startswith("#"):
+            entries.append(tuple(fields))
+    return entries
+
+
+@needs_tools
+def test_community_sources_are_pinned_and_downloaded() -> None:
+    entries = community_sources()
+    assert entries
+    for entry in entries:
+        assert len(entry) == 3, entry
+        checksum, url, dest = entry
+        assert re.fullmatch(r"[0-9a-f]{64}", checksum), entry
+        assert COMMUNITY_URL.fullmatch(url), entry
+        target = COMMUNITY_DIR / dest
+        assert target.is_file(), dest
+        assert hashlib.sha256(target.read_bytes()).hexdigest() == checksum, dest
+
+
+@needs_tools
+def test_community_policies_are_default_plus_upstream() -> None:
+    directory = COMMUNITY_DIR / "tetragon.tp.d"
+    downloaded = {Path(dest).name for _, _, dest in community_sources() if dest.startswith("tetragon.tp.d/")}
+    assert downloaded
+    assert not downloaded & DEFAULT_POLICIES
+    assert {path.name for path in directory.iterdir()} == DEFAULT_POLICIES | downloaded
+    for name in DEFAULT_POLICIES:
+        assert (directory / name).read_bytes() == (REPO_ROOT / "tools" / "tetragon" / "default" / "tetragon.tp.d" / name).read_bytes()
+    conf = COMMUNITY_DIR / "tetragon.conf.d"
+    default_conf = REPO_ROOT / "tools" / "tetragon" / "default" / "tetragon.conf.d"
+    assert {path.name for path in conf.iterdir()} == {path.name for path in default_conf.iterdir()}
+    for path in conf.iterdir():
+        assert path.read_bytes() == (default_conf / path.name).read_bytes(), path.name
+
+
+def selector_actions(policy: dict) -> list[str]:
+    actions = []
+    for hook in hooks(policy) + list((policy.get("spec") or {}).get("usdts") or []):
+        for selector in hook.get("selectors") or []:
+            for key in ("matchActions", "matchReturnActions"):
+                actions.extend(str(action.get("action")) for action in selector.get(key) or [])
+    return actions
+
+
+@needs_tools
+def test_community_policies_observe_only_and_load_as_one_sensor_type() -> None:
+    policies = load_policies("community")
+    names = set()
+    for name, policy in policies.items():
+        text = (COMMUNITY_DIR / "tetragon.tp.d" / name).read_text()
+        assert policy["kind"] == "TracingPolicy", name
+        assert not ENFORCING_ACTIONS & set(selector_actions(policy)), name
+        assert not re.search(r"action:\s*(Override|Sigkill|Signal|NotifyEnforcer)", text), name
+        spec = policy.get("spec") or {}
+        assert "enforcers" not in spec, name
+        assert sum(1 for key in HOOK_SECTIONS if spec.get(key)) == 1, name
+        names.add(policy["metadata"]["name"])
     assert len(names) == len(policies)

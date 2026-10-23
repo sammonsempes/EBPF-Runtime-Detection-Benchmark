@@ -1,0 +1,19 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-defense-evasion-root-certificate"},
+  "spec": {
+    "tags": ["MITRE", "T1055"],
+    "message": "Audit modifications in root certificates",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "severity": 6,
+      "matchPaths": [
+        {"path": "/etc/ca-certificates.conf"}
+      ],
+      "matchDirectories": [
+        {"dir": "/usr/local/share/ca-certificates/", "recursive": true}
+      ],
+      "action": "Audit"
+    }
+  }
+}

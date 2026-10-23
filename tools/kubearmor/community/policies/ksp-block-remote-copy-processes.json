@@ -1,0 +1,19 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-block-remote-copy-processes"},
+  "spec": {
+    "tags": ["MITRE"],
+    "message": "remote copy binaries execution attempted!",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/scp"},
+        {"path": "/usr/bin/sftp"},
+        {"path": "/usr/bin/rsync"},
+        {"path": "/usr/bin/dcp"}
+      ],
+      "action": "Audit",
+      "severity": 4
+    }
+  }
+}

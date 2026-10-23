@@ -42,7 +42,7 @@ printed by the single-threaded event loop once the loader yields; a few events r
 - `default/config.yaml`: the upstream default configuration of 0.6.2 (`Config::default()`, what `kunai config --dump`
   prints): output to `/dev/stdout`, every event enabled except `read`, `write` and `write_close`, **no rules, no IoCs, no
   YARA**. Kunai ships no detection rule in its repository or release (community rules live in the separate
-  `kunai-project/community-rules` repository and are not installed by default). With no rule loaded, Kunai prints
+  `kunai-project/community-rules` repository and are not installed by default, see the `community` profile). With no rule loaded, Kunai prints
   every telemetry event and none carries a `detection` section, so this profile honestly reports zero detections. It also
   produces a large volume of logs, which is the upstream default behavior.
 - `tuned/config.yaml` + `tuned/rules.yaml`: same configuration with `write_close` enabled and `scanner.rules` pointing to
@@ -58,6 +58,40 @@ printed by the single-threaded event loop once the loader yields; a few events r
   `download.to.tmpfs`, `chmod.exec.in.tmpfs` (a compiled or downloaded binary in `/tmp`), `defense_evasion.logs.clear`
   and `defense_evasion.logs.delete` (log rotation), `discovery.container.environment` and `discovery.system.information`
   (admin commands). Same rule set and severities as tuned, so detection results are comparable.
+- `community/config.yaml` + `community/rules/`: the default configuration with `scanner.rules` set to the
+  `/etc/kunai/rules` directory, which holds the upstream community rules verbatim (see below). No rule of ours.
+
+## Community profile
+
+- Source: https://github.com/kunai-project/community-rules, the rule repository of the Kunai GitHub organization
+  ("Community-driven detection rules for Kunai"), not installed by Kunai. Rules live on one branch per Kunai version
+  (`kunai-v0.4`, `kunai-v0.5`; `main` holds only the README). There is no `kunai-v0.6` branch, so the profile uses the
+  head of `kunai-v0.5`, commit `9a2e1640781b6562eecbe8767a4cf6e6c638283a` (2025-01-29, "add: rule CI/CD workflow").
+- Compatibility with 0.6.2: the repository CI runs `kunai test -r ./rules` with the latest `v0.5.x` tag, i.e. it loads
+  the repository root as a rule directory. Kunai 0.6.2 loads a `scanner.rules` directory the same way
+  (`compile_kunai_rules` in `kunai/src/bin/main.rs`): `.yaml`/`.yml` files as Gene templates first, then `.kun`,
+  `.kunai`, `.gen`, `.gene` files in sorted order, so `00-dependencies.kun` is loaded before the rules that depend on it.
+  The release notes of 0.6.0 to 0.6.2 list no rule format change, every event name used exists in 0.6.2 (only
+  `task_sched`, unused here, was removed) and the fields used (`.data.ancestors` as a `|` separated string,
+  `.data.exe.error`, `.data.mapped.error`, `.data.target.exe.path`, `.info.task.flags`, `.info.task.zombie`,
+  `.info.host.container.type`, `.data.socket.domain`) exist in the v0.6.2 event structs. The 0.7 schema (ancestors as an
+  array) would break `dep.run.tmpfs`, `dep.webservers` and `run.memfd`.
+- Files (`community/sources.txt`, sha256 pinned, fetched by the `community-rules` compose service):
+  `00-dependencies.kun`, `50-detections.kun`, `60-low-detections.kun`, `90-heuristics.kun`, `templates.yaml`, in
+  `community/rules/`. The CI workflow, `.vscode` settings and test traces are not fetched.
+- License: the repository has no `LICENSE` file and GitHub reports no license for it; the files are used unmodified
+  and attributed to their author (`qjerome`, Kunai maintainer).
+- Content: 22 detection rules and 7 dependency rules (`dep.*`, never printed on their own), plus 4 templates
+  (`tmpfs-dir`, `important-dir`, `systemd-dir`, `kthread-names`). They target malware tradecraft seen in perfctl,
+  BPFDoor and similar Linux samples: piped crontab, stopping/disabling auditd or AppArmor, shared objects or executables
+  in tmpfs, memfd execution, one-liner droppers, timestomping with `touch -r`, kills of systemd or sshd, self-deleting
+  executables, executables or shared objects deleted right after use, kernel thread masquerading, raw socket sniffing,
+  webshell commands under web servers, chmod/chown/cp/touch on system directories and every `mprotect_exec` event
+  (severity 5). Low severity rules (2 to 5) are designed to stack up: severities of matching rules are summed (cap 10).
+- Behavior: rules are loaded, so Kunai only prints detections (`min_severity: 0`, so every match) plus `start` and
+  `event_loss`. The default configuration keeps `write` and `write_close` disabled, so `dep.exe.dir`,
+  `dep.config.dir` and `run.tmpfs.write.exe.dir` can never match in this profile; enabling those events would be a
+  change of ours to the default configuration, which the profile excludes.
 
 ## Response (enforce profile)
 

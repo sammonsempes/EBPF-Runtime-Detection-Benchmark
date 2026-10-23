@@ -23,7 +23,26 @@ The image keeps its own upstream `/etc/falco/falco.yaml` (the 0.45.0 `falco.yaml
 
 - `default`: upstream `falco.yaml` plus upstream stable rules `falco_rules.yaml` (falco-rules 5.2.0) as shipped in the pinned image, plus the drop-in above. The rules file is not vendored in this repository because the falcosecurity/rules submodule is not part of the local upstream clone; the image is the source of truth for that exact version.
 - `tuned`: `default` plus `rules.d/custom_rules.yaml`, appended to `rules_files` by the drop-in (config_files `append` strategy). The tuned rules reuse upstream macros (`spawned_process`, `open_write`, `open_read`, `container`, `shell_binaries`) and target behaviours of the scenario catalog: shell outbound connections, shells spawned by interpreters, execution from temporary directories, cron/systemd/authorized_keys/account database writes, account management commands, kernel module load attempts, setuid bits and sensitive chmod, host disk mounts and namespace changes from containers, history and log tampering, daemon-name masquerading, credential and service account token reads with generic tools, container runtime socket access, container and system discovery commands, network scanners, HTTP uploads with curl/wget, miner pool ports and miner process names. They contain no benchmark tokens and were checked against the benign scenarios (`cat /etc/os-release`, logrotate with gzip, tar backups, gcc, python http.server with curl, dpkg/apt-cache).
+- `community`: `default` plus the upstream incubating and sandbox rule files, verbatim, appended to `rules_files` exactly like `tuned` (see below). No rule written by us.
 - No `enforce` profile: Falco has no in-kernel blocking (see `operational.yaml`, `response`).
+
+## Community profile
+
+- Source: [falcosecurity/rules](https://github.com/falcosecurity/rules), the Falco project's own rules repository, which publishes one file per maturity level (`rules/falco_rules.yaml` stable, `rules/falco-incubating_rules.yaml`, `rules/falco-sandbox_rules.yaml`). Only the stable file is bundled in the Falco package; the other two are optional rule sets maintained by the same project. A `deprecated` maturity level exists but has no rule file in `rules/` at this commit.
+- Commit: `80880bd59906ee9619dedc6cd60f6603252052f6`, the commit of tag `falco-rules-5.2.0`, i.e. the same release as the stable rules bundled with Falco 0.45.0 (`cmake/modules/rules.cmake`, `FALCOSECURITY_RULES_FALCO_VERSION falco-rules-5.2.0`).
+- License: Apache-2.0 (SPDX header of each file, Copyright The Falco Authors).
+- Files, downloaded by the `community-rules` service from `sources.txt` (URLs pinned to the commit, sha256 verified) into `rules.d/`, unmodified:
+
+| File | Maturity tag | Rules | Enabled by the file | Disabled by the file (`enabled: false`) |
+| --- | --- | --- | --- | --- |
+| `rules.d/falco-incubating_rules.yaml` | `maturity_incubating` | 31 | 31 | 0 |
+| `rules.d/falco-sandbox_rules.yaml` | `maturity_sandbox` | 39 | 25 | 14 |
+
+- Loading: the drop-in appends `/etc/falco/bench/rules.d` to the image's `rules_files`; Falco loads `/etc/falco/falco_rules.yaml` (stable, from the image) first, then the directory in lexical order (incubating, then sandbox). Rules disabled upstream stay disabled (they are disabled because they need environment-specific tuning, e.g. allow lists or GPU workloads), as a user enabling these files would get them.
+- Requirements: both files declare `required_engine_version: 0.57.0` (Falco 0.45.0 has engine 0.65.0, `userspace/engine/falco_engine_version.h`) and `required_plugin_versions: container >= 0.4.0` (the image ships container plugin 0.7.5). They only use the `syscall` source with container plugin fields (`container.*`, `k8s.ns.name`, `k8s.pod.name`); no k8saudit, cloudtrail or other plugin is needed, so no file was dropped.
+- Like the stable file, each file redefines shared macros and lists (`open_write`, `container`, `shell_binaries`, `docker_binaries`...); the last definition loaded wins for all files, including stable rules. The incubating and sandbox copies are identical to each other; they were not diffed against the stable file in the image, so a differing stable definition would be replaced by the community one (upstream intends the files to be loaded together in this order).
+- Expected noise (not tuned, by design): broad auditing rules such as `Write below etc`, `Write below root`, `Change thread namespace`, `Unexpected UDP Traffic`, `Launch Privileged Container`, `Launch Excessively Capable Container`, `Launch Sensitive Mount Container` and `Container Access to Host Sensitive Paths` can fire on benign scenarios, on the benchmark's own containers and possibly on the Falco container itself (it is privileged and reads `/host/proc`). `Exfiltrating Artifacts via Kubernetes Control Plane` fires on any non-interactive `tar` started directly by the container runtime.
+- Not validated with `falco --dry-run` against the image in this environment (same caveat as `tuned`); a load error would show at startup in the container logs before the ready pattern.
 
 ## Alert collection
 

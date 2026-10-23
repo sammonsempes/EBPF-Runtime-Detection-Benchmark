@@ -76,3 +76,12 @@ services:
     entrypoint: ["true"]
     command: []
     restart: "no"
+
+  community-rules:
+    <<: *runner
+    user: "${BENCH_UID:-1000}:${BENCH_GID:-1000}"
+    volumes:
+      - .:/bench
+    entrypoint: ["python", "/bench/tools/fetch_community.py"]
+    command: []
+    restart: "no"

@@ -1,0 +1,793 @@
+{
+  "run_id": "20261023T082958Z",
+  "status": "completed",
+  "started_at": 1792744198.3474076,
+  "finished_at": 1792747788.147799,
+  "host": {
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "operating_system": "Ubuntu 24.04 LTS",
+    "architecture": "x86_64",
+    "cpus": 8,
+    "memory_bytes": 16540459008,
+    "docker_version": "29.7.1",
+    "docker_api_version": "1.55",
+    "cgroup_version": "2",
+    "cgroup_driver": "systemd",
+    "storage_driver": "overlayfs",
+    "runner_python": "3.12.14"
+  },
+  "host_repo_root": "/home/sam/hackathon/EBPF-Runtime-Detection-Benchmark",
+  "config": {
+    "tools": [
+      "falco",
+      "tetragon",
+      "kubearmor",
+      "kunai"
+    ],
+    "profiles": [
+      "community"
+    ],
+    "scenarios": "all",
+    "repetitions": 5,
+    "grace_seconds": 10,
+    "idle_seconds": 3,
+    "control_scenarios": true,
+    "overhead": {
+      "enabled": true,
+      "duration_seconds": 30,
+      "repetitions": 3,
+      "workloads": [
+        "syscall",
+        "exec",
+        "fileio"
+      ]
+    },
+    "results_dir": "results",
+    "backend": "docker",
+    "kubernetes": {
+      "kubeconfig": null,
+      "context": "kind-ebpf-bench",
+      "namespace": "ebpf-bench",
+      "node": null
+    }
+  },
+  "bench_yaml": "tools:\n  - falco\n  - tetragon\n  - kubearmor\n  - kunai\n\nprofiles:\n  - community\n\nscenarios: all\n\nrepetitions: 5\ngrace_seconds: 10\nidle_seconds: 3\ncontrol_scenarios: true\n\noverhead:\n  duration_seconds: 30\n  repetitions: 3\n  workloads:\n    - syscall\n    - exec\n    - fileio\n\nresults_dir: results\n\nbackend: docker\n\nkubernetes:\n  kubeconfig: null\n  context: kind-ebpf-bench\n  namespace: ebpf-bench\n  node: null\n",
+  "tools": {
+    "falco": {
+      "name": "falco",
+      "version": "0.45.0",
+      "profiles": [
+        "community"
+      ],
+      "supported_profiles": [
+        "default",
+        "tuned",
+        "community"
+      ],
+      "config_sha256": {
+        "community": "bad5350a7c3a2a3a32c035f56bb251875620b741d3099a87cc3ff9939cbf019d"
+      },
+      "available": true,
+      "status": "ok",
+      "error": null
+    },
+    "tetragon": {
+      "name": "tetragon",
+      "version": "1.7.1",
+      "profiles": [
+        "community"
+      ],
+      "supported_profiles": [
+        "default",
+        "tuned",
+        "enforce",
+        "community"
+      ],
+      "config_sha256": {
+        "community": "f2fe37d1e025c8486f7764628031c88e3184ac5a43c1eafa92c98b2da2727036"
+      },
+      "available": true,
+      "status": "failed",
+      "error": "community: ToolStartError: container bench-tool-tetragon-community exited with code 255; last logs:\nlevel=warn msg=\"Unload failed during destroy\" sensor=generic_kprobe error=\"unload of sensor generic_kprobe failed: sensor not loaded\"\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor __base__\"\nlevel=info msg=\"Sensor unloaded\" sensor=__base__ maps-error=[]\nlevel=info msg=\"BPF events statistics: 0 received, 0% events loss\"\nlevel=info msg=\"Observer events statistics\" received=0 lost=0 errors=0 filterPass=0 filterDrop=0\nlevel=error msg=\"Failed to execute tetragon\" error=\"sensor generic_kprobe from collection process.credentials.changes.at.syscalls failed to load: tetragon, aborting could not load sensor BPF maps: failed to load map 'kprobe_calls' for sensor 'generic_kprobe': failed to create subbir for 'kprobe_calls': mkdir /run/cilium/bpffs/tetragon/process.credentials.changes.at.syscalls: operation not permitted\""
+    },
+    "kubearmor": {
+      "name": "kubearmor",
+      "version": "1.7.5",
+      "profiles": [
+        "community"
+      ],
+      "supported_profiles": [
+        "default",
+        "tuned",
+        "enforce",
+        "community"
+      ],
+      "config_sha256": {
+        "community": "cf1c6c0ff99c0a5aba41dcae562908b1701e52d8f4686129fef6d5a776ab295f"
+      },
+      "available": true,
+      "status": "ok",
+      "error": null
+    },
+    "kunai": {
+      "name": "kunai",
+      "version": "0.6.2",
+      "profiles": [
+        "community"
+      ],
+      "supported_profiles": [
+        "default",
+        "tuned",
+        "enforce",
+        "community"
+      ],
+      "config_sha256": {
+        "community": "a8d2102db5950bef793c8271822339956f681c8c69b65d28b51c9ebfe59999f4"
+      },
+      "available": true,
+      "status": "ok",
+      "error": null
+    }
+  },
+  "operational": {
+    "falco": {
+      "tool": "falco",
+      "version": "0.45.0",
+      "license": "Apache-2.0",
+      "deployment": {
+        "linux": "Official falcosecurity/falco:0.45.0 image as one privileged container (host PID and network) using the modern eBPF probe built into the binary, with host /proc, /etc and docker.sock mounted for the bundled container plugin",
+        "kubernetes": "Official Helm chart falcosecurity/falco (DaemonSet, driver.kind=modern_ebpf or auto, container plugin and optional k8s-metacollector)",
+        "steps": 2
+      },
+      "rules": {
+        "language": "YAML rules, macros and lists whose conditions use the Falco filter language over syscall and plugin fields, with exceptions, append and override",
+        "custom_rules": true,
+        "hot_reload": true
+      },
+      "output": {
+        "formats": [
+          "json",
+          "text"
+        ],
+        "enrichment": [
+          "container",
+          "kubernetes"
+        ],
+        "attack_mapping": true
+      },
+      "response": {
+        "blocking": false,
+        "mechanisms": [],
+        "notes": "Falco is detection only: rules emit alerts and never act on the event in the kernel. Response is delegated to separate projects fed by Falco outputs (Falcosidekick forwarding, Falco Talon actions such as killing a pod); they react after the fact and are out of scope here, so Falco has no enforce profile.\n"
+      },
+      "scores": {
+        "deployment": 5,
+        "rule_customization": 5,
+        "output_quality": 5
+      },
+      "notes": "Deployment 5: the image runs with defaults (docker/falco/Dockerfile ships /usr/bin/falco as CMD, its usage label is a single privileged docker run, falco.yaml defaults engine.kind to modern_ebpf which needs no kernel headers or driver loader, and the container plugin is enabled by the packaged config.d/falco.container_plugin.yaml); on Kubernetes the chart README documents a plain \"helm install falco falcosecurity/falco\". The only benchmark change is a config.d drop-in enabling json_output and disabling syslog. Modern eBPF still requires a BTF-enabled kernel. Rule customization 5: declarative YAML rules loaded from rules_files and rules.d, rule enable/disable by name or tag in falco.yaml, and watch_config_files: true reloads configuration and rules on change (plus SIGHUP and the 0.45 reload API). Output quality 5: json_output emits rule, priority, time, source, hostname, tags and output_fields (formats.cpp); upstream stable rules carry mitre_* and Txxxx tags, the container plugin adds container.* and k8s.pod.* fields, and parent/ancestor fields (proc.pname, proc.aname) are available, although ancestry depth depends on each rule's output template.\n"
+    },
+    "tetragon": {
+      "tool": "tetragon",
+      "version": "1.7.1",
+      "license": "Apache-2.0",
+      "deployment": {
+        "linux": "Official quay.io/cilium/tetragon:v1.7.1 image as one privileged container (host PID, cgroup and network namespaces) with BTF, bpffs and host /proc mounted, TracingPolicies loaded from a mounted tetragon.tp.d and JSON events exported to a bind-mounted file",
+        "kubernetes": "Official Helm chart cilium/tetragon (agent DaemonSet, operator installing the TracingPolicy CRDs, export-stdout sidecar)",
+        "steps": 2
+      },
+      "rules": {
+        "language": "TracingPolicy YAML (Kubernetes CRD format) attaching kprobes, tracepoints, uprobes or LSM hooks with in-kernel selectors (matchArgs, matchBinaries, matchNamespaces, matchCapabilities) and actions",
+        "custom_rules": true,
+        "hot_reload": true
+      },
+      "output": {
+        "formats": [
+          "json"
+        ],
+        "enrichment": [
+          "container",
+          "kubernetes"
+        ],
+        "attack_mapping": false
+      },
+      "response": {
+        "blocking": true,
+        "mechanisms": [
+          "sigkill"
+        ],
+        "synchronous": true,
+        "notes": "Selectors can carry Sigkill, Signal and Override actions executed synchronously in the kernel (docs/content/en/docs/concepts/enforcement/_index.md). The benchmark enforce profile uses Sigkill only, so it loads on kernels without bpf_override_return (CONFIG_BPF_KPROBE_OVERRIDE unset, e.g. WSL2 6.6): the signal is raised in-kernel at the hook, but without Override the in-flight syscall may still complete before the process dies (a write, send or mount can take effect). A variant adding Override (returning an error from syscalls and security_* hooks without running them) gives true denial on kernels built with CONFIG_BPF_KPROBE_OVERRIDE; it is not used here. Enforcement events are regular process_kprobe events whose action field is KPROBE_ACTION_SIGKILL (or KPROBE_ACTION_OVERRIDE for such a variant), and the killed process ends with a process_exit carrying signal SIGKILL.\n"
+      },
+      "scores": {
+        "deployment": 5,
+        "rule_customization": 4,
+        "output_quality": 4
+      },
+      "notes": "Deployment 5: docs/content/en/docs/installation/container.md runs the stable image with a single privileged docker run (only the BTF file is mounted) and the Helm chart installs with defaults; the benchmark adds bpffs, /procRoot and an export file location, mirroring the chart's tetragon_configmap.yaml (procfs /procRoot, export-filename). Rule customization 4: policies are declarative and can be added or removed at runtime (TracingPolicy CRDs, tetra tracingpolicy add), but they are low level: authors must know kernel function or syscall names and argument types, a hook takes at most 5 selectors and 5 argument filters, integer filters accept at most 4 values (pkg/selectors/kernel.go), a policy referencing a missing symbol fails unless ignore.callNotFound is set, and there is no correlation across events. Output quality 4: JSON events carry process and parent (binary, arguments, uid, exec_id, start time), optional full ancestry (enable-ancestors), pod/container/workload metadata on Kubernetes and the cgroup-derived container id (\"docker\") elsewhere, plus policy_name, message and user-defined tags; there is no built-in ATT&CK mapping or severity, and outside Kubernetes the container name and image are not resolved.\n"
+    },
+    "kubearmor": {
+      "tool": "kubearmor",
+      "version": "1.7.5",
+      "license": "Apache-2.0",
+      "deployment": {
+        "linux": "single privileged container kubearmor/kubearmor:v1.7.5 in non-Kubernetes mode (k8s=false, container policies only, config via KUBEARMOR_CFG), docker socket, bpffs and securityfs mounted, policies restored from /opt/kubearmor/policies, alerts written as JSON lines with -logPath; blocking needs a BPF-LSM enabled host kernel",
+        "kubernetes": "official Helm chart (deployments/helm, kubearmor-operator) or karmor install, policies as KubeArmorPolicy CRDs",
+        "steps": 2
+      },
+      "rules": {
+        "language": "declarative KubeArmorPolicy YAML (process, file, network, capabilities, syscalls and presets rules with matchPaths, matchDirectories, matchPatterns, fromSource, Allow/Audit/Block actions)",
+        "custom_rules": true,
+        "hot_reload": true
+      },
+      "output": {
+        "formats": [
+          "json"
+        ],
+        "enrichment": [
+          "container",
+          "kubernetes"
+        ],
+        "attack_mapping": false
+      },
+      "response": {
+        "blocking": true,
+        "mechanisms": [
+          "bpf-lsm",
+          "apparmor",
+          "selinux-host-only",
+          "presets"
+        ],
+        "synchronous": true,
+        "notes": "Block rules are enforced in the kernel by the LSM picked from the lsm order (enforcer/runtimeEnforcer.go selectLsm): BPF-LSM needs CONFIG_BPF_LSM and \"bpf\" in /sys/kernel/security/lsm (boot parameter lsm=...,bpf, getting-started/FAQ.md); it attaches to already running containers through their pid/mnt namespaces, so it works for unorchestrated Docker containers without runner changes. AppArmor enforcement needs host AppArmor, apparmor_parser and /etc/apparmor.d, and the workload must run under the KubeArmor generated profile kubearmor_<container> (docker --security-opt apparmor=...), which the benchmark victims do not; SELinux is only used for host policies outside Kubernetes. The enforce profile pins lsm=bpf; on hosts without BPF-LSM KubeArmor silently falls back to another or no enforcer and Block rules become alerts with Result Passed (getting-started/FAQ.md, \"If Block policy is used and there are no supported enforcement mechanism\"). A blocked operation is reported as action Block with Result \"Permission denied\" (or another errno text such as \"Operation not permitted\") and Enforcer BPFLSM. Presets (filelessExec, anonymousMapExec...) require BPF-LSM. WSL2 has no securityfs, so no blocking there."
+      },
+      "scores": {
+        "deployment": 3,
+        "rule_customization": 4,
+        "output_quality": 4
+      },
+      "notes": "deployment 3: outside Kubernetes the daemon must be started with k8s=false and policy flags (deployments/podman/docker-compose.yaml, KubeArmor/packaging/kubearmor.yaml), upstream pairs it with the kubearmor-init container that compiles the eBPF objects against the host kernel (Dockerfile.init, build/compile.sh), it needs the container runtime socket, bpffs, securityfs and debugfs, and policies can only be fed through the gRPC PolicyService (karmor vm policy add) or the JSON backup directory /opt/kubearmor/policies read at startup (core/unorchestratedUpdates.go restoreKubeArmorPolicies). Helm and the operator make the Kubernetes path simpler. rule_customization 4: policies are declarative and applied live (CRD watchers in Kubernetes, gRPC PolicyService outside), but expressiveness is limited to paths, directories, glob patterns, source binaries and protocols; arguments can only be matched for Allow lists (matchArgs) and there is no correlation; Audit rules need visibility enabled (getting-started/kubearmor_visibility.md). output_quality 4: JSON per event (types/types.go Log struct) with container id/name/image, pod, namespace, labels, host and container pids, parent process name, source command line, policy name, severity, tags, message, action and result; ATT&CK mapping only exists when the policy author puts MITRE tags in the policy (hardening templates do), there is no built-in technique field and no ancestry beyond the parent."
+    },
+    "kunai": {
+      "tool": "kunai",
+      "version": "0.6.2",
+      "license": "GPL-3.0",
+      "deployment": {
+        "linux": "static musl binary from the GitHub release, wrapped in a privileged alpine container built from tools/kunai/Dockerfile (host PID namespace, /sys/kernel/debug, /sys/kernel/btf and /sys/fs/bpf mounted)",
+        "kubernetes": "none upstream",
+        "steps": 3
+      },
+      "rules": {
+        "language": "Gene YAML rules (match-on event names, $variables matching event fields with ==, ~= regex, &= flags and numeric comparisons, boolean condition, severity, ATT&CK ids), plus JSON-lines IoCs and YARA for file scans",
+        "custom_rules": true,
+        "hot_reload": false
+      },
+      "output": {
+        "formats": [
+          "json"
+        ],
+        "enrichment": [
+          "process_ancestry",
+          "container",
+          "file_hashes",
+          "user",
+          "dns"
+        ],
+        "attack_mapping": true
+      },
+      "response": {
+        "blocking": false,
+        "mechanisms": [
+          "kill"
+        ],
+        "synchronous": false,
+        "notes": "Detection rules accept `actions: [kill]` (v0.6.2 `kunai/src/bin/main.rs`, actions `kill` and `scan-files`). The userland event loop calls kill(pid, SIGKILL) on `info.task.pid` after the event went through the ring buffer, reordering and rule scan, and after it was printed; the syscall that produced the event has already completed, so this is an asynchronous after-the-fact response, not prevention. Kill is ignored for filter rules. Matching events carry `detection.actions: [\"kill\"]`, the kill itself is only logged on stderr (`sending SIGKILL to PID=<pid>`)."
+      },
+      "scores": {
+        "deployment": 3,
+        "rule_customization": 4,
+        "output_quality": 4
+      },
+      "notes": "Deployment 3: upstream ships a distribution-agnostic static binary (assets kunai-amd64 / kunai-aarch64 with .asc signatures and sha512.txt on the v0.6.2 release) and no container image or Kubernetes manifest; the README recommends the binary, the docs install it as a systemd service with `kunai install`. Running it in a container needs host preparation: privileged mode, host PID namespace, BTF and the bpf/debug filesystems. Steps 3 = download, chmod +x, `kunai run -r <rules>`; upstream ships no detection rule, so with the bare `sudo kunai` quickstart every event is printed and nothing is an alert. Rule customization 4: rules are declarative YAML (Gene engine) with detection, filter and dependency types, regex and flag operators, severity and actions (kill, scan-files), loaded from the config `scanner.rules` or `-r`; there is no runtime reload in 0.6.2, a restart is required (hardened mode even requires a reboot). Output quality 4: one JSON object per line (`data`, `detection`, `filter`, `info`) with process ancestors, parent command line, executable hashes, task/parent uid/gid, mount namespace and container name/type; `detection` carries rule names, tags, severity and ATT&CK ids from rule metadata. Not 5 because container context is only the UTS hostname plus a heuristic type (no container id, image or Kubernetes metadata), and the container `type` is often null for processes started after kunai."
+    }
+  },
+  "scenarios": [
+    {
+      "id": "benign-admin-commands",
+      "name": "Routine administration commands",
+      "kind": "benign",
+      "description": "Runs the commands an operator types when checking a machine: id, ps aux, ls -la /, df -h, free -m, cat /etc/os-release and uptime. Read only, local only.",
+      "path": "/bench/scenarios/benign-admin-commands",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "benign-backup",
+      "name": "Data directory backup with tar",
+      "kind": "benign",
+      "description": "Creates a data directory /srv/bench-data-<marker> with a few text files, archives it with tar -czf to /backup/data-<marker>.tar.gz, lists the archive to verify it and removes both afterwards. Local only, no network.",
+      "path": "/bench/scenarios/benign-backup",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "benign-compile",
+      "name": "Compile and run a C program",
+      "kind": "benign",
+      "description": "Writes a small C program in /root/workspace/bench-<marker>, compiles it with gcc (cc1, as and collect2/ld child processes, new executable written to disk) and runs the produced binary. The workspace is removed afterwards.",
+      "path": "/bench/scenarios/benign-compile",
+      "tactic": null,
+      "technique": null,
+      "timeout": 60.0,
+      "requires": []
+    },
+    {
+      "id": "benign-log-rotation",
+      "name": "Application log rotation with logrotate",
+      "kind": "benign",
+      "description": "Writes application logs to /var/log/benchapp-<marker>/, runs logrotate -f with a dedicated configuration (rotate 3, compress) and state file, which renames the logs and gzips the rotated copies, then verifies the .1.gz archives. Everything is removed afterwards. Exercises legitimate file renames and writes under /var/log.",
+      "path": "/bench/scenarios/benign-log-rotation",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "benign-package-query",
+      "name": "Installed package queries",
+      "kind": "benign",
+      "description": "Queries the local package database without network access: dpkg -l, dpkg -s coreutils, dpkg -L bash and apt-cache policy for bash and python3 (reads the apt lists kept in the victim image).",
+      "path": "/bench/scenarios/benign-package-query",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "benign-web-server",
+      "name": "Local Python web server queried with curl",
+      "kind": "benign",
+      "description": "Starts python3 -m http.server bound to 127.0.0.1:18080 serving a static directory /tmp/bench-site-<marker>, waits until it answers, fetches the index page with curl, then stops the server and removes the directory. Loopback traffic only.",
+      "path": "/bench/scenarios/benign-web-server",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1003-008-shadow-read",
+      "name": "Read /etc/shadow",
+      "kind": "attack",
+      "description": "Reads /etc/shadow with cat and copies it to /tmp/bench-shadow-<marker> with dd, the way a credential dumper stages hashes for offline cracking. Prints only account names. The copy is removed afterwards.",
+      "path": "/bench/scenarios/t1003-008-shadow-read",
+      "tactic": "credential-access",
+      "technique": "T1003.008",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1036-005-masquerading",
+      "name": "Binary masquerading as sshd in a hidden directory",
+      "kind": "attack",
+      "description": "Copies /usr/bin/sleep to the hidden directory /tmp/.X11-<marker>/sshd and runs it, producing a process named sshd whose executable lives in /tmp and whose content is not the OpenSSH daemon. The directory is removed afterwards.",
+      "path": "/bench/scenarios/t1036-005-masquerading",
+      "tactic": "defense-evasion",
+      "technique": "T1036.005",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1046-network-scan",
+      "name": "TCP port scan of the attacker with netcat",
+      "kind": "attack",
+      "description": "Runs nc -z (connect scan) against $BENCH_ATTACKER on ports 1-1024, 3300-3400 and 8000-8100, i.e. about 1200 TCP connection attempts in a few seconds, most of them refused. Port 4444 is deliberately skipped so the reverse shell sink is not triggered. Exits 0 when the scan found at least one open port (8080 is always open), which proves the scan reached the attacker.",
+      "path": "/bench/scenarios/t1046-network-scan",
+      "tactic": "discovery",
+      "technique": "T1046",
+      "timeout": 60.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1048-exfiltration-http",
+      "name": "Sensitive files archived and posted over HTTP",
+      "kind": "attack",
+      "description": "Archives /etc/passwd, /etc/shadow and the honey credential files (/root/.aws/credentials, /root/.ssh/id_rsa, /opt/app/.env) into /tmp/bench-exfil-<marker>.tar.gz and uploads it with curl --data-binary to http://$BENCH_ATTACKER:8080/upload, which discards the data. The archive is removed afterwards.",
+      "path": "/bench/scenarios/t1048-exfiltration-http",
+      "tactic": "exfiltration",
+      "technique": "T1048",
+      "timeout": 30.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1053-003-cron-persistence",
+      "name": "Cron job dropped in /etc/cron.d",
+      "kind": "attack",
+      "description": "Writes /etc/cron.d/bench-<marker> containing a job running every minute as root, prints it, then removes it. The cron daemon is not started, the file creation in /etc/cron.d is the behavior.",
+      "path": "/bench/scenarios/t1053-003-cron-persistence",
+      "tactic": "persistence",
+      "technique": "T1053.003",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1059-004-reverse-shell",
+      "name": "Reverse shell with bash /dev/tcp",
+      "kind": "attack",
+      "description": "Starts an interactive bash whose stdin, stdout and stderr are redirected to a TCP socket opened with the bash /dev/tcp pseudo device towards $BENCH_ATTACKER:4444. The attacker sink sends id, uname -a, hostname and exit, then closes. The shell history is disabled so the scenario leaves no trace. BENCH_MARKER is the $0 of the outer bash -c.",
+      "path": "/bench/scenarios/t1059-004-reverse-shell",
+      "tactic": "execution",
+      "technique": "T1059.004",
+      "timeout": 30.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1059-006-python-exec",
+      "name": "Python inline code spawning a shell",
+      "kind": "attack",
+      "description": "Runs python3 -c with inline code that spawns /bin/sh -c to execute id and uname. The resulting process tree is python3 -> sh -> id/uname. BENCH_MARKER is passed as a python argument and echoed by the shell.",
+      "path": "/bench/scenarios/t1059-006-python-exec",
+      "tactic": "execution",
+      "technique": "T1059.006",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1070-002-clear-logs",
+      "name": "System logs truncated under /var/log",
+      "kind": "attack",
+      "description": "Truncates /var/log/auth.log (seeded honey log), wtmp, btmp, lastlog, dpkg.log, apt/history.log and a dedicated /var/log/bench-<marker>.log, using both shell redirection and truncate -s 0. Every existing file is backed up to /tmp/bench-logs-<marker>/ first and its content restored in place on exit.",
+      "path": "/bench/scenarios/t1070-002-clear-logs",
+      "tactic": "defense-evasion",
+      "technique": "T1070.002",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1070-003-clear-history",
+      "name": "Shell history cleared",
+      "kind": "attack",
+      "description": "Clears /root/.bash_history (seeded by the victim image) with the usual sequence: bash history -c / history -w, truncate -s 0, rm -f, then replaces it with a symlink to /dev/null. The original history is backed up to /tmp/bench-history-<marker>.bak first and restored on exit.",
+      "path": "/bench/scenarios/t1070-003-clear-history",
+      "tactic": "defense-evasion",
+      "technique": "T1070.003",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1082-system-discovery",
+      "name": "System information discovery",
+      "kind": "attack",
+      "description": "Collects host information the way a post exploitation survey script does: uname -a, /proc/version, /etc/os-release, hostname, machine id, lscpu and /proc/cpuinfo, /proc/meminfo, uptime, network interfaces and routes with ip, mounted filesystems, and a walk over /proc/<pid>/comm and cmdline for every process (hostnamectl style inventory without systemd).",
+      "path": "/bench/scenarios/t1082-system-discovery",
+      "tactic": "discovery",
+      "technique": "T1082",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1098-004-ssh-authorized-keys",
+      "name": "SSH key appended to root authorized_keys",
+      "kind": "attack",
+      "description": "Appends a fake ed25519 public key whose comment is bench-<marker> to /root/.ssh/authorized_keys (the victim image seeds this file with a honey admin key). Afterwards the injected line is removed in place, keeping the original content and inode.",
+      "path": "/bench/scenarios/t1098-004-ssh-authorized-keys",
+      "tactic": "persistence",
+      "technique": "T1098.004",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1105-ingress-tool-transfer",
+      "name": "Download and execute a script with curl",
+      "kind": "attack",
+      "description": "Downloads a shell script from http://$BENCH_ATTACKER:8080/payload.sh with curl, writes it to /tmp/bench-payload-<marker>.sh, makes it executable and runs it. The payload is harmless (prints id and uname). The file is removed afterwards.",
+      "path": "/bench/scenarios/t1105-ingress-tool-transfer",
+      "tactic": "command-and-control",
+      "technique": "T1105",
+      "timeout": 30.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1136-001-create-account",
+      "name": "Local account created with useradd",
+      "kind": "attack",
+      "description": "Creates a local account named bench<sanitized marker> with useradd (home directory, bash shell, GECOS comment \"bench <marker>\"), sets its password with chpasswd, then deletes it with userdel -r. Writes /etc/passwd, /etc/shadow and /etc/group.",
+      "path": "/bench/scenarios/t1136-001-create-account",
+      "tactic": "persistence",
+      "technique": "T1136.001",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1222-002-permission-modification",
+      "name": "World writable /etc/shadow",
+      "kind": "attack",
+      "description": "Records the mode of /etc/shadow, runs chmod 777 on it, shows the new mode and restores the original mode on exit.",
+      "path": "/bench/scenarios/t1222-002-permission-modification",
+      "tactic": "defense-evasion",
+      "technique": "T1222.002",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1485-data-destruction",
+      "name": "Files shredded and deleted",
+      "kind": "attack",
+      "description": "Creates /tmp/bench-destruction-<marker>/documents with 20 random 4 KiB files, then overwrites and unlinks them with shred -u -z -n 1 and removes the directory tree with rm -rf. Only files created by the script itself are destroyed.",
+      "path": "/bench/scenarios/t1485-data-destruction",
+      "tactic": "impact",
+      "technique": "T1485",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1496-cryptominer",
+      "name": "Simulated xmrig miner talking stratum",
+      "kind": "attack",
+      "description": "Copies the python3 interpreter to /tmp/bench-miner-<marker>/xmrig and runs it with xmrig style arguments (--url stratum+tcp://$BENCH_ATTACKER:3333 --user bench-<marker> --donate-level 1). The process, named xmrig, connects to the attacker stratum sink, sends a JSON-RPC login with agent xmrig/6.21.0, burns CPU for about three seconds computing SHA-256 hashes (no real mining) and submits a fake share. The directory is removed afterwards.",
+      "path": "/bench/scenarios/t1496-cryptominer",
+      "tactic": "impact",
+      "technique": "T1496",
+      "timeout": 30.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1543-002-systemd-service",
+      "name": "Systemd service unit created and enabled",
+      "kind": "attack",
+      "description": "Creates /etc/systemd/system/bench-<marker>.service with Restart=always and enables it the way systemctl enable does, by symlinking it into multi-user.target.wants. systemd is not running in the container; the unit file write and symlink are the behavior. Both are removed afterwards.",
+      "path": "/bench/scenarios/t1543-002-systemd-service",
+      "tactic": "persistence",
+      "technique": "T1543.002",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1547-006-kernel-module",
+      "name": "Kernel module load attempt with insmod",
+      "kind": "attack",
+      "description": "Writes a dummy, non ELF file /tmp/bench-module-<marker>.ko and calls insmod on it, which issues the finit_module syscall. The kernel always rejects the file (ENOEXEC \"Invalid module format\", or EPERM without CAP_SYS_MODULE), so nothing is ever loaded; the load attempt itself is the behavior. The scenario exits 0 when insmod reports that the kernel refused the module, i.e. the syscall was issued.",
+      "path": "/bench/scenarios/t1547-006-kernel-module",
+      "tactic": "persistence",
+      "technique": "T1547.006",
+      "timeout": 30.0,
+      "requires": [
+        "privileged"
+      ]
+    },
+    {
+      "id": "t1548-001-setuid-binary",
+      "name": "Setuid copy of a binary",
+      "kind": "attack",
+      "description": "Copies /usr/bin/id to /tmp/bench-suid-<marker>, sets the setuid bit with chmod u+s, then runs it as nobody through setpriv to show the effective uid 0. The copy is removed afterwards.",
+      "path": "/bench/scenarios/t1548-001-setuid-binary",
+      "tactic": "privilege-escalation",
+      "technique": "T1548.001",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1552-001-credentials-in-files",
+      "name": "Credential files searched and read",
+      "kind": "attack",
+      "description": "Searches /root, /home, /opt and /srv with find (names credentials, id_rsa*, *.pem, .env) and grep (aws_secret_access_key, PRIVATE KEY, PASSWORD) and reads every hit. The victim image seeds honey files: /root/.aws/credentials, /root/.ssh/id_rsa and /opt/app/.env. The hit list is staged in /tmp/bench-credential-hits-<marker> and removed afterwards. Exits 0 when at least one credential file was read.",
+      "path": "/bench/scenarios/t1552-001-credentials-in-files",
+      "tactic": "credential-access",
+      "technique": "T1552.001",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1552-007-container-api",
+      "name": "Kubernetes token and Docker socket probing",
+      "kind": "attack",
+      "description": "Lists and reads the Kubernetes service account directory /var/run/secrets/kubernetes.io/serviceaccount (the victim image seeds a honey token, real pods get the projected one), checks KUBERNETES_SERVICE_HOST, then probes /var/run/docker.sock and calls the Docker API /containers/json through it with curl --unix-socket. The socket is normally absent; the access attempts are the behavior, so the scenario exits 0 once the token path was opened.",
+      "path": "/bench/scenarios/t1552-007-container-api",
+      "tactic": "credential-access",
+      "technique": "T1552.007",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1611-escape-to-host",
+      "name": "Host filesystem mounted from a privileged container",
+      "kind": "attack",
+      "description": "From the privileged victim, finds the host block device backing /etc/hostname in /proc/self/mountinfo, creates a device node with mknod when /dev does not expose it, and mounts that host filesystem under /tmp/bench-hostfs-<marker>. The mount is read only (ro, or a rw mount of the already mounted superblock immediately remounted bind,ro when the kernel refuses to change the superblock read only state). It lists the host root and Docker container directory, then unmounts and removes everything. It also runs nsenter into the namespaces of PID 1. Nothing is ever written to the host filesystem. Exits 0 when the host filesystem was mounted and listed.",
+      "path": "/bench/scenarios/t1611-escape-to-host",
+      "tactic": "privilege-escalation",
+      "technique": "T1611",
+      "timeout": 60.0,
+      "requires": [
+        "privileged"
+      ]
+    },
+    {
+      "id": "t1613-container-discovery",
+      "name": "Container environment enumeration",
+      "kind": "attack",
+      "description": "Enumerates the container environment the way breakout tooling such as deepce or amicontained does: /.dockerenv, /proc/1/cgroup and /proc/self/cgroup, the cgroup filesystem, /proc/self/mountinfo, the capability sets in /proc/self/status decoded with capsh, seccomp and no_new_privs status, PID 1 command line and container related environment variables.",
+      "path": "/bench/scenarios/t1613-container-discovery",
+      "tactic": "discovery",
+      "technique": "T1613",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1620-fileless-exec",
+      "name": "Fileless execution from memfd_create",
+      "kind": "attack",
+      "description": "A python3 process creates an anonymous memory file with os.memfd_create named bench-memfd-<marker>, copies the /bin/sh binary into it and executes it with os.execve on the file descriptor (execveat with AT_EMPTY_PATH). The executed image has no path on disk (/memfd:bench-memfd-<marker> (deleted)) and runs echo and id.",
+      "path": "/bench/scenarios/t1620-fileless-exec",
+      "tactic": "defense-evasion",
+      "technique": "T1620",
+      "timeout": 30.0,
+      "requires": []
+    }
+  ],
+  "baseline": {
+    "status": "completed",
+    "errors": [],
+    "started_at": 1792744198.4993901,
+    "ended_at": 1792744474.074767
+  },
+  "control": {
+    "tool": "none",
+    "profile": "control",
+    "status": "completed",
+    "error": null,
+    "errors": [],
+    "container_id": null,
+    "started_at": 1792744474.0777974,
+    "container_started_at": null,
+    "ready_at": null,
+    "time_to_ready": null,
+    "workloads_started_at": null,
+    "workloads_ended_at": null,
+    "scenarios_started_at": 1792744476.707931,
+    "scenarios_ended_at": 1792745067.7111912,
+    "ended_at": 1792745075.2364664,
+    "runs": 150,
+    "log_lines": 0,
+    "log_bytes": 0,
+    "alerts_file_lines": 0,
+    "alerts_file_bytes": 0,
+    "alerts": 0,
+    "parse_errors": 0,
+    "cleanup_failures": 0,
+    "enforce": false,
+    "enforcement_verified": null,
+    "enforcement_alerts": 0,
+    "confirmed_enforcements": []
+  },
+  "deployments": {
+    "falco-community": {
+      "tool": "falco",
+      "profile": "community",
+      "status": "completed",
+      "error": null,
+      "errors": [],
+      "container_id": "c112847d3b2c1f45d8a79312f5cd069a9b791b68fa5f8ace0167d22d86dc4867",
+      "started_at": 1792745075.2427979,
+      "container_started_at": 1792745075.932513,
+      "ready_at": 1792745076.8299472,
+      "time_to_ready": 0.8974342346191406,
+      "workloads_started_at": 1792745081.83402,
+      "workloads_ended_at": 1792745359.7944849,
+      "scenarios_started_at": 1792745361.8791869,
+      "scenarios_ended_at": 1792745960.3923628,
+      "ended_at": 1792745968.7615488,
+      "runs": 150,
+      "log_lines": 581,
+      "log_bytes": 713065,
+      "alerts_file_lines": 0,
+      "alerts_file_bytes": 0,
+      "alerts": 486,
+      "parse_errors": 0,
+      "cleanup_failures": 0,
+      "enforce": false,
+      "enforcement_verified": null,
+      "enforcement_alerts": 0,
+      "confirmed_enforcements": []
+    },
+    "tetragon-community": {
+      "tool": "tetragon",
+      "profile": "community",
+      "status": "failed",
+      "error": "ToolStartError: container bench-tool-tetragon-community exited with code 255; last logs:\nlevel=warn msg=\"Unload failed during destroy\" sensor=generic_kprobe error=\"unload of sensor generic_kprobe failed: sensor not loaded\"\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor generic_kprobe\"\nlevel=info msg=\"Sensor unloaded\" sensor=generic_kprobe maps-error=[]\nlevel=info msg=\"Unloading sensor __base__\"\nlevel=info msg=\"Sensor unloaded\" sensor=__base__ maps-error=[]\nlevel=info msg=\"BPF events statistics: 0 received, 0% events loss\"\nlevel=info msg=\"Observer events statistics\" received=0 lost=0 errors=0 filterPass=0 filterDrop=0\nlevel=error msg=\"Failed to execute tetragon\" error=\"sensor generic_kprobe from collection process.credentials.changes.at.syscalls failed to load: tetragon, aborting could not load sensor BPF maps: failed to load map 'kprobe_calls' for sensor 'generic_kprobe': failed to create subbir for 'kprobe_calls': mkdir /run/cilium/bpffs/tetragon/process.credentials.changes.at.syscalls: operation not permitted\"",
+      "errors": [],
+      "container_id": "76d2b589c3323740316d43e374a3d6d995ed92a40f9aa80c9eb522ea9f169057",
+      "started_at": 1792745968.9785643,
+      "container_started_at": 1792745969.8866405,
+      "ready_at": null,
+      "time_to_ready": null,
+      "workloads_started_at": null,
+      "workloads_ended_at": null,
+      "scenarios_started_at": null,
+      "scenarios_ended_at": null,
+      "ended_at": 1792746030.6851263,
+      "runs": 0,
+      "log_lines": 267,
+      "log_bytes": 34613,
+      "alerts_file_lines": 135,
+      "alerts_file_bytes": 115406,
+      "alerts": 0,
+      "parse_errors": 0,
+      "cleanup_failures": 0,
+      "enforce": false,
+      "enforcement_verified": null,
+      "enforcement_alerts": 0,
+      "confirmed_enforcements": []
+    },
+    "kubearmor-community": {
+      "tool": "kubearmor",
+      "profile": "community",
+      "status": "completed",
+      "error": null,
+      "errors": [],
+      "container_id": "1cb447f86a7875860375dd39e99efe9c241e108e2a7a157aed204cad89b95a68",
+      "started_at": 1792746030.6954784,
+      "container_started_at": 1792746031.351765,
+      "ready_at": 1792746037.2776837,
+      "time_to_ready": 5.925918817520142,
+      "workloads_started_at": 1792746042.2813432,
+      "workloads_ended_at": 1792746323.991109,
+      "scenarios_started_at": 1792746325.526234,
+      "scenarios_ended_at": 1792746893.8630092,
+      "ended_at": 1792746908.6136532,
+      "runs": 150,
+      "log_lines": 178,
+      "log_bytes": 22037,
+      "alerts_file_lines": 479345,
+      "alerts_file_bytes": 403201999,
+      "alerts": 8815,
+      "parse_errors": 0,
+      "cleanup_failures": 0,
+      "enforce": false,
+      "enforcement_verified": null,
+      "enforcement_alerts": 0,
+      "confirmed_enforcements": []
+    },
+    "kunai-community": {
+      "tool": "kunai",
+      "profile": "community",
+      "status": "completed",
+      "error": null,
+      "errors": [],
+      "container_id": "2d6a862de5e1e332b076c1191b8e6be8dd4371ee9224717115e721dcd08e8ea5",
+      "started_at": 1792746916.705268,
+      "container_started_at": 1792746917.1453722,
+      "ready_at": 1792746919.4669042,
+      "time_to_ready": 2.3215320110321045,
+      "workloads_started_at": 1792746924.469638,
+      "workloads_ended_at": 1792747203.766664,
+      "scenarios_started_at": 1792747205.245434,
+      "scenarios_ended_at": 1792747775.5142868,
+      "ended_at": 1792747786.6458108,
+      "runs": 150,
+      "log_lines": 8258,
+      "log_bytes": 9435727,
+      "alerts_file_lines": 0,
+      "alerts_file_bytes": 0,
+      "alerts": 8237,
+      "parse_errors": 0,
+      "cleanup_failures": 0,
+      "enforce": false,
+      "enforcement_verified": null,
+      "enforcement_alerts": 0,
+      "confirmed_enforcements": []
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-persistence-boot-or-logon-autostart-execution-kernel-modules-and-extensions"},
+  "spec": {
+    "tags": ["system", "K8s", "T1547", "MITRE"],
+    "message": "Alert! something has been executed related the system boot",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/sbin/modprobe"},
+        {"path": "/usr/sbin/insmod"},
+        {"path": "/usr/sbin/modinfo"},
+        {"path": "/usr/sbin/lsmod"}
+      ],
+      "action": "Audit",
+      "severity": 4
+    }
+  }
+}

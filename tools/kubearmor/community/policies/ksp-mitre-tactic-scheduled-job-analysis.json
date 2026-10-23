@@ -1,0 +1,19 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-scheduled-job-analysis"},
+  "spec": {
+    "tags": ["MITRE", "system", "cron", "T1053"],
+    "message": "“Someone tried to access scheduled job”",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "severity": 7,
+      "matchPaths": [
+        {"path": "/var/spool/cron/atjobs"},
+        {"path": "/var/spool/cron/atspool"},
+        {"path": "/proc/loadavg"},
+        {"path": "/var/run/utmp"}
+      ],
+      "action": "Audit"
+    }
+  }
+}

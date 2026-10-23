@@ -32,7 +32,7 @@ class Adapter(ToolAdapter):
     name = "kubearmor"
     version = "1.7.5"
     image = "kubearmor/kubearmor:v1.7.5"
-    profiles = ("default", "tuned", "enforce")
+    profiles = ("default", "tuned", "enforce", "community")
 
     @staticmethod
     def is_blocked(raw: dict[str, Any]) -> bool:

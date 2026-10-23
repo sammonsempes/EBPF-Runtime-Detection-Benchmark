@@ -1,0 +1,25 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-persistence-createaccount-localaccount"},
+  "spec": {
+    "tags": ["MITRE", "system", "K8s", "T1136"],
+    "message": "Alert! Someone created new user or Accessed user details.",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/sbin/adduser"},
+        {"path": "/usr/sbin/useradd"}
+      ],
+      "severity": 4,
+      "action": "Audit"
+    },
+    "file": {
+      "matchPaths": [
+        {"path": "/etc/passwd"},
+        {"path": "/etc/shadow"}
+      ],
+      "action": "Audit",
+      "severity": 4
+    }
+  }
+}

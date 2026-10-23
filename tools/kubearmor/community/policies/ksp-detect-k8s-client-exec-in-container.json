@@ -1,0 +1,29 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-detect-k8s-client-exec-in-container"},
+  "spec": {
+    "tags": ["MITRE", "T1609", "NIST", "SI-4"],
+    "message": "k8s client execution detected within container!",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "matchPaths": [
+        {"path": "/usr/bin/docker"},
+        {"path": "/usr/bin/cri-ctl"},
+        {"path": "/usr/bin/kubectl"}
+      ],
+      "matchPatterns": [
+        {"pattern": "/*/*/*/kubectl"},
+        {"pattern": "/*/*/kubectl"},
+        {"pattern": "/*/kubectl"},
+        {"pattern": "/*/*/*/cri-ctl"},
+        {"pattern": "/*/*/cri-ctl"},
+        {"pattern": "/*/cri-ctl"},
+        {"pattern": "/*/*/*/docker"},
+        {"pattern": "/*/*/docker"},
+        {"pattern": "/*/docker"}
+      ],
+      "action": "Audit",
+      "severity": 4
+    }
+  }
+}

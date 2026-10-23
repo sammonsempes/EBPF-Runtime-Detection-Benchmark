@@ -1,0 +1,23 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-persistence-external-remote-services"},
+  "spec": {
+    "tags": ["MITRE", "system", "K8s", "T1133"],
+    "message": "Warning! someone tried to access This sensitive file",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "matchPaths": [
+        {"path": "/var/log/wtmp"},
+        {"path": "/var/run/utmp"},
+        {"path": "/var/log/auth.log"},
+        {"path": "/etc/passwd"},
+        {"path": "/etc/shadow"}
+      ],
+      "matchDirectories": [
+        {"dir": "/etc/ssh/"}
+      ],
+      "severity": 3,
+      "action": "Audit"
+    }
+  }
+}

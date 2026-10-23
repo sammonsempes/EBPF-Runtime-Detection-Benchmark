@@ -120,10 +120,10 @@ def test_non_alert_lines(adapter: Adapter) -> None:
 
 
 def test_profiles(adapter: Adapter) -> None:
-    assert adapter.profiles == ("default", "tuned", "enforce")
+    assert adapter.profiles == ("default", "tuned", "enforce", "community")
 
 
-@pytest.mark.parametrize("profile", ["default", "tuned", "enforce"])
+@pytest.mark.parametrize("profile", ["default", "tuned", "enforce", "community"])
 def test_container_spec(adapter: Adapter, profile: str, tmp_path: Path) -> None:
     root = Path("/srv/bench")
     spec = adapter.container_spec(root, profile, tmp_path)
@@ -151,3 +151,31 @@ def test_profiles_exist(adapter: Adapter) -> None:
         assert (adapter.config_dir(repo, profile) / "config.yaml").is_file()
     assert (adapter.config_dir(repo, "tuned") / "rules.yaml").is_file()
     assert (adapter.config_dir(repo, "enforce") / "rules.yaml").is_file()
+
+
+def test_community_sources_pinned(adapter: Adapter) -> None:
+    repo = Path(__file__).resolve().parents[2]
+    community = adapter.config_dir(repo, "community")
+    if not community.is_dir():
+        pytest.skip("tools directory not available")
+    pinned = re.compile(r"https://raw\.githubusercontent\.com/kunai-project/community-rules/[0-9a-f]{40}/\S+")
+    entries = [line.split() for line in (community / "sources.txt").read_text().splitlines() if line.strip()]
+    assert entries
+    for checksum, url, dest in entries:
+        assert re.fullmatch(r"[0-9a-f]{64}", checksum)
+        assert pinned.fullmatch(url)
+    config = (community / "config.yaml").read_text()
+    assert "    - /etc/kunai/rules\n" in config
+    default = (adapter.config_dir(repo, "default") / "config.yaml").read_text()
+    assert config == default.replace("  rules: []\n", "  rules:\n    - /etc/kunai/rules\n")
+
+
+def test_community_rules_fetched(adapter: Adapter) -> None:
+    repo = Path(__file__).resolve().parents[2]
+    community = adapter.config_dir(repo, "community")
+    if not (community / "sources.txt").is_file():
+        pytest.skip("tools directory not available")
+    entries = [line.split() for line in (community / "sources.txt").read_text().splitlines() if line.strip()]
+    if not all((community / dest).is_file() for _, _, dest in entries):
+        pytest.skip("community rules not fetched, run docker compose up community-rules")
+    assert (community / "rules" / "00-dependencies.kun").is_file()

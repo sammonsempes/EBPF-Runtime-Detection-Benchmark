@@ -1,0 +1,5 @@
+24b78fa338c4cbfbfdea857d838a4a7069cc1e907b3d14873818ec4babd94749 https://raw.githubusercontent.com/kunai-project/community-rules/9a2e1640781b6562eecbe8767a4cf6e6c638283a/00-dependencies.kun rules/00-dependencies.kun
+b5565416ec4a30de0318eb8372f4e1cb1e49bc942c9eb8f7750810ed751ca841 https://raw.githubusercontent.com/kunai-project/community-rules/9a2e1640781b6562eecbe8767a4cf6e6c638283a/50-detections.kun rules/50-detections.kun
+8f16613f7a4e12fd237724c5008e6b6ccc0213ab45e517c3aa22c9e81c6cd501 https://raw.githubusercontent.com/kunai-project/community-rules/9a2e1640781b6562eecbe8767a4cf6e6c638283a/60-low-detections.kun rules/60-low-detections.kun
+fb64e49e24ec438c846f19695e9b1e814001b18444e62359aa72192a20afe2b2 https://raw.githubusercontent.com/kunai-project/community-rules/9a2e1640781b6562eecbe8767a4cf6e6c638283a/90-heuristics.kun rules/90-heuristics.kun
+f3c33a695ef21e2008142662a425b5b5a4f4e49352185e4c886d441f36f9a3c2 https://raw.githubusercontent.com/kunai-project/community-rules/9a2e1640781b6562eecbe8767a4cf6e6c638283a/templates.yaml rules/templates.yaml

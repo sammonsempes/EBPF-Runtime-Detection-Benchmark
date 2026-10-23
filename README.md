@@ -20,16 +20,17 @@ The goal is to provide transparent, vendor-neutral results that help security te
 
 | Tool | Version | Profiles | Can block |
 |---|---|---|---|
-| [Falco](https://github.com/falcosecurity/falco) | 0.45.0 | default, tuned | no |
-| [Tetragon](https://github.com/cilium/tetragon) | 1.7.1 | default, tuned, enforce | yes (Sigkill) |
+| [Falco](https://github.com/falcosecurity/falco) | 0.45.0 | default, tuned, community | no |
+| [Tetragon](https://github.com/cilium/tetragon) | 1.7.1 | default, tuned, enforce, community | yes (Sigkill) |
 | [Tracee](https://github.com/aquasecurity/tracee) | 0.24.1 | default, tuned | no |
-| [KubeArmor](https://github.com/kubearmor/KubeArmor) | 1.7.5 | default, tuned, enforce | yes (BPF-LSM) |
-| [Kunai](https://github.com/kunai-project/kunai) | 0.6.2 | default, tuned, enforce | kill after the event (asynchronous) |
+| [KubeArmor](https://github.com/kubearmor/KubeArmor) | 1.7.5 | default, tuned, enforce, community | yes (BPF-LSM) |
+| [Kunai](https://github.com/kunai-project/kunai) | 0.6.2 | default, tuned, enforce, community | kill after the event (asynchronous) |
 | [Pulsar](https://github.com/exein-io/pulsar) | 0.10.1 | default, tuned | no |
 
 - **default**: what an operator gets out of the box (upstream configuration and rules). Kunai ships no detection rules, so its default profile detects nothing by design.
 - **tuned**: default plus rules written for the behaviors of the scenario catalog. They target behaviors, never benchmark-specific tokens, but they were written knowing the scenarios: see [Limitations](#limitations).
 - **enforce**: tuned rules with the tool's blocking action on malicious behaviors only.
+- **community**: default plus the optional rule set published by the project itself, verbatim, where one exists.
 
 Each tool's deployment, profiles and alert definition are documented in `tools/<tool>/README.md`.
 
@@ -77,6 +78,27 @@ Reading notes:
 - Out of the box, Falco and Tetragon cover 11 of 24 techniques, Tracee 5, Pulsar 4, Kunai none.
 
 Per-scenario coverage, the rules that matched, and the rules behind each false positive are in the [full report](results/20261022T204058Z/report.md#coverage-matrix).
+
+### Community rule sets
+
+The `community` profile is the default profile plus the optional rule set each project publishes itself, loaded verbatim and pinned to a commit (`tools/<tool>/community/sources.txt`, sha256-checked by `docker compose up community-rules`). It shows what an operator gets by enabling the project's extra rules without writing any.
+
+| Tool | Community source | Recall | FP rate | Median latency |
+|---|---|---|---|---|
+| Falco | `falcosecurity/rules` 5.2.0: incubating (31 rules) and sandbox (39 rules, 14 disabled upstream) | 79.2% (default 45.8%) | 66.7% (default 16.7%) | 0.005 s |
+| KubeArmor | `kubearmor/policy-templates`: 47 MITRE container templates, converted to Audit | 91.7% (default 91.7%) | 100.0% (default 100.0%) | 0.082 s |
+| Kunai | `kunai-project/community-rules`, branch `kunai-v0.5`: 22 detection rules | 20.8% (default 0.0%) | 0.0% | 0.103 s |
+| Tetragon | `cilium/tetragon` v1.7.1 examples: 6 extra observability policies | 100.0% (default 45.8%) | 100.0% (default 16.7%) | 0.105 s |
+| Tracee, Pulsar | none published for the pinned versions | — | — | — |
+
+- **Falco** gains 8 techniques, mostly persistence, cron and SSH keys, but 4 of the 6 benign scenarios now alert (package manager, file download tools, `/proc` environment reads, new binary executed).
+- **Kunai**'s community rules target specific tradecraft (perfctl, BPFDoor: tmpfs execution, memfd, droppers, miners). They catch 5 techniques with no false positive.
+- **KubeArmor** templates are broad (shell, `ps`, `id`, `/var/log` writes): they add alerts, not coverage.
+- **Tetragon**'s 100% only means that `process-exec-elf-begin` (every exec), `process-creds-changed` and `creds-capability-checks` report generic activity (1.2 million alerts in one run): every scenario, benign or not, is "detected". It is telemetry, not detection.
+- Excluded upstream files and the reasons (load failures on this kernel, duplicate names, cluster-specific placeholders) are listed in each `tools/<tool>/README.md`.
+- The Kunai community repository has no license, so its rule files are not redistributed here: `docker compose up community-rules` downloads them.
+
+These come from two later runs on the same host, [`20261023T082958Z`](results/20261023T082958Z/report.md) (Falco, KubeArmor, Kunai) and [`20261023T093007Z`](results/20261023T093007Z/report.md) (Tetragon, after excluding a policy that failed to load), each with its own control phase where all 30 scenarios were valid. The host was noticeably busier during their baselines (`exec` baseline 589 execs/s versus 2,188 in the main run, with negative overheads as a result), so their overhead numbers are not reliable and are not reported here.
 
 ### Response effectiveness
 

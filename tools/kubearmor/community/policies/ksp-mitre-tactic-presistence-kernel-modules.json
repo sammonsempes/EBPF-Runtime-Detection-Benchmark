@@ -1,0 +1,18 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-presistence-kernel-modules"},
+  "spec": {
+    "tags": ["MITRE", "T1547.006"],
+    "message": "Modify the Kernel to Automatically Execute Programs on System Boot",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "severity": 6,
+      "matchPaths": [
+        {"path": "/usr/sbin/insmod"},
+        {"path": "/usr/sbin/modprobe"},
+        {"path": "/usr/sbin/rmmod"}
+      ],
+      "action": "Audit"
+    }
+  }
+}

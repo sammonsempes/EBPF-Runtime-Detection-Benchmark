@@ -36,7 +36,7 @@ def _strip_scheme(value: str | None) -> str | None:
 class Adapter(ToolAdapter):
     name = "tetragon"
     version = VERSION
-    profiles = ("default", "tuned", "enforce")
+    profiles = ("default", "tuned", "enforce", "community")
 
     @staticmethod
     def export_file(profile: str) -> str:

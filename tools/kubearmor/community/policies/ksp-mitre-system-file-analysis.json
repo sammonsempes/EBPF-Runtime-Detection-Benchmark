@@ -1,0 +1,17 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-system-file-analysis"},
+  "spec": {
+    "tags": ["MITRE", "system", "T1003"],
+    "message": "“Suspicious! Someone Tried to Access the System User files”",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "severity": 7,
+      "matchPaths": [
+        {"path": "/etc/passwd"},
+        {"path": "/etc/shadow"}
+      ],
+      "action": "Audit"
+    }
+  }
+}

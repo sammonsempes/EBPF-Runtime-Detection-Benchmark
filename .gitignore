@@ -5,6 +5,7 @@ __pycache__/
 .venv/
 results/*/raw/
 results/*/alerts/
+tools/kunai/community/rules/
 compose.override.yaml
 runner/certs/*
 !runner/certs/.gitkeep

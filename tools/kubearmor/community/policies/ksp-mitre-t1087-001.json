@@ -1,0 +1,25 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-t1087-001"},
+  "spec": {
+    "tags": ["MITRE", "T1087.001", "DISCOVERY"],
+    "message": "Someone Tried to Access Local User Account Details",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "process": {
+      "severity": 5,
+      "matchPaths": [
+        {"path": "/usr/bin/id"},
+        {"path": "/usr/bin/groups"},
+        {"path": "/usr/bin/net"},
+        {"path": "/usr/bin/finger"},
+        {"path": "/usr/bin/getent"},
+        {"path": "/usr/bin/lslogins"},
+        {"path": "/usr/bin/users"},
+        {"path": "/usr/bin/w"},
+        {"path": "/usr/bin/last"},
+        {"path": "/usr/bin/lastlog"}
+      ],
+      "action": "Audit"
+    }
+  }
+}

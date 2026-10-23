@@ -1,0 +1,18 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-impair-defence"},
+  "spec": {
+    "tags": ["MITRE", "T1562"],
+    "message": "Selinux Files Accessed by Unknown Process",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "severity": 6,
+      "matchPaths": [
+        {"path": "/etc/selinux/semanage.conf"},
+        {"path": "/etc/sysconfig/selinux"},
+        {"path": "/etc/apparmor.d"}
+      ],
+      "action": "Audit"
+    }
+  }
+}

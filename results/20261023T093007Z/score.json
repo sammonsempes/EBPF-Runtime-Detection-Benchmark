@@ -1,0 +1,4569 @@
+{
+  "baseline": {
+    "exec": {
+      "execs_per_sec": 2030.666,
+      "p50_us": 463.384,
+      "p99_us": 1105.41
+    },
+    "fileio": {
+      "ops_per_sec": 593.061,
+      "p50_us": 1547.317,
+      "p99_us": 3518.132
+    },
+    "syscall": {
+      "connect_ops_per_sec": 68410.931,
+      "connect_p50_ns": 5527.0,
+      "connect_p99_ns": 21276.0,
+      "getpid_ops_per_sec": 7003014.436,
+      "getpid_p50_ns": 87.0,
+      "getpid_p99_ns": 178.0,
+      "openat_ops_per_sec": 671100.941,
+      "openat_p50_ns": 1018.0,
+      "openat_p99_ns": 2508.0,
+      "read_ops_per_sec": 4616471.38,
+      "read_p50_ns": 156.0,
+      "read_p99_ns": 226.0,
+      "stat_ops_per_sec": 2303576.55,
+      "stat_p50_ns": 346.0,
+      "stat_p99_ns": 528.0
+    }
+  },
+  "control": {
+    "available": true,
+    "invalid_scenarios": [],
+    "scenarios": {
+      "benign-admin-commands": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "benign",
+        "repetitions": 5,
+        "valid": true
+      },
+      "benign-backup": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "benign",
+        "repetitions": 5,
+        "valid": true
+      },
+      "benign-compile": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "benign",
+        "repetitions": 5,
+        "valid": true
+      },
+      "benign-log-rotation": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "benign",
+        "repetitions": 5,
+        "valid": true
+      },
+      "benign-package-query": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "benign",
+        "repetitions": 5,
+        "valid": true
+      },
+      "benign-web-server": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "benign",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1003-008-shadow-read": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1036-005-masquerading": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1046-network-scan": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1048-exfiltration-http": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1053-003-cron-persistence": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1059-004-reverse-shell": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1059-006-python-exec": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1070-002-clear-logs": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1070-003-clear-history": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1082-system-discovery": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1098-004-ssh-authorized-keys": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1105-ingress-tool-transfer": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1136-001-create-account": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1222-002-permission-modification": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1485-data-destruction": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1496-cryptominer": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1543-002-systemd-service": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1547-006-kernel-module": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1548-001-setuid-binary": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1552-001-credentials-in-files": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1552-007-container-api": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1611-escape-to-host": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1613-container-discovery": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      },
+      "t1620-fileless-exec": {
+        "action_timestamps": 5,
+        "effect_achieved": 5,
+        "effect_not_achieved": 0,
+        "effect_unknown": 0,
+        "failed_executions": 0,
+        "kind": "attack",
+        "repetitions": 5,
+        "valid": true
+      }
+    },
+    "status": "completed",
+    "unknown_scenarios": [],
+    "valid_scenarios": [
+      "benign-admin-commands",
+      "benign-backup",
+      "benign-compile",
+      "benign-log-rotation",
+      "benign-package-query",
+      "benign-web-server",
+      "t1003-008-shadow-read",
+      "t1036-005-masquerading",
+      "t1046-network-scan",
+      "t1048-exfiltration-http",
+      "t1053-003-cron-persistence",
+      "t1059-004-reverse-shell",
+      "t1059-006-python-exec",
+      "t1070-002-clear-logs",
+      "t1070-003-clear-history",
+      "t1082-system-discovery",
+      "t1098-004-ssh-authorized-keys",
+      "t1105-ingress-tool-transfer",
+      "t1136-001-create-account",
+      "t1222-002-permission-modification",
+      "t1485-data-destruction",
+      "t1496-cryptominer",
+      "t1543-002-systemd-service",
+      "t1547-006-kernel-module",
+      "t1548-001-setuid-binary",
+      "t1552-001-credentials-in-files",
+      "t1552-007-container-api",
+      "t1611-escape-to-host",
+      "t1613-container-discovery",
+      "t1620-fileless-exec"
+    ]
+  },
+  "grace_seconds": 10,
+  "run_id": "20261023T093007Z",
+  "scenarios": {
+    "benign-admin-commands": {
+      "kind": "benign",
+      "name": "Routine administration commands",
+      "requires": [],
+      "tactic": null,
+      "technique": null
+    },
+    "benign-backup": {
+      "kind": "benign",
+      "name": "Data directory backup with tar",
+      "requires": [],
+      "tactic": null,
+      "technique": null
+    },
+    "benign-compile": {
+      "kind": "benign",
+      "name": "Compile and run a C program",
+      "requires": [],
+      "tactic": null,
+      "technique": null
+    },
+    "benign-log-rotation": {
+      "kind": "benign",
+      "name": "Application log rotation with logrotate",
+      "requires": [],
+      "tactic": null,
+      "technique": null
+    },
+    "benign-package-query": {
+      "kind": "benign",
+      "name": "Installed package queries",
+      "requires": [],
+      "tactic": null,
+      "technique": null
+    },
+    "benign-web-server": {
+      "kind": "benign",
+      "name": "Local Python web server queried with curl",
+      "requires": [],
+      "tactic": null,
+      "technique": null
+    },
+    "t1003-008-shadow-read": {
+      "kind": "attack",
+      "name": "Read /etc/shadow",
+      "requires": [],
+      "tactic": "credential-access",
+      "technique": "T1003.008"
+    },
+    "t1036-005-masquerading": {
+      "kind": "attack",
+      "name": "Binary masquerading as sshd in a hidden directory",
+      "requires": [],
+      "tactic": "defense-evasion",
+      "technique": "T1036.005"
+    },
+    "t1046-network-scan": {
+      "kind": "attack",
+      "name": "TCP port scan of the attacker with netcat",
+      "requires": [
+        "attacker"
+      ],
+      "tactic": "discovery",
+      "technique": "T1046"
+    },
+    "t1048-exfiltration-http": {
+      "kind": "attack",
+      "name": "Sensitive files archived and posted over HTTP",
+      "requires": [
+        "attacker"
+      ],
+      "tactic": "exfiltration",
+      "technique": "T1048"
+    },
+    "t1053-003-cron-persistence": {
+      "kind": "attack",
+      "name": "Cron job dropped in /etc/cron.d",
+      "requires": [],
+      "tactic": "persistence",
+      "technique": "T1053.003"
+    },
+    "t1059-004-reverse-shell": {
+      "kind": "attack",
+      "name": "Reverse shell with bash /dev/tcp",
+      "requires": [
+        "attacker"
+      ],
+      "tactic": "execution",
+      "technique": "T1059.004"
+    },
+    "t1059-006-python-exec": {
+      "kind": "attack",
+      "name": "Python inline code spawning a shell",
+      "requires": [],
+      "tactic": "execution",
+      "technique": "T1059.006"
+    },
+    "t1070-002-clear-logs": {
+      "kind": "attack",
+      "name": "System logs truncated under /var/log",
+      "requires": [],
+      "tactic": "defense-evasion",
+      "technique": "T1070.002"
+    },
+    "t1070-003-clear-history": {
+      "kind": "attack",
+      "name": "Shell history cleared",
+      "requires": [],
+      "tactic": "defense-evasion",
+      "technique": "T1070.003"
+    },
+    "t1082-system-discovery": {
+      "kind": "attack",
+      "name": "System information discovery",
+      "requires": [],
+      "tactic": "discovery",
+      "technique": "T1082"
+    },
+    "t1098-004-ssh-authorized-keys": {
+      "kind": "attack",
+      "name": "SSH key appended to root authorized_keys",
+      "requires": [],
+      "tactic": "persistence",
+      "technique": "T1098.004"
+    },
+    "t1105-ingress-tool-transfer": {
+      "kind": "attack",
+      "name": "Download and execute a script with curl",
+      "requires": [
+        "attacker"
+      ],
+      "tactic": "command-and-control",
+      "technique": "T1105"
+    },
+    "t1136-001-create-account": {
+      "kind": "attack",
+      "name": "Local account created with useradd",
+      "requires": [],
+      "tactic": "persistence",
+      "technique": "T1136.001"
+    },
+    "t1222-002-permission-modification": {
+      "kind": "attack",
+      "name": "World writable /etc/shadow",
+      "requires": [],
+      "tactic": "defense-evasion",
+      "technique": "T1222.002"
+    },
+    "t1485-data-destruction": {
+      "kind": "attack",
+      "name": "Files shredded and deleted",
+      "requires": [],
+      "tactic": "impact",
+      "technique": "T1485"
+    },
+    "t1496-cryptominer": {
+      "kind": "attack",
+      "name": "Simulated xmrig miner talking stratum",
+      "requires": [
+        "attacker"
+      ],
+      "tactic": "impact",
+      "technique": "T1496"
+    },
+    "t1543-002-systemd-service": {
+      "kind": "attack",
+      "name": "Systemd service unit created and enabled",
+      "requires": [],
+      "tactic": "persistence",
+      "technique": "T1543.002"
+    },
+    "t1547-006-kernel-module": {
+      "kind": "attack",
+      "name": "Kernel module load attempt with insmod",
+      "requires": [
+        "privileged"
+      ],
+      "tactic": "persistence",
+      "technique": "T1547.006"
+    },
+    "t1548-001-setuid-binary": {
+      "kind": "attack",
+      "name": "Setuid copy of a binary",
+      "requires": [],
+      "tactic": "privilege-escalation",
+      "technique": "T1548.001"
+    },
+    "t1552-001-credentials-in-files": {
+      "kind": "attack",
+      "name": "Credential files searched and read",
+      "requires": [],
+      "tactic": "credential-access",
+      "technique": "T1552.001"
+    },
+    "t1552-007-container-api": {
+      "kind": "attack",
+      "name": "Kubernetes token and Docker socket probing",
+      "requires": [],
+      "tactic": "credential-access",
+      "technique": "T1552.007"
+    },
+    "t1611-escape-to-host": {
+      "kind": "attack",
+      "name": "Host filesystem mounted from a privileged container",
+      "requires": [
+        "privileged"
+      ],
+      "tactic": "privilege-escalation",
+      "technique": "T1611"
+    },
+    "t1613-container-discovery": {
+      "kind": "attack",
+      "name": "Container environment enumeration",
+      "requires": [],
+      "tactic": "discovery",
+      "technique": "T1613"
+    },
+    "t1620-fileless-exec": {
+      "kind": "attack",
+      "name": "Fileless execution from memfd_create",
+      "requires": [],
+      "tactic": "defense-evasion",
+      "technique": "T1620"
+    }
+  },
+  "tools": {
+    "tetragon": {
+      "error": null,
+      "profiles": {
+        "community": {
+          "enforce": false,
+          "operational": {
+            "alerts": 1206237,
+            "alerts_per_minute": 33545.291619,
+            "attributed_share": 0.024756,
+            "container_identity_share": 0.718095,
+            "duration_seconds": 2157.507552,
+            "log_bytes": 1807762934,
+            "log_bytes_per_minute": 50273648.379146,
+            "log_lines": 1452961,
+            "log_lines_per_minute": 40406.653466,
+            "status": "completed",
+            "time_to_ready": 20.839737
+          },
+          "overhead": {
+            "available": true,
+            "cpu_percent": {
+              "max": 318.307179,
+              "median": 15.427148,
+              "samples": 261
+            },
+            "host_cpu_baseline": {
+              "max": 30.317848,
+              "median": 12.969849,
+              "samples": 270
+            },
+            "host_cpu_delta_pp": 3.96867,
+            "host_cpu_percent": {
+              "max": 62.641509,
+              "median": 16.938519,
+              "samples": 277
+            },
+            "latency_overhead_percent": 7.38635,
+            "memory_mib": {
+              "max": 2861.339844,
+              "median": 478.763672,
+              "samples": 270
+            },
+            "overall_overhead_percent": 0.5544,
+            "repetitions": 9,
+            "syscall_latency_overhead_percent": 7.38635,
+            "throughput_overhead_percent": 0.5544,
+            "workloads": {
+              "exec": {
+                "execs_per_sec": {
+                  "baseline": 2030.666,
+                  "delta": -0.388511,
+                  "direction": "lower_is_worse",
+                  "overhead_percent": 38.8511,
+                  "value": 1241.729
+                },
+                "p50_us": {
+                  "baseline": 463.384,
+                  "delta": 0.5045,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": 50.45,
+                  "value": 697.161
+                },
+                "p99_us": {
+                  "baseline": 1105.41,
+                  "delta": 0.760904,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": 76.0904,
+                  "value": 1946.521
+                }
+              },
+              "fileio": {
+                "ops_per_sec": {
+                  "baseline": 593.061,
+                  "delta": 0.020935,
+                  "direction": "lower_is_worse",
+                  "overhead_percent": -2.0935,
+                  "value": 605.477
+                },
+                "p50_us": {
+                  "baseline": 1547.317,
+                  "delta": -0.019423,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": -1.9423,
+                  "value": 1517.263
+                },
+                "p99_us": {
+                  "baseline": 3518.132,
+                  "delta": -0.045417,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": -4.5417,
+                  "value": 3358.35
+                }
+              },
+              "syscall": {
+                "connect_ops_per_sec": {
+                  "baseline": 68410.931,
+                  "delta": -0.533965,
+                  "direction": "lower_is_worse",
+                  "overhead_percent": 53.3965,
+                  "value": 31881.881
+                },
+                "connect_p50_ns": {
+                  "baseline": 5527.0,
+                  "delta": 0.631446,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": 63.1446,
+                  "value": 9017.0
+                },
+                "connect_p99_ns": {
+                  "baseline": 21276.0,
+                  "delta": 3.1395,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": 313.95,
+                  "value": 88072.0
+                },
+                "getpid_ops_per_sec": {
+                  "baseline": 7003014.436,
+                  "delta": 0.012801,
+                  "direction": "lower_is_worse",
+                  "overhead_percent": -1.2801,
+                  "value": 7092657.927
+                },
+                "getpid_p50_ns": {
+                  "baseline": 87.0,
+                  "delta": 0.0,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": 0.0,
+                  "value": 87.0
+                },
+                "getpid_p99_ns": {
+                  "baseline": 178.0,
+                  "delta": -0.005618,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": -0.5618,
+                  "value": 177.0
+                },
+                "openat_ops_per_sec": {
+                  "baseline": 671100.941,
+                  "delta": 0.071985,
+                  "direction": "lower_is_worse",
+                  "overhead_percent": -7.1985,
+                  "value": 719410.084
+                },
+                "openat_p50_ns": {
+                  "baseline": 1018.0,
+                  "delta": -0.011788,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": -1.1788,
+                  "value": 1006.0
+                },
+                "openat_p99_ns": {
+                  "baseline": 2508.0,
+                  "delta": -0.107656,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": -10.7656,
+                  "value": 2238.0
+                },
+                "read_ops_per_sec": {
+                  "baseline": 4616471.38,
+                  "delta": -0.877213,
+                  "direction": "lower_is_worse",
+                  "overhead_percent": 87.7213,
+                  "value": 566844.9
+                },
+                "read_p50_ns": {
+                  "baseline": 156.0,
+                  "delta": 8.891026,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": 889.1026,
+                  "value": 1543.0
+                },
+                "read_p99_ns": {
+                  "baseline": 226.0,
+                  "delta": 9.345133,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": 934.5133,
+                  "value": 2338.0
+                },
+                "stat_ops_per_sec": {
+                  "baseline": 2303576.55,
+                  "delta": -0.005544,
+                  "direction": "lower_is_worse",
+                  "overhead_percent": 0.5544,
+                  "value": 2290806.402
+                },
+                "stat_p50_ns": {
+                  "baseline": 346.0,
+                  "delta": -0.00578,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": -0.578,
+                  "value": 344.0
+                },
+                "stat_p99_ns": {
+                  "baseline": 528.0,
+                  "delta": 0.147727,
+                  "direction": "higher_is_worse",
+                  "overhead_percent": 14.7727,
+                  "value": 606.0
+                }
+              }
+            }
+          },
+          "scenarios": {
+            "benign-admin-commands": {
+              "action_timestamps": 5,
+              "alerts": 160,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "false_positives": 5,
+              "kind": "benign",
+              "latencies": [
+                0.024987,
+                0.126041,
+                0.042209,
+                0.172666,
+                0.14587
+              ],
+              "latency_median": 0.126041,
+              "latency_p95": 0.167307,
+              "name": "Routine administration commands",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 40,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.024987,
+                  "latency_reference": "action",
+                  "marker": "e1feb0253940",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 30,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.126041,
+                  "latency_reference": "action",
+                  "marker": "02934caf8b81",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 30,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.042209,
+                  "latency_reference": "action",
+                  "marker": "baad92d103a8",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 30,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.172666,
+                  "latency_reference": "action",
+                  "marker": "4a17920896d9",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 30,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.14587,
+                  "latency_reference": "action",
+                  "marker": "91f059b08638",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": null,
+              "technique": null,
+              "valid": true
+            },
+            "benign-backup": {
+              "action_timestamps": 5,
+              "alerts": 185,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "false_positives": 5,
+              "kind": "benign",
+              "latencies": [
+                0.15718,
+                0.075273,
+                0.16183,
+                0.114919,
+                0.073627
+              ],
+              "latency_median": 0.114919,
+              "latency_p95": 0.1609,
+              "name": "Data directory backup with tar",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 41,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.15718,
+                  "latency_reference": "action",
+                  "marker": "7d0b8caf499f",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 36,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.075273,
+                  "latency_reference": "action",
+                  "marker": "ecb03c37a64e",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 36,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.16183,
+                  "latency_reference": "action",
+                  "marker": "362d785796b3",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 36,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.114919,
+                  "latency_reference": "action",
+                  "marker": "f518d6ffe559",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 36,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.073627,
+                  "latency_reference": "action",
+                  "marker": "26d0d07afaef",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": null,
+              "technique": null,
+              "valid": true
+            },
+            "benign-compile": {
+              "action_timestamps": 5,
+              "alerts": 174,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 1,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "false_positives": 5,
+              "kind": "benign",
+              "latencies": [
+                0.100906,
+                -0.004233,
+                0.096701,
+                0.107087,
+                0.039309
+              ],
+              "latency_median": 0.096701,
+              "latency_p95": 0.105851,
+              "name": "Compile and run a C program",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 38,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.100906,
+                  "latency_reference": "action",
+                  "marker": "1f95052f4510",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 34,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.004233,
+                  "latency_reference": "action",
+                  "marker": "455833d09a91",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 34,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.096701,
+                  "latency_reference": "action",
+                  "marker": "8d63499908a3",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 34,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.107087,
+                  "latency_reference": "action",
+                  "marker": "c54c553e8884",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 34,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.039309,
+                  "latency_reference": "action",
+                  "marker": "31926498773e",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": null,
+              "technique": null,
+              "valid": true
+            },
+            "benign-log-rotation": {
+              "action_timestamps": 5,
+              "alerts": 4193,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "false_positives": 5,
+              "kind": "benign",
+              "latencies": [
+                0.175002,
+                0.039516,
+                0.081734,
+                0.158273,
+                0.10884
+              ],
+              "latency_median": 0.10884,
+              "latency_p95": 0.171656,
+              "name": "Application log rotation with logrotate",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 841,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.175002,
+                  "latency_reference": "action",
+                  "marker": "102dfcb38a80",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 838,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.039516,
+                  "latency_reference": "action",
+                  "marker": "373ab55def25",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 838,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.081734,
+                  "latency_reference": "action",
+                  "marker": "00dc4cd8e8a3",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 838,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.158273,
+                  "latency_reference": "action",
+                  "marker": "13d251eb6543",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 838,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.10884,
+                  "latency_reference": "action",
+                  "marker": "5cc23c0b4eaf",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": null,
+              "technique": null,
+              "valid": true
+            },
+            "benign-package-query": {
+              "action_timestamps": 5,
+              "alerts": 217,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 1,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "false_positives": 5,
+              "kind": "benign",
+              "latencies": [
+                0.134738,
+                -0.003644,
+                0.0453,
+                0.11046,
+                0.063917
+              ],
+              "latency_median": 0.063917,
+              "latency_p95": 0.129882,
+              "name": "Installed package queries",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 45,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.134738,
+                  "latency_reference": "action",
+                  "marker": "5cc1c2a72708",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 43,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.003644,
+                  "latency_reference": "action",
+                  "marker": "cd7d929bb8c1",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 43,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.0453,
+                  "latency_reference": "action",
+                  "marker": "e7c6785c77f0",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 43,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.11046,
+                  "latency_reference": "action",
+                  "marker": "2d9f7ca55863",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 43,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.063917,
+                  "latency_reference": "action",
+                  "marker": "25461675bb9b",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": null,
+              "technique": null,
+              "valid": true
+            },
+            "benign-web-server": {
+              "action_timestamps": 5,
+              "alerts": 268,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "false_positives": 5,
+              "kind": "benign",
+              "latencies": [
+                0.143307,
+                0.156805,
+                0.159235,
+                0.045379,
+                0.16226
+              ],
+              "latency_median": 0.156805,
+              "latency_p95": 0.161655,
+              "name": "Local Python web server queried with curl",
+              "repetitions": 5,
+              "rules": [
+                "accept",
+                "connect",
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 56,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.143307,
+                  "latency_reference": "action",
+                  "marker": "0b9e59601f53",
+                  "repetition": 0,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 53,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.156805,
+                  "latency_reference": "action",
+                  "marker": "3deb6d496809",
+                  "repetition": 1,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 53,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.159235,
+                  "latency_reference": "action",
+                  "marker": "852bb17333a2",
+                  "repetition": 2,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 53,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.045379,
+                  "latency_reference": "action",
+                  "marker": "6a58f11983b4",
+                  "repetition": 3,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 53,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.16226,
+                  "latency_reference": "action",
+                  "marker": "a55875d24c6a",
+                  "repetition": 4,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": null,
+              "technique": null,
+              "valid": true
+            },
+            "t1003-008-shadow-read": {
+              "action_timestamps": 5,
+              "alerts": 156,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.007701,
+                0.131363,
+                0.095531,
+                0.030898,
+                0.042905
+              ],
+              "latency_median": 0.042905,
+              "latency_p95": 0.124197,
+              "name": "Read /etc/shadow",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 32,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.007701,
+                  "latency_reference": "action",
+                  "marker": "4ea3e6ad5830",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 31,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.131363,
+                  "latency_reference": "action",
+                  "marker": "ee1413d7a20a",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 31,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.095531,
+                  "latency_reference": "action",
+                  "marker": "bd9a0d2470c9",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 31,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.030898,
+                  "latency_reference": "action",
+                  "marker": "cb9a0c71a904",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 31,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.042905,
+                  "latency_reference": "action",
+                  "marker": "0c775cfbd866",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "credential-access",
+              "technique": "T1003.008",
+              "valid": true
+            },
+            "t1036-005-masquerading": {
+              "action_timestamps": 5,
+              "alerts": 105,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.188353,
+                0.083291,
+                0.046143,
+                0.031565,
+                0.030723
+              ],
+              "latency_median": 0.046143,
+              "latency_p95": 0.167341,
+              "name": "Binary masquerading as sshd in a hidden directory",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 21,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.188353,
+                  "latency_reference": "action",
+                  "marker": "0b1be1183931",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 21,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.083291,
+                  "latency_reference": "action",
+                  "marker": "8f6c462adcbd",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 21,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.046143,
+                  "latency_reference": "action",
+                  "marker": "f7e08a9e7964",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 21,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.031565,
+                  "latency_reference": "action",
+                  "marker": "9cfdd61fdf88",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 21,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.030723,
+                  "latency_reference": "action",
+                  "marker": "532ac01c900e",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "defense-evasion",
+              "technique": "T1036.005",
+              "valid": true
+            },
+            "t1046-network-scan": {
+              "action_timestamps": 5,
+              "alerts": 18547,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.108304,
+                0.0228,
+                0.173652,
+                0.144945,
+                0.054347
+              ],
+              "latency_median": 0.108304,
+              "latency_p95": 0.167911,
+              "name": "TCP port scan of the attacker with netcat",
+              "repetitions": 5,
+              "rules": [
+                "accept",
+                "connect",
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 3711,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.108304,
+                  "latency_reference": "action",
+                  "marker": "b13f156869c8",
+                  "repetition": 0,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 3709,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.0228,
+                  "latency_reference": "action",
+                  "marker": "b82851e54729",
+                  "repetition": 1,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 3709,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.173652,
+                  "latency_reference": "action",
+                  "marker": "a7a2ed3cc9d5",
+                  "repetition": 2,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 3709,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.144945,
+                  "latency_reference": "action",
+                  "marker": "3fc9d2566422",
+                  "repetition": 3,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 3709,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.054347,
+                  "latency_reference": "action",
+                  "marker": "54b7023f6e09",
+                  "repetition": 4,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "discovery",
+              "technique": "T1046",
+              "valid": true
+            },
+            "t1048-exfiltration-http": {
+              "action_timestamps": 5,
+              "alerts": 184,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.085374,
+                0.019694,
+                0.141752,
+                0.179262,
+                0.013686
+              ],
+              "latency_median": 0.085374,
+              "latency_p95": 0.17176,
+              "name": "Sensitive files archived and posted over HTTP",
+              "repetitions": 5,
+              "rules": [
+                "accept",
+                "connect",
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 39,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.085374,
+                  "latency_reference": "action",
+                  "marker": "880fd8148f22",
+                  "repetition": 0,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 39,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.019694,
+                  "latency_reference": "action",
+                  "marker": "e9fccf841178",
+                  "repetition": 1,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 39,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.141752,
+                  "latency_reference": "action",
+                  "marker": "a0475cee67a7",
+                  "repetition": 2,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 39,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.179262,
+                  "latency_reference": "action",
+                  "marker": "2cea11d56bb2",
+                  "repetition": 3,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 28,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.013686,
+                  "latency_reference": "action",
+                  "marker": "7fd8b743d972",
+                  "repetition": 4,
+                  "rules": [
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "exfiltration",
+              "technique": "T1048",
+              "valid": true
+            },
+            "t1053-003-cron-persistence": {
+              "action_timestamps": 5,
+              "alerts": 103,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 1,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.045007,
+                0.131332,
+                0.160022,
+                -0.003551,
+                0.170197
+              ],
+              "latency_median": 0.131332,
+              "latency_p95": 0.168162,
+              "name": "Cron job dropped in /etc/cron.d",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.045007,
+                  "latency_reference": "action",
+                  "marker": "f0a50bd35c29",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 20,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.131332,
+                  "latency_reference": "action",
+                  "marker": "3a6625067ad3",
+                  "repetition": 1,
+                  "rules": [
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 20,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.160022,
+                  "latency_reference": "action",
+                  "marker": "4d2029a013a9",
+                  "repetition": 2,
+                  "rules": [
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 20,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.003551,
+                  "latency_reference": "action",
+                  "marker": "27f3419d0ff6",
+                  "repetition": 3,
+                  "rules": [
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 20,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.170197,
+                  "latency_reference": "action",
+                  "marker": "91a23f667ce7",
+                  "repetition": 4,
+                  "rules": [
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "persistence",
+              "technique": "T1053.003",
+              "valid": true
+            },
+            "t1059-004-reverse-shell": {
+              "action_timestamps": 5,
+              "alerts": 413,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.015653,
+                0.141911,
+                0.195082,
+                0.007031,
+                0.193255
+              ],
+              "latency_median": 0.141911,
+              "latency_p95": 0.194717,
+              "name": "Reverse shell with bash /dev/tcp",
+              "repetitions": 5,
+              "rules": [
+                "accept",
+                "connect",
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "privileges-raise",
+                "privileges-setuid-root",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 87,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.015653,
+                  "latency_reference": "action",
+                  "marker": "46fab5247b3d",
+                  "repetition": 0,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "privileges-raise",
+                    "privileges-setuid-root",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 81,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.141911,
+                  "latency_reference": "action",
+                  "marker": "9ac3d4e213d2",
+                  "repetition": 1,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "privileges-raise",
+                    "privileges-setuid-root",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 85,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.195082,
+                  "latency_reference": "action",
+                  "marker": "82761051053f",
+                  "repetition": 2,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "privileges-raise",
+                    "privileges-setuid-root",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 81,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.007031,
+                  "latency_reference": "action",
+                  "marker": "46229902426e",
+                  "repetition": 3,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "privileges-raise",
+                    "privileges-setuid-root",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 79,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.193255,
+                  "latency_reference": "action",
+                  "marker": "2950af9db73e",
+                  "repetition": 4,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "privileges-raise",
+                    "privileges-setuid-root",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "execution",
+              "technique": "T1059.004",
+              "valid": true
+            },
+            "t1059-006-python-exec": {
+              "action_timestamps": 5,
+              "alerts": 121,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.169105,
+                0.03777,
+                0.149072,
+                0.189451,
+                0.010934
+              ],
+              "latency_median": 0.149072,
+              "latency_p95": 0.185382,
+              "name": "Python inline code spawning a shell",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 25,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.169105,
+                  "latency_reference": "action",
+                  "marker": "3dc3a4b7f8ef",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 24,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.03777,
+                  "latency_reference": "action",
+                  "marker": "5a60545649d9",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 24,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.149072,
+                  "latency_reference": "action",
+                  "marker": "bba37900597c",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 24,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.189451,
+                  "latency_reference": "action",
+                  "marker": "f05d76ca2be4",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 24,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.010934,
+                  "latency_reference": "action",
+                  "marker": "05c8eae33e37",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "execution",
+              "technique": "T1059.006",
+              "valid": true
+            },
+            "t1070-002-clear-logs": {
+              "action_timestamps": 5,
+              "alerts": 829,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 3,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.079136,
+                0.077795,
+                -0.009209,
+                -0.031507,
+                -0.014609
+              ],
+              "latency_median": -0.009209,
+              "latency_p95": 0.078868,
+              "name": "System logs truncated under /var/log",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 169,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.079136,
+                  "latency_reference": "action",
+                  "marker": "eb582f7e5376",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 165,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.077795,
+                  "latency_reference": "action",
+                  "marker": "4773c2a67575",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 165,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.009209,
+                  "latency_reference": "action",
+                  "marker": "46ebf4481114",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 165,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.031507,
+                  "latency_reference": "action",
+                  "marker": "f227546a144c",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 165,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.014609,
+                  "latency_reference": "action",
+                  "marker": "82d1e574b92d",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "defense-evasion",
+              "technique": "T1070.002",
+              "valid": true
+            },
+            "t1070-003-clear-history": {
+              "action_timestamps": 5,
+              "alerts": 216,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 1,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.018734,
+                -0.00338,
+                0.15539,
+                0.154955,
+                0.141175
+              ],
+              "latency_median": 0.141175,
+              "latency_p95": 0.155303,
+              "name": "Shell history cleared",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 44,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.018734,
+                  "latency_reference": "action",
+                  "marker": "66662e198a49",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 43,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.00338,
+                  "latency_reference": "action",
+                  "marker": "6c6487244cf3",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 43,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.15539,
+                  "latency_reference": "action",
+                  "marker": "712ce9fe2921",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 43,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.154955,
+                  "latency_reference": "action",
+                  "marker": "3ff977d651a0",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 43,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.141175,
+                  "latency_reference": "action",
+                  "marker": "2e3fc71acbe5",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "defense-evasion",
+              "technique": "T1070.003",
+              "valid": true
+            },
+            "t1082-system-discovery": {
+              "action_timestamps": 5,
+              "alerts": 297,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.157395,
+                0.139223,
+                0.153008,
+                0.187658,
+                0.137527
+              ],
+              "latency_median": 0.153008,
+              "latency_p95": 0.181605,
+              "name": "System information discovery",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 61,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.157395,
+                  "latency_reference": "action",
+                  "marker": "b46ea216b366",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.139223,
+                  "latency_reference": "action",
+                  "marker": "b54900eca840",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.153008,
+                  "latency_reference": "action",
+                  "marker": "0ef576c84e40",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.187658,
+                  "latency_reference": "action",
+                  "marker": "2877a9fd77d3",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.137527,
+                  "latency_reference": "action",
+                  "marker": "61f49fecf3dd",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "discovery",
+              "technique": "T1082",
+              "valid": true
+            },
+            "t1098-004-ssh-authorized-keys": {
+              "action_timestamps": 5,
+              "alerts": 302,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.121049,
+                0.06596,
+                0.140379,
+                0.104879,
+                0.116304
+              ],
+              "latency_median": 0.116304,
+              "latency_p95": 0.136513,
+              "name": "SSH key appended to root authorized_keys",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 66,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.121049,
+                  "latency_reference": "action",
+                  "marker": "09941c5b9171",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.06596,
+                  "latency_reference": "action",
+                  "marker": "10b428c97113",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.140379,
+                  "latency_reference": "action",
+                  "marker": "aed5c4509a33",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.104879,
+                  "latency_reference": "action",
+                  "marker": "ca6d2d8f622c",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.116304,
+                  "latency_reference": "action",
+                  "marker": "a76f9d405321",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "persistence",
+              "technique": "T1098.004",
+              "valid": true
+            },
+            "t1105-ingress-tool-transfer": {
+              "action_timestamps": 5,
+              "alerts": 190,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.088273,
+                0.04869,
+                0.151124,
+                0.131328,
+                0.146071
+              ],
+              "latency_median": 0.131328,
+              "latency_p95": 0.150113,
+              "name": "Download and execute a script with curl",
+              "repetitions": 5,
+              "rules": [
+                "accept",
+                "connect",
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 38,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.088273,
+                  "latency_reference": "action",
+                  "marker": "89f77140659c",
+                  "repetition": 0,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 38,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.04869,
+                  "latency_reference": "action",
+                  "marker": "cfd6dd3d3542",
+                  "repetition": 1,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 38,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.151124,
+                  "latency_reference": "action",
+                  "marker": "dbe235603b6f",
+                  "repetition": 2,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 38,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.131328,
+                  "latency_reference": "action",
+                  "marker": "7590e971d474",
+                  "repetition": 3,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 38,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.146071,
+                  "latency_reference": "action",
+                  "marker": "4a09345b9bd8",
+                  "repetition": 4,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "command-and-control",
+              "technique": "T1105",
+              "valid": true
+            },
+            "t1136-001-create-account": {
+              "action_timestamps": 5,
+              "alerts": 1003,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.031839,
+                0.143845,
+                0.136139,
+                0.076657,
+                0.155145
+              ],
+              "latency_median": 0.136139,
+              "latency_p95": 0.152885,
+              "name": "Local account created with useradd",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 203,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.031839,
+                  "latency_reference": "action",
+                  "marker": "601192924f88",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 200,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.143845,
+                  "latency_reference": "action",
+                  "marker": "132c1506b60e",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 200,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.136139,
+                  "latency_reference": "action",
+                  "marker": "7998cffc7af9",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 200,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.076657,
+                  "latency_reference": "action",
+                  "marker": "a3ef047fbe81",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 200,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.155145,
+                  "latency_reference": "action",
+                  "marker": "6b03ec913839",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "persistence",
+              "technique": "T1136.001",
+              "valid": true
+            },
+            "t1222-002-permission-modification": {
+              "action_timestamps": 5,
+              "alerts": 135,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.128571,
+                0.100156,
+                0.027445,
+                0.072676,
+                0.017544
+              ],
+              "latency_median": 0.072676,
+              "latency_p95": 0.122888,
+              "name": "World writable /etc/shadow",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.128571,
+                  "latency_reference": "action",
+                  "marker": "88418019b770",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.100156,
+                  "latency_reference": "action",
+                  "marker": "706394853943",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.027445,
+                  "latency_reference": "action",
+                  "marker": "a6e7e29821b0",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.072676,
+                  "latency_reference": "action",
+                  "marker": "0ae2e9747342",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.017544,
+                  "latency_reference": "action",
+                  "marker": "cdbebc0dcf64",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "defense-evasion",
+              "technique": "T1222.002",
+              "valid": true
+            },
+            "t1485-data-destruction": {
+              "action_timestamps": 5,
+              "alerts": 295,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 3,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.113035,
+                0.03204,
+                -0.026327,
+                -0.006466,
+                -0.016277
+              ],
+              "latency_median": -0.006466,
+              "latency_p95": 0.096836,
+              "name": "Files shredded and deleted",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.113035,
+                  "latency_reference": "action",
+                  "marker": "01ca33ac7869",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.03204,
+                  "latency_reference": "action",
+                  "marker": "3e1d987d5143",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.026327,
+                  "latency_reference": "action",
+                  "marker": "2ec139deb05f",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.006466,
+                  "latency_reference": "action",
+                  "marker": "d3c2cfb6b85d",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 59,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.016277,
+                  "latency_reference": "action",
+                  "marker": "e1c20152b19e",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "impact",
+              "technique": "T1485",
+              "valid": true
+            },
+            "t1496-cryptominer": {
+              "action_timestamps": 5,
+              "alerts": 136,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.002466,
+                0.123756,
+                0.145515,
+                0.105512,
+                0.16412
+              ],
+              "latency_median": 0.123756,
+              "latency_p95": 0.160399,
+              "name": "Simulated xmrig miner talking stratum",
+              "repetitions": 5,
+              "rules": [
+                "accept",
+                "connect",
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 28,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.002466,
+                  "latency_reference": "action",
+                  "marker": "036b35ad0e74",
+                  "repetition": 0,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.123756,
+                  "latency_reference": "action",
+                  "marker": "59398b2963ea",
+                  "repetition": 1,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.145515,
+                  "latency_reference": "action",
+                  "marker": "8e5c5596a676",
+                  "repetition": 2,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.105512,
+                  "latency_reference": "action",
+                  "marker": "88e8145cffa9",
+                  "repetition": 3,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.16412,
+                  "latency_reference": "action",
+                  "marker": "099438af8aa0",
+                  "repetition": 4,
+                  "rules": [
+                    "accept",
+                    "connect",
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "impact",
+              "technique": "T1496",
+              "valid": true
+            },
+            "t1543-002-systemd-service": {
+              "action_timestamps": 5,
+              "alerts": 120,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.159858,
+                0.026969,
+                0.10393,
+                0.11641,
+                0.18442
+              ],
+              "latency_median": 0.11641,
+              "latency_p95": 0.179508,
+              "name": "Systemd service unit created and enabled",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 28,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.159858,
+                  "latency_reference": "action",
+                  "marker": "d19c039b7a73",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.026969,
+                  "latency_reference": "action",
+                  "marker": "ca49db85a64a",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.10393,
+                  "latency_reference": "action",
+                  "marker": "6c4814885a83",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.11641,
+                  "latency_reference": "action",
+                  "marker": "0ea36ec6139c",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.18442,
+                  "latency_reference": "action",
+                  "marker": "090c60681674",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "persistence",
+              "technique": "T1543.002",
+              "valid": true
+            },
+            "t1547-006-kernel-module": {
+              "action_timestamps": 5,
+              "alerts": 143,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.013092,
+                0.098181,
+                0.107827,
+                0.10864,
+                0.031967
+              ],
+              "latency_median": 0.098181,
+              "latency_p95": 0.108477,
+              "name": "Kernel module load attempt with insmod",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "monitor-kernel-modules",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 35,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.013092,
+                  "latency_reference": "action",
+                  "marker": "4ad5f202e9df",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "monitor-kernel-modules",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.098181,
+                  "latency_reference": "action",
+                  "marker": "36afb2718f05",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "monitor-kernel-modules",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.107827,
+                  "latency_reference": "action",
+                  "marker": "10ba57d8b8eb",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "monitor-kernel-modules",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.10864,
+                  "latency_reference": "action",
+                  "marker": "5237bb84e84a",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "monitor-kernel-modules",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 27,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.031967,
+                  "latency_reference": "action",
+                  "marker": "72ee5286a793",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "monitor-kernel-modules",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "persistence",
+              "technique": "T1547.006",
+              "valid": true
+            },
+            "t1548-001-setuid-binary": {
+              "action_timestamps": 5,
+              "alerts": 195,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.027975,
+                0.132332,
+                0.003251,
+                0.088317,
+                0.060286
+              ],
+              "latency_median": 0.060286,
+              "latency_p95": 0.123529,
+              "name": "Setuid copy of a binary",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "privileges-raise",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 39,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.027975,
+                  "latency_reference": "action",
+                  "marker": "22148bc8e3ec",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "privileges-raise",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 39,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.132332,
+                  "latency_reference": "action",
+                  "marker": "5bdd991ac207",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "privileges-raise",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 39,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.003251,
+                  "latency_reference": "action",
+                  "marker": "94963db00057",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "privileges-raise",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 39,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.088317,
+                  "latency_reference": "action",
+                  "marker": "4ca14328fa02",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "privileges-raise",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 39,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.060286,
+                  "latency_reference": "action",
+                  "marker": "f97c35ac7ddd",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "privileges-raise",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "privilege-escalation",
+              "technique": "T1548.001",
+              "valid": true
+            },
+            "t1552-001-credentials-in-files": {
+              "action_timestamps": 5,
+              "alerts": 418,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.046758,
+                0.14616,
+                0.15854,
+                0.005249,
+                0.062989
+              ],
+              "latency_median": 0.062989,
+              "latency_p95": 0.156064,
+              "name": "Credential files searched and read",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "file-monitoring-filtered",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 86,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.046758,
+                  "latency_reference": "action",
+                  "marker": "504b38819abd",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 83,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.14616,
+                  "latency_reference": "action",
+                  "marker": "d8b235377fc8",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 83,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.15854,
+                  "latency_reference": "action",
+                  "marker": "15966126153d",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 83,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.005249,
+                  "latency_reference": "action",
+                  "marker": "f284a03d0522",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 83,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.062989,
+                  "latency_reference": "action",
+                  "marker": "54e41cb10155",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "file-monitoring-filtered",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "credential-access",
+              "technique": "T1552.001",
+              "valid": true
+            },
+            "t1552-007-container-api": {
+              "action_timestamps": 5,
+              "alerts": 116,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 1,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.155413,
+                0.146821,
+                0.081608,
+                -0.002199,
+                0.07569
+              ],
+              "latency_median": 0.081608,
+              "latency_p95": 0.153695,
+              "name": "Kubernetes token and Docker socket probing",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 24,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.155413,
+                  "latency_reference": "action",
+                  "marker": "1e461f1f1976",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.146821,
+                  "latency_reference": "action",
+                  "marker": "95ab6a9d1863",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.081608,
+                  "latency_reference": "action",
+                  "marker": "806b492507d3",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": -0.002199,
+                  "latency_reference": "action",
+                  "marker": "69226e649f95",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.07569,
+                  "latency_reference": "action",
+                  "marker": "89beb22ffaf4",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "credential-access",
+              "technique": "T1552.007",
+              "valid": true
+            },
+            "t1611-escape-to-host": {
+              "action_timestamps": 5,
+              "alerts": 320,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.150464,
+                0.122087,
+                0.069859,
+                0.127606,
+                0.10523
+              ],
+              "latency_median": 0.122087,
+              "latency_p95": 0.145892,
+              "name": "Host filesystem mounted from a privileged container",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 68,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.150464,
+                  "latency_reference": "action",
+                  "marker": "f6e21c498c30",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 63,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.122087,
+                  "latency_reference": "action",
+                  "marker": "47d5738c899a",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 63,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.069859,
+                  "latency_reference": "action",
+                  "marker": "f2036a9fae93",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 63,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.127606,
+                  "latency_reference": "action",
+                  "marker": "dceb946bdd73",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 63,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.10523,
+                  "latency_reference": "action",
+                  "marker": "e6fd234dc7c1",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "privilege-escalation",
+              "technique": "T1611",
+              "valid": true
+            },
+            "t1613-container-discovery": {
+              "action_timestamps": 5,
+              "alerts": 206,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.176634,
+                0.12011,
+                0.031399,
+                0.13334,
+                0.127257
+              ],
+              "latency_median": 0.127257,
+              "latency_p95": 0.167975,
+              "name": "Container environment enumeration",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 42,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.176634,
+                  "latency_reference": "action",
+                  "marker": "2823063aa84d",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 41,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.12011,
+                  "latency_reference": "action",
+                  "marker": "d51b3eccf241",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 41,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.031399,
+                  "latency_reference": "action",
+                  "marker": "a7052d66d1a2",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 41,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.13334,
+                  "latency_reference": "action",
+                  "marker": "84851fd81084",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 41,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.127257,
+                  "latency_reference": "action",
+                  "marker": "fca8f1bba9c1",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "discovery",
+              "technique": "T1613",
+              "valid": true
+            },
+            "t1620-fileless-exec": {
+              "action_timestamps": 5,
+              "alerts": 115,
+              "detected": 5,
+              "detection_rate": 1.0,
+              "early_alerts": 0,
+              "effect_achieved": 5,
+              "failed_executions": 0,
+              "kind": "attack",
+              "latencies": [
+                0.100996,
+                0.069545,
+                0.184183,
+                0.166059,
+                0.115323
+              ],
+              "latency_median": 0.115323,
+              "latency_p95": 0.180558,
+              "name": "Fileless execution from memfd_create",
+              "repetitions": 5,
+              "rules": [
+                "creds-capability-checks",
+                "process-creds-changed",
+                "process-exec-elf-begin"
+              ],
+              "runs": [
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.100996,
+                  "latency_reference": "action",
+                  "marker": "61acdc915f57",
+                  "repetition": 0,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.069545,
+                  "latency_reference": "action",
+                  "marker": "57388be413a9",
+                  "repetition": 1,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.184183,
+                  "latency_reference": "action",
+                  "marker": "214d74b86f11",
+                  "repetition": 2,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.166059,
+                  "latency_reference": "action",
+                  "marker": "615dd1db7605",
+                  "repetition": 3,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                },
+                {
+                  "alerts": 23,
+                  "check_exit_code": 0,
+                  "cleanup_exit_code": 0,
+                  "detected": true,
+                  "effect_achieved": true,
+                  "exit_code": 0,
+                  "latency": 0.115323,
+                  "latency_reference": "action",
+                  "marker": "3dcf6cb5dd0a",
+                  "repetition": 4,
+                  "rules": [
+                    "creds-capability-checks",
+                    "process-creds-changed",
+                    "process-exec-elf-begin"
+                  ]
+                }
+              ],
+              "status": "detected",
+              "tactic": "defense-evasion",
+              "technique": "T1620",
+              "valid": true
+            }
+          },
+          "summary": {
+            "action_timestamp_share": 1.0,
+            "alerts_attributed": 29862,
+            "alerts_total": 1206237,
+            "attack_runs": 120,
+            "attack_scenarios": 24,
+            "background_noise": 11,
+            "benign_runs": 30,
+            "benign_scenarios": 6,
+            "coverage": {
+              "command-and-control": {
+                "coverage": 1.0,
+                "detected": 1,
+                "missed": 0,
+                "partial": 0,
+                "scenarios": 1
+              },
+              "credential-access": {
+                "coverage": 1.0,
+                "detected": 3,
+                "missed": 0,
+                "partial": 0,
+                "scenarios": 3
+              },
+              "defense-evasion": {
+                "coverage": 1.0,
+                "detected": 5,
+                "missed": 0,
+                "partial": 0,
+                "scenarios": 5
+              },
+              "discovery": {
+                "coverage": 1.0,
+                "detected": 3,
+                "missed": 0,
+                "partial": 0,
+                "scenarios": 3
+              },
+              "execution": {
+                "coverage": 1.0,
+                "detected": 2,
+                "missed": 0,
+                "partial": 0,
+                "scenarios": 2
+              },
+              "exfiltration": {
+                "coverage": 1.0,
+                "detected": 1,
+                "missed": 0,
+                "partial": 0,
+                "scenarios": 1
+              },
+              "impact": {
+                "coverage": 1.0,
+                "detected": 2,
+                "missed": 0,
+                "partial": 0,
+                "scenarios": 2
+              },
+              "persistence": {
+                "coverage": 1.0,
+                "detected": 5,
+                "missed": 0,
+                "partial": 0,
+                "scenarios": 5
+              },
+              "privilege-escalation": {
+                "coverage": 1.0,
+                "detected": 2,
+                "missed": 0,
+                "partial": 0,
+                "scenarios": 2
+              }
+            },
+            "detected_scenarios": 24,
+            "detection_rate": 1.0,
+            "early_alerts": 9,
+            "failed_executions": 0,
+            "false_negatives": 0,
+            "false_positive_rate": 1.0,
+            "false_positive_scenarios": 6,
+            "false_positives": 30,
+            "invalid_attack_scenarios": [],
+            "latency_median": 0.105054,
+            "latency_p95": 0.184195,
+            "missed_scenarios": 0,
+            "non_victim_alerts": 1176364,
+            "partial_scenarios": 0,
+            "recall": 1.0,
+            "true_positives": 120,
+            "unattributed_in_window": 0
+          }
+        }
+      },
+      "status": "ok",
+      "version": "1.7.1"
+    }
+  }
+}

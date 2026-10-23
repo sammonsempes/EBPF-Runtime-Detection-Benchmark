@@ -1,0 +1,16 @@
+{
+  "kind": "KubeArmorPolicy",
+  "metadata": {"namespaceName": "bench", "policyName": "ksp-mitre-tactic-defence-evasion-hidden-files-directories"},
+  "spec": {
+    "tags": ["MITRE", "T1564.001"],
+    "message": "Bash history accessed",
+    "selector": {"matchLabels": {"kubearmor.io/container.name": "bench-victim"}},
+    "file": {
+      "severity": 3,
+      "matchPaths": [
+        {"path": "/root/.bash_history"}
+      ],
+      "action": "Audit"
+    }
+  }
+}
