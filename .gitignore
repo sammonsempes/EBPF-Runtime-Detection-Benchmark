@@ -4,6 +4,7 @@ __pycache__/
 *.egg-info/
 .venv/
 results/*/raw/
+results/*/alerts/
 compose.override.yaml
 runner/certs/*
 !runner/certs/.gitkeep
