@@ -17,6 +17,8 @@ collectors:
     enabled: false
 mounts:
   volumes:
+    - name: image-config-d
+      emptyDir: {}
     - name: bench-config
       configMap:
         name: bench-falco-config
@@ -24,6 +26,8 @@ mounts:
       configMap:
         name: bench-falco-rules
   volumeMounts:
+    - name: image-config-d
+      mountPath: /etc/falco/config.d
     - name: bench-config
       mountPath: /etc/falco/config.d/zz-bench.yaml
       subPath: falco.bench.yaml

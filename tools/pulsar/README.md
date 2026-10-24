@@ -89,6 +89,15 @@ env_logger lines. An alert is a JSON line with a non-null `header.threat`. The p
 | `command_line` | `payload.content.argv` joined with spaces for `Exec` payloads |
 | `raw` | the whole event |
 
+## Kubernetes mode
+
+Pulsar runs as a DaemonSet (`deploy/kubernetes/tools/pulsar/daemonset.yaml`). On kind under WSL2 it produces threat
+events, but about 99% of its log lines are `Process not found in tracker N: process not found` (`network-monitor`,
+`file-system-monitor`), and alerts carry no container because Pulsar resolves Docker and Podman only, not
+containerd, so attribution would rely on `BENCH_MARKER`. In both full runs Pulsar default stopped the host during
+its overhead workloads (Docker and the WSL2 VM exited), so it has no Kubernetes result. Details:
+`deploy/kubernetes/README.md`, "Validated on kind / WSL2".
+
 ## Fixtures
 
 Upstream contains no JSON threat sample (no `*.json`/`*.jsonl` in the tree, the threat-logger README shows none). The

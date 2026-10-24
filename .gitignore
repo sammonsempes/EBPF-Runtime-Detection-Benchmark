@@ -7,5 +7,6 @@ results/*/raw/
 results/*/alerts/
 tools/kunai/community/rules/
 compose.override.yaml
+.debug/
 runner/certs/*
 !runner/certs/.gitkeep

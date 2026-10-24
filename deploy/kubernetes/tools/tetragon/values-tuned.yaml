@@ -1,7 +1,16 @@
 imagePullPolicy: IfNotPresent
+exportDirectory: /var/lib/ebpf-bench/tetragon
 tetragon:
   hostProcPath: /procHost
   enableK8sAPI: true
+  commandOverride:
+    - /bin/sh
+    - -c
+    - rm -f /var/lib/ebpf-bench/tetragon/tetragon*.log && exec /usr/bin/tetragon "$@"
+    - tetragon
+  exportFilename: tetragon.log
+  exportFileMaxSizeMB: 2048
+  exportFileMaxBackups: 1
   exportDenyList: |-
     {"health_check":true}
 tetragonOperator:
@@ -10,4 +19,4 @@ tetragonOperator:
   tracingPolicy:
     enabled: true
 export:
-  mode: stdout
+  mode: ""

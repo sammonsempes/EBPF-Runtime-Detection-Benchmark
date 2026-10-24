@@ -339,6 +339,28 @@ def test_tool_start_failure_does_not_abort(repo: Path, scenarios: list[Scenario]
     assert backend.events[-1] == "cleanup"
 
 
+def test_tool_start_diagnostics_are_written_to_container_log(repo: Path, scenarios: list[Scenario]) -> None:
+    class FailingBackend(FakeBackend):
+        def start_tool(self, tool: str, profile: str, spec: ContainerSpec) -> ContainerRef:
+            raise ToolStartError("pod failed\nlast logs:\nboom", [(12.5, "[falco-x/falco] boom on secret-laptop")])
+
+    results = make_orchestrator(
+        repo,
+        scenarios,
+        FailingBackend(),
+        FakeAdapter(),
+        hostname="secret-laptop",
+        tools=("falco",),
+        profiles=("default",),
+        overhead=OverheadConfig(enabled=False),
+    ).run()
+    log = (results / "raw" / "falco-default" / "container.log").read_text()
+    assert log == "12.500000 [falco-x/falco] boom on host\n"
+    deployment = json.loads((results / "metadata.json").read_text())["deployments"]["falco-default"]
+    assert deployment["error"] == "ToolStartError: pod failed\nlast logs:\nboom"
+    assert deployment["log_lines"] == 0
+
+
 def test_alerts_file_is_used_when_declared(repo: Path, scenarios: list[Scenario]) -> None:
     backend = FakeBackend()
     results = make_orchestrator(
@@ -346,6 +368,43 @@ def test_alerts_file_is_used_when_declared(repo: Path, scenarios: list[Scenario]
     ).run()
     alerts = read_jsonl(results / "alerts" / "falco-default.jsonl")
     assert [alert["rule"] for alert in alerts] == ["from-file"]
+
+
+def test_log_cap_drops_lines_and_records_overflow(repo: Path, scenarios: list[Scenario]) -> None:
+    backend = FakeBackend()
+    messages: list[str] = []
+    orchestrator = make_orchestrator(
+        repo,
+        scenarios,
+        backend,
+        FakeAdapter(),
+        tools=("falco",),
+        profiles=("default",),
+        overhead=OverheadConfig(enabled=False),
+        max_log_lines=4,
+    )
+    orchestrator.log = messages.append
+    results = orchestrator.run()
+    deployment = json.loads((results / "metadata.json").read_text())["deployments"]["falco-default"]
+    assert deployment["status"] == "completed"
+    assert deployment["log_overflow"] is True
+    assert deployment["log_lines"] == 4
+    assert deployment["dropped_log_lines"] == 3
+    assert deployment["dropped_log_bytes"] > 0
+    assert deployment["dropped_alerts_file_lines"] == 0
+    assert deployment["alerts"] == 1
+    assert any(error.startswith("log overflow: kept at most 4 lines") for error in deployment["errors"])
+    assert any("log overflow" in message for message in messages)
+    assert (results / "raw" / "falco-default" / "container.log").read_text().count("\n") == 4
+
+
+def test_no_overflow_by_default(repo: Path, scenarios: list[Scenario]) -> None:
+    results = make_orchestrator(
+        repo, scenarios, FakeBackend(), FakeAdapter(), tools=("falco",), profiles=("default",)
+    ).run()
+    deployment = json.loads((results / "metadata.json").read_text())["deployments"]["falco-default"]
+    assert deployment["log_overflow"] is False
+    assert deployment["dropped_log_lines"] == 0 and deployment["errors"] == []
 
 
 def test_skip_overhead_and_unsupported_profile(repo: Path, scenarios: list[Scenario]) -> None:

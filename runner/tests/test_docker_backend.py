@@ -50,6 +50,27 @@ def test_pump_log_stream_reassembles_lines() -> None:
     assert buffer.closed
 
 
+def test_line_buffer_drops_lines_after_line_cap() -> None:
+    buffer = LineBuffer(max_lines=2)
+    for index in range(5):
+        buffer.append(float(index), f"line {index}")
+    assert buffer.lines() == [(0.0, "line 0"), (1.0, "line 1")]
+    assert buffer.overflow
+    assert buffer.dropped_lines == 3 and buffer.dropped_bytes == 3 * len("line 2\n")
+    assert not buffer.wait_for("line 4", 0)
+
+
+def test_line_buffer_byte_cap_drops_everything_after_first_overflow() -> None:
+    buffer = LineBuffer()
+    assert not buffer.overflow
+    buffer.limit(None, 10)
+    buffer.append(1.0, "1234")
+    buffer.append(2.0, "123456")
+    buffer.append(3.0, "1")
+    assert buffer.lines() == [(1.0, "1234")]
+    assert buffer.bytes == 5 and buffer.dropped_lines == 2 and buffer.dropped_bytes == 9
+
+
 def test_line_buffer_wait_for() -> None:
     buffer = LineBuffer()
     buffer.append(1.0, "starting")

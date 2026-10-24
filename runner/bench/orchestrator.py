@@ -52,6 +52,11 @@ class Deployment:
     log_bytes: int = 0
     alerts_file_lines: int = 0
     alerts_file_bytes: int = 0
+    log_overflow: bool = False
+    dropped_log_lines: int = 0
+    dropped_log_bytes: int = 0
+    dropped_alerts_file_lines: int = 0
+    dropped_alerts_file_bytes: int = 0
     alerts: int = 0
     parse_errors: int = 0
     cleanup_failures: int = 0
@@ -360,6 +365,7 @@ class Orchestrator:
         tool_ref: ContainerRef | None = None
         logs: LineBuffer | None = None
         alerts_source: LineBuffer | None = None
+        diagnostics: list[tuple[float, str]] = []
         self.log(f"[{key}] starting {deployment.tool} {getattr(adapter, 'version', '')}")
         try:
             try:
@@ -368,9 +374,9 @@ class Orchestrator:
                 tool_ref = self.backend.start_tool(deployment.tool, deployment.profile, spec)
                 deployment.container_started_at = self.clock()
                 deployment.container_id = tool_ref.id
-                logs = self.backend.follow_logs(tool_ref)
+                logs = self._capped(self.backend.follow_logs(tool_ref))
                 if spec.alerts_file:
-                    alerts_source = self.backend.tail_file(raw_dir / spec.alerts_file)
+                    alerts_source = self._capped(self.backend.tail_file(raw_dir / spec.alerts_file))
                 self.backend.wait_ready(tool_ref, logs, spec.ready_pattern, spec.startup_timeout)
                 if spec.ready_url:
                     elapsed = self.clock() - deployment.container_started_at
@@ -382,6 +388,7 @@ class Orchestrator:
             except Exception as error:
                 deployment.status = "failed"
                 deployment.error = describe(error)
+                diagnostics = list(getattr(error, "diagnostics", None) or [])
                 self.log(f"[{key}] failed to start: {deployment.error}")
                 return
             deployment.status = "running"
@@ -409,8 +416,30 @@ class Orchestrator:
             if alerts_source is not None:
                 alerts_source.finish(FILE_DRAIN_TIMEOUT)
             deployment.ended_at = self.clock()
-            self._collect(deployment, adapter, raw_dir, logs, alerts_source)
+            self._collect(deployment, adapter, raw_dir, logs, alerts_source, diagnostics)
             self._write_metadata()
+
+    def _capped(self, buffer: LineBuffer) -> LineBuffer:
+        buffer.limit(self.config.max_log_lines, self.config.max_log_bytes)
+        return buffer
+
+    def _record_overflow(self, deployment: Deployment, logs: LineBuffer | None, alerts_source: LineBuffer | None) -> None:
+        for buffer, lines, size in (
+            (logs, "dropped_log_lines", "dropped_log_bytes"),
+            (alerts_source, "dropped_alerts_file_lines", "dropped_alerts_file_bytes"),
+        ):
+            if buffer is not None:
+                setattr(deployment, lines, buffer.dropped_lines)
+                setattr(deployment, size, buffer.dropped_bytes)
+        deployment.log_overflow = bool(deployment.dropped_log_lines or deployment.dropped_alerts_file_lines)
+        if deployment.log_overflow:
+            message = (
+                f"log overflow: kept at most {self.config.max_log_lines} lines / {self.config.max_log_bytes} bytes per "
+                f"stream, dropped {deployment.dropped_log_lines} log lines and "
+                f"{deployment.dropped_alerts_file_lines} alerts file lines"
+            )
+            deployment.errors.append(message)
+            self.log(f"[{deployment.tool}-{deployment.profile}] {message}")
 
     def _run_tool_workloads(self, deployment: Deployment, tool_ref: ContainerRef, started: list[ContainerRef]) -> None:
         deployment.workloads_started_at = self.clock()
@@ -501,6 +530,7 @@ class Orchestrator:
         raw_dir: Path,
         logs: LineBuffer | None,
         alerts_source: LineBuffer | None,
+        diagnostics: list[tuple[float, str]] | None = None,
     ) -> None:
         log_lines = logs.lines() if logs is not None else []
         file_lines = alerts_source.lines() if alerts_source is not None else []
@@ -508,8 +538,9 @@ class Orchestrator:
         deployment.log_bytes = byte_count(log_lines)
         deployment.alerts_file_lines = len(file_lines)
         deployment.alerts_file_bytes = byte_count(file_lines)
+        self._record_overflow(deployment, logs, alerts_source)
         with (raw_dir / "container.log").open("w", encoding="utf-8") as handle:
-            for emitted_at, line in log_lines:
+            for emitted_at, line in log_lines + list(diagnostics or []):
                 handle.write(f"{emitted_at:.6f} {redact(line, self.hostname_pattern)}\n")
         source_lines = file_lines if alerts_source is not None else log_lines
         alerts: list[Alert] = []

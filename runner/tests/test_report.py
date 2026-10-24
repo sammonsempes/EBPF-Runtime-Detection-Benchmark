@@ -18,6 +18,29 @@ def test_report_never_renders_host_hostname() -> None:
     assert "hostname" not in text and "secret-laptop" not in text
 
 
+def test_report_lists_log_overflow() -> None:
+    metadata = {
+        "deployments": {
+            "tetragon-default": {
+                "tool": "tetragon",
+                "profile": "default",
+                "log_overflow": True,
+                "dropped_log_lines": 0,
+                "dropped_log_bytes": 0,
+                "dropped_alerts_file_lines": 1234,
+                "dropped_alerts_file_bytes": 2 * 1024 * 1024,
+            },
+            "falco-default": {"tool": "falco", "profile": "default", "log_overflow": False},
+        }
+    }
+    text = render_report({"run_id": "r1"}, metadata)
+    section = text.split("### Log overflow")[1].split("###")[0]
+    assert "| tetragon | default | 0 | 1234 | 2.00 |" in section
+    assert "falco" not in section
+    empty = render_report({"run_id": "r1"}, {}).split("### Log overflow")[1].split("###")[0]
+    assert empty.rstrip().endswith("None.")
+
+
 def write_jsonl(path: Path, records) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(asdict(record)) + "\n" for record in records), encoding="utf-8")

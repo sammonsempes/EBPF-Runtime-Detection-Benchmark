@@ -25,6 +25,7 @@ agent:
   log_containers: [kubearmor]
   alerts_container: kubearmor
   ready_pattern: adapter
+  startup_timeout: 600
 custom_resources:
   - source: policies
     format: kubearmor-backup

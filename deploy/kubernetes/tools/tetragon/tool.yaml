@@ -11,8 +11,9 @@ install:
     tuned: values-tuned.yaml
 agent:
   selector: app.kubernetes.io/name=tetragon,app.kubernetes.io/instance=tetragon
-  log_containers: [tetragon, export-stdout]
-  alerts_container: export-stdout
+  log_containers: [tetragon]
+  alerts_container: tetragon
+  alerts_file: /var/lib/ebpf-bench/tetragon/tetragon.log
   ready_pattern: adapter
 custom_resources:
   - source: tetragon.tp.d

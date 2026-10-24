@@ -184,6 +184,15 @@ The `-logPath` file uses the Go `json` tags of `types.Log` (camelCase: `policyNa
 `updatedTime`, `hostPid`...), while gRPC clients (`karmor logs --json`) and all documentation samples use the
 protobuf PascalCase names (`PolicyName`, `ContainerName`...). The parser accepts both spellings.
 
+## Kubernetes mode
+
+On kind under WSL2, KubeArmor v1.7.5 (chart v1.7.5) starts (with `agent.startup_timeout: 600`), loads the policies
+and detects the victim pods, but registers every container with `pidns=0/mntns=0`, so no event matches a victim
+policy and there are 0 alerts. The likely cause, not proven, is namespace resolution in the nested PID namespaces of
+WSL2. `BPF LSM not supported` and `Disabled KubeArmor Enforcer` are logged, as in Docker mode on WSL2. Details:
+`deploy/kubernetes/README.md`, "Validated on kind / WSL2". A Kubernetes result for KubeArmor needs a native Linux
+node.
+
 ## Fixtures (`runner/tests/fixtures/kubearmor/alerts.jsonl`)
 
 | Line | Source |

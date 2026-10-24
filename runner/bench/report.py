@@ -681,6 +681,33 @@ def section_failures(score: dict[str, Any], metadata: dict[str, Any]) -> list[st
         if status != "ok":
             rows.append([tool, status, info.get("error") or scored.get("error")])
     lines.extend(table(["Tool", "Status", "Error"], rows) if rows else ["None."])
+    lines.extend(
+        [
+            "",
+            "### Log overflow",
+            "",
+            "Deployments whose log or alerts stream exceeded `max_log_lines` / `max_log_bytes`: lines after the cap were "
+            "dropped, so alerts emitted after it are missing and detection results are a lower bound.",
+            "",
+        ]
+    )
+    deployments = metadata.get("deployments") if isinstance(metadata.get("deployments"), dict) else {}
+    rows = [
+        [
+            info.get("tool"),
+            info.get("profile"),
+            info.get("dropped_log_lines", 0),
+            info.get("dropped_alerts_file_lines", 0),
+            fmt_number((info.get("dropped_log_bytes", 0) + info.get("dropped_alerts_file_bytes", 0)) / MIB),
+        ]
+        for _, info in sorted(deployments.items())
+        if isinstance(info, dict) and info.get("log_overflow")
+    ]
+    lines.extend(
+        table(["Tool", "Profile", "Dropped log lines", "Dropped alerts file lines", "Dropped MiB"], rows)
+        if rows
+        else ["None."]
+    )
     lines.extend(["", "### Scenario executions with a non-zero exit code", ""])
     rows = [
         [column[0], column[1], scenario_id, run.get("repetition"), run.get("exit_code")]

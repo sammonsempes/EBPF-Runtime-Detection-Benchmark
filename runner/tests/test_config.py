@@ -119,6 +119,18 @@ def test_overhead_disabled() -> None:
     assert parse_config({"overhead": {"enabled": False}}).overhead.enabled is False
 
 
+def test_log_caps() -> None:
+    config = parse_config({})
+    assert config.max_log_lines == 5_000_000
+    assert config.max_log_bytes == 2 * 1024**3
+    custom = parse_config({"max_log_lines": 10, "max_log_bytes": 1000})
+    assert (custom.max_log_lines, custom.max_log_bytes) == (10, 1000)
+    assert parse_config(custom.as_dict()) == custom
+    for key in ("max_log_lines", "max_log_bytes"):
+        with pytest.raises(ValueError, match=key):
+            parse_config({key: 0})
+
+
 def test_as_dict_round_trips() -> None:
     config = parse_config({"tools": ["kunai"], "scenarios": ["x"]})
     assert parse_config(config.as_dict()) == replace(config, source="")

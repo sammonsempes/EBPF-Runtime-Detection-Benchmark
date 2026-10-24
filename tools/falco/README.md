@@ -60,6 +60,10 @@ Falco writes alerts as JSON lines on stdout and its own logs on stderr; the runn
 
 Every rule match is an alert. `ready_pattern` is `Opening 'syscall' source with modern BPF probe`, logged by `userspace/falco/app/actions/helpers_inspector.cpp` right before the probe is opened.
 
+## Kubernetes mode
+
+Falco is installed with the `falcosecurity/falco` chart 9.1.0. The image's `config.d/falco.container_plugin.yaml` and the chart both load the container plugin, which makes Falco abort (`found another plugin with name container`); the values mount an `emptyDir` over `/etc/falco/config.d` so only the chart's container plugin configuration (containerd sockets) is loaded, and the benchmark drop-in is still mounted at `/etc/falco/config.d/zz-bench.yaml`. With that fix, the shadow-read scenario was detected and attributed to the victim pod on kind under WSL2. Details: `deploy/kubernetes/README.md`, "Validated on kind / WSL2".
+
 ## Fixtures
 
 `runner/tests/fixtures/falco/alerts.jsonl`:

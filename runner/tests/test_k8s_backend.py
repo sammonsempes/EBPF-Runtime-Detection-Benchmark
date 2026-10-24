@@ -9,6 +9,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import yaml
 
 from bench.adapters.base import ContainerSpec, Mount
 from bench.config import KubernetesConfig, load_config, parse_config
@@ -32,6 +33,7 @@ from bench.k8s_backend import (
     pod_metrics_sample,
     pod_state,
     pump_log_streams,
+    pump_read_lines,
     strip_container_id,
 )
 
@@ -100,6 +102,9 @@ class FakeCore:
         self.logs: dict[tuple[str, str], list[bytes]] = {}
         self.pod_statuses: dict[str, list] = {}
         self.selector_pods: dict[tuple[str, str], list] = {}
+        self.log_reads: list[tuple] = []
+        self.log_errors: set[tuple] = set()
+        self.events: list[SimpleNamespace] = []
         self.nodes = [
             SimpleNamespace(
                 metadata=SimpleNamespace(name="node-1"),
@@ -203,7 +208,16 @@ class FakeCore:
 
     def read_namespaced_pod_log(self, name, namespace, container=None, **kwargs):
         self.calls.append(("logs", namespace, name, container, kwargs.get("timestamps"), kwargs.get("follow")))
-        return FakeLogResponse(self.logs.get((name, container), []))
+        if kwargs.get("follow"):
+            return FakeLogResponse(self.logs.get((name, container), []))
+        key = (name, container, "previous") if kwargs.get("previous") else (name, container)
+        self.log_reads.append((key, kwargs.get("tail_lines"), kwargs.get("timestamps")))
+        if key in self.log_errors:
+            raise ApiError(400)
+        return b"".join(self.logs.get(key, [])).decode()
+
+    def list_namespaced_event(self, namespace, **kwargs):
+        return SimpleNamespace(items=list(self.events))
 
 
 class FakeApps:
@@ -746,19 +760,107 @@ def test_start_tool_from_adapter_manifest() -> None:
     assert ("DaemonSet", "ebpf-bench-kunai", "kunai") not in api.core.objects
 
 
-def test_tail_file_follows_alerts_container() -> None:
+TETRAGON_SELECTOR = "app.kubernetes.io/name=tetragon,app.kubernetes.io/instance=tetragon"
+TETRAGON_EXPORT = "/var/lib/ebpf-bench/tetragon/tetragon.log"
+
+
+def test_tail_file_follows_alerts_container_logs() -> None:
     backend, api, _ = make_backend()
-    selector = "app.kubernetes.io/name=tetragon,app.kubernetes.io/instance=tetragon"
-    api.core.selector_pods[("ebpf-bench-tetragon", selector)] = [tool_pod("tetragon-x", ["tetragon", "export-stdout"])]
-    api.core.logs[("tetragon-x", "export-stdout")] = [b'2026-01-02T03:04:05Z {"process_exec": {}}\n']
-    ref = backend.start_tool("tetragon", "default", ContainerSpec(image="x"))
+    api.core.selector_pods[("ebpf-bench-falco", FALCO_SELECTOR)] = [tool_pod("falco-x", ["falco"])]
+    api.core.logs[("falco-x", "falco")] = [b'2026-01-02T03:04:05Z {"rule": "r"}\n']
+    backend.start_tool("falco", "default", ContainerSpec(image="x"))
     buffer = backend.tail_file(Path("/ignored"))
     assert buffer.wait_closed(5)
-    assert [line for _, line in buffer.lines()] == ['{"process_exec": {}}']
+    assert buffer.lines() == [(datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC).timestamp(), '{"rule": "r"}')]
+    assert api.stream.calls == []
+
+
+def test_tail_file_streams_export_file_through_exec() -> None:
+    backend, api, clock = make_backend()
+    api.core.selector_pods[("ebpf-bench-tetragon", TETRAGON_SELECTOR)] = [tool_pod("tetragon-x", ["tetragon"])]
+    api.core.logs[("tetragon-x", "tetragon")] = [b"2026-01-02T03:04:05Z Listening for events...\n"]
+    ref = backend.start_tool("tetragon", "default", ContainerSpec(image="x"))
+    api.stream.client = FakeExecClient(
+        ['{"process_kprobe": {"policy_name": "a"}}\n{"process_', 'exec": {}}\n', '{"tail": 1}'],
+        ["tail: can't open: No such file or directory"],
+        0,
+    )
+    buffer = backend.tail_file(Path("/ignored"))
+    assert buffer.wait_closed(5)
+    assert buffer.lines() == [
+        (clock.now, '{"process_kprobe": {"policy_name": "a"}}'),
+        (clock.now, '{"process_exec": {}}'),
+        (clock.now, '{"tail": 1}'),
+    ]
+    call = api.stream.calls[0]
+    assert call["name"] == "tetragon-x" and call["namespace"] == "ebpf-bench-tetragon"
+    assert call["container"] == "tetragon"
+    assert call["command"] == ["tail", "-n", "+1", "-F", TETRAGON_EXPORT]
+    assert call["stdin"] is False and call["tty"] is False and call["_preload_content"] is False
+    assert api.stream.client.closed
     logs = backend.follow_logs(ref)
     assert logs.wait_closed(5)
-    containers = {call[3] for call in api.core.calls if call[0] == "logs"}
-    assert containers == {"tetragon", "export-stdout"}
+    assert {call[3] for call in api.core.calls if call[0] == "logs"} == {"tetragon"}
+    assert [line for _, line in logs.lines()] == ["Listening for events..."]
+
+
+def test_tail_file_retries_exec_until_container_accepts_it() -> None:
+    backend, api, clock = make_backend()
+    api.core.selector_pods[("ebpf-bench-tetragon", TETRAGON_SELECTOR)] = [tool_pod("tetragon-x", ["tetragon"])]
+    backend.start_tool("tetragon", "default", ContainerSpec(image="x"))
+    client = FakeExecClient(['{"process_exec": {}}\n'], [], 0)
+    attempts = []
+
+    def flaky(method, name, namespace, **kwargs):
+        attempts.append(name)
+        if len(attempts) < 3:
+            raise ApiError(500)
+        return client
+
+    api.stream = flaky
+    buffer = backend.tail_file(Path("/ignored"))
+    assert buffer.wait_closed(5)
+    assert len(attempts) == 3
+    assert [line for _, line in buffer.lines()] == ['{"process_exec": {}}']
+    api.stream = lambda *args, **kwargs: (_ for _ in ()).throw(ApiError(500))
+    failing = backend.tail_file(Path("/ignored"))
+    assert failing.wait_closed(5)
+    assert failing.lines() == []
+
+
+def test_tetragon_deployment_keeps_exported_events_off_stdout_and_var_log() -> None:
+    deployment = load_tool_deployment(REPO_ROOT, "tetragon")
+    assert deployment.alerts_file == TETRAGON_EXPORT
+    assert deployment.alerts_container == "tetragon"
+    assert deployment.log_containers == ("tetragon",)
+    for profile in ("default", "tuned"):
+        values = yaml.safe_load((deployment.directory / deployment.install["values"][profile]).read_text(encoding="utf-8"))
+        assert values["export"]["mode"] == ""
+        agent = values["tetragon"]
+        assert f"{values['exportDirectory']}/{agent['exportFilename']}" == TETRAGON_EXPORT
+        assert not values["exportDirectory"].startswith("/var/log")
+        assert agent["exportFileMaxSizeMB"] >= 2048
+        command = agent["commandOverride"]
+        assert command[:2] == ["/bin/sh", "-c"]
+        assert command[2].startswith("rm -f /var/lib/ebpf-bench/tetragon/tetragon*.log && exec /usr/bin/tetragon")
+
+
+def test_alerts_file_must_be_absolute(tmp_path: Path) -> None:
+    tool_dir = tmp_path / "deploy" / "kubernetes" / "tools" / "bad"
+    tool_dir.mkdir(parents=True)
+    (tool_dir / "tool.yaml").write_text(
+        "namespace: n\nrelease: r\ninstall: {type: manifests, manifests: [a.yaml], container: c}\n"
+        "agent: {selector: a=b, log_containers: [c], alerts_file: relative.log}\n"
+    )
+    with pytest.raises(ToolStartError, match="alerts_file"):
+        load_tool_deployment(tmp_path, "bad")
+
+
+def test_pump_read_lines_uses_read_time() -> None:
+    buffer = LineBuffer()
+    pump_read_lines(lambda: iter([b"a\nb", "c\r\n\n", "d"]), buffer, lambda: 7.0)
+    assert buffer.wait_closed(5)
+    assert buffer.lines() == [(7.0, "a"), (7.0, "bc"), (7.0, "d")]
 
 
 def test_tail_file_without_tool_is_closed() -> None:
@@ -776,6 +878,198 @@ def test_wait_ready_detects_restart() -> None:
     logs.append(1.0, "starting")
     with pytest.raises(ToolStartError, match="restarted"):
         backend.wait_ready(ref, logs, "never", 0.1)
+
+
+FALCO_SELECTOR = "app.kubernetes.io/name=falco,app.kubernetes.io/instance=falco"
+KUBEARMOR_SELECTOR = "kubearmor-app=kubearmor"
+
+
+def terminated_status(name: str, exit_code: int, reason: str, restarts: int = 0) -> SimpleNamespace:
+    state = SimpleNamespace(running=None, waiting=None, terminated=SimpleNamespace(exit_code=exit_code, reason=reason, message=None))
+    return SimpleNamespace(name=name, container_id=None, ready=False, restart_count=restarts, state=state)
+
+
+def warning_event(name: str, reason: str, message: str, count: int = 1, kind: str = "Pod") -> SimpleNamespace:
+    return SimpleNamespace(
+        type="Warning",
+        reason=reason,
+        message=message,
+        count=count,
+        involved_object=SimpleNamespace(kind=kind, name=name),
+        last_timestamp=datetime(2026, 1, 2, 3, 5, 0, tzinfo=UTC),
+    )
+
+
+def test_start_tool_failure_captures_pod_diagnostics() -> None:
+    runner = FakeRunner()
+    backend, api, _ = make_backend(runner=runner)
+    pod = make_pod("falco-x", [terminated_status("falco", 1, "Error")])
+    pod.status.init_container_statuses = [terminated_status("falco-driver-loader", 0, "Completed")]
+    api.core.selector_pods[("ebpf-bench-falco", FALCO_SELECTOR)] = [pod]
+    api.core.logs[("falco-x", "falco")] = [
+        f"2026-01-02T03:04:{index:02d}Z line {index}\n".encode() for index in range(30)
+    ] + [b"2026-01-02T03:04:59Z Error: could not load BPF probe\n"]
+    api.core.logs[("falco-x", "falco-driver-loader")] = [b"2026-01-02T03:04:00Z driver ok\n"]
+    api.core.events = [
+        warning_event("falco-x", "BackOff", "Back-off restarting failed container falco", 3),
+        SimpleNamespace(
+            type="Normal",
+            reason="Pulled",
+            message="Container image pulled",
+            count=1,
+            involved_object=SimpleNamespace(kind="Pod", name="falco-x"),
+            last_timestamp=None,
+        ),
+    ]
+    with pytest.raises(PodStartError) as caught:
+        backend.start_tool("falco", "default", ContainerSpec(image="x"))
+    message = str(caught.value)
+    assert "terminated with exit code 1 (Error)" in message
+    assert "container falco-x/falco: terminated exit_code=1 reason=Error" in message
+    assert "last logs (falco-x/falco):\nline 11\n" in message
+    assert message.count("\nline ") == 19 and "Error: could not load BPF probe" in message
+    assert "[event Pod/falco-x] Warning BackOff x3: Back-off restarting failed container falco" in message
+    assert "Pulled" not in message
+    lines = [line for _, line in caught.value.diagnostics]
+    assert "[falco-x/falco] Error: could not load BPF probe" in lines
+    assert "[falco-x/falco] line 0" in lines
+    assert "[falco-x/falco-driver-loader] driver ok" in lines
+    assert any(line.startswith("[falco-x] init container falco-driver-loader: terminated exit_code=0") for line in lines)
+    assert any("Normal Pulled x1" in line for line in lines)
+    stamps = dict((line, stamp) for stamp, line in caught.value.diagnostics)
+    assert stamps["[falco-x/falco] line 0"] == datetime(2026, 1, 2, 3, 4, 0, tzinfo=UTC).timestamp()
+    assert stamps["[event Pod/falco-x] Warning BackOff x3: Back-off restarting failed container falco"] == (
+        datetime(2026, 1, 2, 3, 5, 0, tzinfo=UTC).timestamp()
+    )
+    reads = {key: (tail, timestamps) for key, tail, timestamps in api.core.log_reads}
+    assert reads[("falco-x", "falco")] == (200, True)
+    assert ("falco-x", "falco", "previous") not in reads
+    assert runner.commands[-1][:2] == ["helm", "uninstall"]
+    assert backend._pending == []
+
+
+def test_crash_loop_diagnostics_use_previous_logs() -> None:
+    backend, api, _ = make_backend()
+    status = waiting_status("falco", "CrashLoopBackOff")
+    status.restart_count = 4
+    api.core.selector_pods[("ebpf-bench-falco", FALCO_SELECTOR)] = [make_pod("falco-x", [status])]
+    api.core.log_errors.add(("falco-x", "falco"))
+    api.core.logs[("falco-x", "falco", "previous")] = [b"2026-01-02T03:04:00Z previous crash\n"]
+    with pytest.raises(PodStartError) as caught:
+        backend.start_tool("falco", "default", ContainerSpec(image="x"))
+    assert "last logs (falco-x/falco previous):\nprevious crash" in str(caught.value)
+    lines = [line for _, line in caught.value.diagnostics]
+    assert "[falco-x/falco previous] previous crash" in lines
+    assert any(line.startswith("[falco-x/falco] logs unavailable: HTTP 400") for line in lines)
+
+
+def test_kubearmor_init_container_timeout_uses_tool_startup_timeout() -> None:
+    backend, api, _ = make_backend()
+    init = SimpleNamespace(
+        name="kubearmor-init",
+        container_id=None,
+        ready=False,
+        restart_count=0,
+        state=SimpleNamespace(running=SimpleNamespace(started_at="t0"), waiting=None, terminated=None),
+    )
+    main = waiting_status("kubearmor", "PodInitializing")
+    pod = make_pod("kubearmor-x", [main])
+    pod.status.init_container_statuses = [init]
+    api.core.selector_pods[("ebpf-bench-kubearmor", KUBEARMOR_SELECTOR)] = [pod]
+    api.core.logs[("kubearmor-x", "kubearmor-init")] = [b"2026-01-02T03:04:00Z compiling BPF objects: no kernel headers\n"]
+    api.core.events = [warning_event("kubearmor", "FailedCreate", "quota", kind="DaemonSet")]
+    with pytest.raises(PodStartError) as caught:
+        backend.start_tool("kubearmor", "default", ContainerSpec(image="x", startup_timeout=120))
+    message = str(caught.value)
+    assert "timed out after 600s" in message
+    assert "init container kubearmor-x/kubearmor-init: running" in message
+    assert "last logs (kubearmor-x/kubearmor-init):\ncompiling BPF objects: no kernel headers" in message
+    assert "[event DaemonSet/kubearmor] Warning FailedCreate x1: quota" in message
+    lines = [line for _, line in caught.value.diagnostics]
+    assert "[kubearmor-x/kubearmor-init] compiling BPF objects: no kernel headers" in lines
+    assert any(line.startswith("[kubearmor-x] container kubearmor: waiting reason=PodInitializing") for line in lines)
+
+
+def test_start_failure_without_pods_reports_it() -> None:
+    runner = FakeRunner(returncode=1, stderr="Error: chart not found")
+    backend, api, _ = make_backend(runner=runner)
+
+    def forbidden(namespace, **kwargs):
+        raise ApiError(403)
+
+    api.core.list_namespaced_event = forbidden
+    with pytest.raises(ToolStartError) as caught:
+        backend.start_tool("falco", "default", ContainerSpec(image="x"))
+    message = str(caught.value)
+    assert "chart not found" in message
+    assert "no agent pod ebpf-bench-falco" in message
+    assert any("events unavailable: HTTP 403" in line for _, line in caught.value.diagnostics)
+
+
+def test_non_tool_errors_are_wrapped_with_diagnostics() -> None:
+    backend, api, _ = make_backend()
+
+    def broken(namespace, body):
+        raise ApiError(403)
+
+    api.core.create_namespaced_config_map = broken
+    with pytest.raises(ToolStartError, match="ApiError: status 403") as caught:
+        backend.start_tool("falco", "default", ContainerSpec(image="x"))
+    assert isinstance(caught.value.__cause__, ApiError)
+
+
+def test_wait_ready_failure_captures_diagnostics() -> None:
+    backend, api, _ = make_backend()
+    api.core.selector_pods[("ebpf-bench-falco", FALCO_SELECTOR)] = [tool_pod("falco-abc", ["falco"])]
+    ref = backend.start_tool("falco", "default", ContainerSpec(image="x"))
+    restarted = tool_pod("falco-abc", ["falco"], restarts=1)
+    api.core.pods[("ebpf-bench-falco", "falco-abc")] = restarted
+    api.core.selector_pods[("ebpf-bench-falco", FALCO_SELECTOR)] = [restarted]
+    api.core.logs[("falco-abc", "falco", "previous")] = [b"2026-01-02T03:04:00Z segfault\n"]
+    api.core.logs[("falco-abc", "falco")] = [b"2026-01-02T03:04:10Z starting again\n"]
+    logs = LineBuffer()
+    logs.append(1.0, "starting")
+    with pytest.raises(ToolStartError) as caught:
+        backend.wait_ready(ref, logs, "never", 0.1)
+    message = str(caught.value)
+    assert "restarted" in message and "last logs:\nstarting" in message
+    assert "last logs (falco-abc/falco)" not in message
+    lines = [line for _, line in caught.value.diagnostics]
+    assert "[falco-abc/falco previous] segfault" in lines
+    assert "[falco-abc/falco] starting again" in lines
+
+
+def test_wait_ready_timeout_uses_tool_startup_timeout(tmp_path: Path) -> None:
+    tool_dir = tmp_path / "deploy" / "kubernetes" / "tools" / "slow"
+    tool_dir.mkdir(parents=True)
+    (tool_dir / "daemonset.yaml").write_text(
+        "kind: DaemonSet\nmetadata: {name: slow}\nspec: {template: {spec: {containers: [{name: slow}]}}}\n"
+    )
+    (tool_dir / "tool.yaml").write_text(
+        "namespace: ebpf-bench-slow\nrelease: slow\ninstall: {type: manifests, manifests: [daemonset.yaml], container: slow}\n"
+        "agent: {selector: app=slow, log_containers: [slow], startup_timeout: 42}\n"
+    )
+    backend, api, _ = make_backend(repo_root=tmp_path)
+    api.core.selector_pods[("ebpf-bench-slow", "app=slow")] = [tool_pod("slow-x", ["slow"])]
+    ref = backend.start_tool("slow", "default", ContainerSpec(image="x"))
+    api.core.pods[("ebpf-bench-slow", "slow-x")] = tool_pod("slow-x", ["slow"])
+    logs = LineBuffer()
+    logs.close()
+    with pytest.raises(ToolStartError, match="not seen within 42s"):
+        backend.wait_ready(ref, logs, "never", 1)
+
+
+def test_tool_startup_timeout_setting(tmp_path: Path) -> None:
+    assert load_tool_deployment(REPO_ROOT, "kubearmor").startup_timeout == 600.0
+    assert load_tool_deployment(REPO_ROOT, "falco").startup_timeout is None
+    tool_dir = tmp_path / "deploy" / "kubernetes" / "tools" / "bad"
+    tool_dir.mkdir(parents=True)
+    (tool_dir / "tool.yaml").write_text(
+        "namespace: n\nrelease: r\ninstall: {type: manifests, manifests: [a.yaml], container: c}\n"
+        "agent: {selector: a=b, log_containers: [c], startup_timeout: soon}\n"
+    )
+    with pytest.raises(ToolStartError, match="startup_timeout"):
+        load_tool_deployment(tmp_path, "bad")
 
 
 def test_exec_collects_output_and_exit_code() -> None:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import json
 import platform
 import subprocess
 import threading
@@ -48,6 +49,7 @@ HELM_TIMEOUT = 900.0
 EXEC_KILL_AFTER = 5
 EXEC_GRACE_SECONDS = 15.0
 EXEC_TIMEOUT_CODES = (TIMEOUT_EXIT_CODE, 137)
+EXEC_OPEN_ATTEMPTS = 30
 METRICS_POLL_SECONDS = 5.0
 METRICS_GROUP = "metrics.k8s.io"
 METRICS_VERSION = "v1beta1"
@@ -55,6 +57,10 @@ RESTART_ANNOTATION = "ebpf-bench/restarted-at"
 ALERTS_SIDECAR = "alerts"
 ALERTS_SIDECAR_IMAGE = "busybox:1.36.1"
 CONFIG_SUFFIXES = (".yaml", ".yml", ".json")
+DIAGNOSTIC_LOG_LINES = 200
+SUMMARY_LOG_LINES = 20
+SUMMARY_EVENTS = 10
+DIAGNOSTICS_TAG = "[diagnostics]"
 FAILED_WAITING_REASONS = frozenset(
     {
         "ErrImagePull",
@@ -131,6 +137,8 @@ class ToolDeployment:
     configmaps: tuple[dict[str, Any], ...] = ()
     custom_resources: tuple[dict[str, Any], ...] = ()
     restart_after_resources: bool = False
+    startup_timeout: float | None = None
+    alerts_file: str | None = None
 
     @property
     def kind(self) -> str:
@@ -328,6 +336,14 @@ def load_tool_deployment(repo_root: Path, tool: str) -> ToolDeployment:
     if absent:
         raise ToolStartError(f"{path}: missing {absent}")
     log_containers = tuple(str(name) for name in agent["log_containers"])
+    startup_timeout = agent.get("startup_timeout")
+    if startup_timeout is not None:
+        if isinstance(startup_timeout, bool) or not isinstance(startup_timeout, (int, float)) or startup_timeout <= 0:
+            raise ToolStartError(f"{path}: agent.startup_timeout must be a positive number of seconds")
+        startup_timeout = float(startup_timeout)
+    alerts_file = agent.get("alerts_file")
+    if alerts_file is not None and (not isinstance(alerts_file, str) or not alerts_file.startswith("/")):
+        raise ToolStartError(f"{path}: agent.alerts_file must be an absolute path inside agent.alerts_container")
     return ToolDeployment(
         tool=tool,
         directory=directory,
@@ -341,7 +357,13 @@ def load_tool_deployment(repo_root: Path, tool: str) -> ToolDeployment:
         configmaps=tuple(data.get("configmaps") or ()),
         custom_resources=tuple(data.get("custom_resources") or ()),
         restart_after_resources=bool(data.get("restart_after_resources", False)),
+        startup_timeout=startup_timeout,
+        alerts_file=alerts_file,
     )
+
+
+def tail_command(path: str) -> list[str]:
+    return ["tail", "-n", "+1", "-F", path]
 
 
 def kube_flags(settings: KubernetesConfig) -> list[str]:
@@ -558,6 +580,114 @@ def container_id(pod: Any, container: str) -> str:
     raise PodStartError(f"pod {pod.metadata.name} has no container {container}")
 
 
+def one_line(value: Any) -> str:
+    return " | ".join(line.strip() for line in str(value or "").splitlines() if line.strip())
+
+
+def error_text(error: BaseException) -> str:
+    body = getattr(error, "body", None)
+    message = None
+    if body:
+        try:
+            message = json.loads(body).get("message")
+        except (ValueError, TypeError, AttributeError):
+            message = body
+    status = getattr(error, "status", None)
+    text = one_line(message or f"{type(error).__name__}: {error}")
+    return f"HTTP {status}: {text}" if status is not None else text
+
+
+def format_state(state: Any) -> str:
+    if state is None:
+        return "unknown"
+    terminated = getattr(state, "terminated", None)
+    if terminated is not None:
+        return (
+            f"terminated exit_code={getattr(terminated, 'exit_code', None)} "
+            f"reason={getattr(terminated, 'reason', None)} message={one_line(getattr(terminated, 'message', None))}"
+        )
+    waiting = getattr(state, "waiting", None)
+    if waiting is not None:
+        return f"waiting reason={getattr(waiting, 'reason', None)} message={one_line(getattr(waiting, 'message', None))}"
+    running = getattr(state, "running", None)
+    if running is not None:
+        return f"running started_at={getattr(running, 'started_at', None)}"
+    return "none"
+
+
+def pod_containers(pod: Any) -> list[tuple[Any, bool]]:
+    status = getattr(pod, "status", None)
+    init = [(item, True) for item in getattr(status, "init_container_statuses", None) or []]
+    main = [(item, False) for item in getattr(status, "container_statuses", None) or []]
+    return init + main
+
+
+def has_previous(item: Any) -> bool:
+    last = getattr(item, "last_state", None)
+    return int(getattr(item, "restart_count", 0) or 0) > 0 or getattr(last, "terminated", None) is not None
+
+
+def is_failing(item: Any, init: bool) -> bool:
+    state = getattr(item, "state", None)
+    terminated = getattr(state, "terminated", None)
+    if init:
+        return terminated is None or getattr(terminated, "exit_code", None) != 0
+    return terminated is not None or getattr(state, "waiting", None) is not None or has_previous(item)
+
+
+def pod_summary(pod: Any) -> list[str]:
+    status = getattr(pod, "status", None)
+    head = f"pod phase={getattr(status, 'phase', None)} node={getattr(getattr(pod, 'spec', None), 'node_name', None)}"
+    for attribute in ("reason", "message"):
+        value = getattr(status, attribute, None)
+        if value:
+            head += f" {attribute}={one_line(value)}"
+    texts = [head]
+    for condition in getattr(status, "conditions", None) or []:
+        if getattr(condition, "status", None) != "True":
+            texts.append(
+                f"condition {condition.type}={condition.status} reason={getattr(condition, 'reason', None)} "
+                f"message={one_line(getattr(condition, 'message', None))}"
+            )
+    for item, init in pod_containers(pod):
+        text = (
+            f"{'init container' if init else 'container'} {item.name}: {format_state(getattr(item, 'state', None))} "
+            f"restarts={int(getattr(item, 'restart_count', 0) or 0)} ready={getattr(item, 'ready', None)}"
+        )
+        last = getattr(item, "last_state", None)
+        if getattr(last, "terminated", None) is not None:
+            text += f"; last state: {format_state(last)}"
+        texts.append(text)
+    return texts
+
+
+def event_line(event: Any) -> str:
+    involved = getattr(event, "involved_object", None)
+    target = f"{getattr(involved, 'kind', None)}/{getattr(involved, 'name', None)}"
+    return (
+        f"[event {target}] {getattr(event, 'type', None)} {getattr(event, 'reason', None)} "
+        f"x{getattr(event, 'count', None) or 1}: {one_line(getattr(event, 'message', None))}"
+    )
+
+
+def event_time(event: Any, default: float) -> float:
+    for attribute in ("last_timestamp", "event_time", "first_timestamp"):
+        value = getattr(event, attribute, None)
+        if isinstance(value, datetime):
+            return value.timestamp()
+    return default
+
+
+def with_diagnostics(error: BaseException, summary: str, diagnostics: list[tuple[float, str]]) -> ToolStartError:
+    if isinstance(error, ToolStartError):
+        cls: type[ToolStartError] = type(error)
+        message = str(error)
+    else:
+        cls = ToolStartError
+        message = f"{type(error).__name__}: {error}"
+    return cls(f"{message}\n{summary}" if summary else message, list(getattr(error, "diagnostics", [])) + diagnostics)
+
+
 def pump_log_streams(sources: list[Callable[[], Iterable[bytes]]], buffer: LineBuffer, name: str = "logs") -> None:
     if not sources:
         buffer.close()
@@ -587,6 +717,29 @@ def pump_log_streams(sources: list[Callable[[], Iterable[bytes]]], buffer: LineB
 
     for index, source in enumerate(sources):
         threading.Thread(target=pump, args=(source,), name=f"{name}-{index}", daemon=True).start()
+
+
+def pump_read_lines(
+    source: Callable[[], Iterable[str | bytes]], buffer: LineBuffer, clock: Callable[[], float], name: str = "tail"
+) -> None:
+    def pump() -> None:
+        pending = ""
+        try:
+            for chunk in source():
+                now = clock()
+                pending += chunk.decode("utf-8", errors="replace") if isinstance(chunk, bytes) else str(chunk)
+                *complete, pending = pending.split("\n")
+                for line in complete:
+                    if line.strip():
+                        buffer.append(now, line.rstrip("\r"))
+        except Exception:
+            pass
+        finally:
+            if pending.strip():
+                buffer.append(clock(), pending.rstrip("\r"))
+            buffer.close()
+
+    threading.Thread(target=pump, name=name, daemon=True).start()
 
 
 class MetricsSampler(StatsSampler):
@@ -766,6 +919,97 @@ class KubernetesBackend(Backend):
         self._remove_labelled(self.namespace)
         self.node = self.node or self._pick_node()
 
+    def _on_node(self, pod: Any) -> bool:
+        node = getattr(getattr(pod, "spec", None), "node_name", None)
+        return not (self.node and node and node != self.node)
+
+    def _read_log(
+        self, namespace: str, pod: str, container: str, previous: bool
+    ) -> tuple[list[tuple[float, str]], str | None]:
+        try:
+            response = self.api.core.read_namespaced_pod_log(
+                pod,
+                namespace,
+                container=container,
+                previous=previous,
+                timestamps=True,
+                tail_lines=DIAGNOSTIC_LOG_LINES,
+            )
+        except Exception as error:
+            return [], error_text(error)
+        text = response.decode("utf-8", errors="replace") if isinstance(response, bytes) else str(response or "")
+        return [split_timestamped(line) for line in text.splitlines() if line.strip()], None
+
+    def _events(self, namespace: str) -> tuple[list[Any], str | None]:
+        try:
+            return list(self.api.core.list_namespaced_event(namespace).items or []), None
+        except Exception as error:
+            return [], error_text(error)
+
+    def _diagnose(
+        self,
+        namespace: str,
+        selector: str,
+        containers: Iterable[str],
+        followed: Iterable[str] = (),
+        exclude: frozenset[str] = frozenset(),
+    ) -> tuple[list[tuple[float, str]], str]:
+        containers = tuple(containers)
+        followed = tuple(followed)
+        now = self.clock()
+        lines: list[tuple[float, str]] = []
+        try:
+            listed = self.api.core.list_namespaced_pod(namespace, label_selector=selector).items or []
+            pods = [pod for pod in listed if pod.metadata.uid not in exclude and self._on_node(pod)]
+            failure = None
+        except Exception as error:
+            pods, failure = [], error_text(error)
+        scope = f"{namespace} {selector} on node {self.node or 'any'}"
+        lines.append((now, f"{DIAGNOSTICS_TAG} ===== {len(pods)} agent pod(s) {scope} ====="))
+        if failure:
+            lines.append((now, f"{DIAGNOSTICS_TAG} cannot list pods: {failure}"))
+        collected: dict[tuple[str, str, bool], list[tuple[float, str]]] = {}
+        target: tuple[str, Any, bool] | None = None
+        fallback: tuple[str, Any, bool] | None = None
+        for pod in pods:
+            name = pod.metadata.name
+            lines.extend((now, f"[{name}] {text}") for text in pod_summary(pod))
+            for item, init in pod_containers(pod):
+                if target is None and is_failing(item, init):
+                    target = (name, item, init)
+                if fallback is None and not init and item.name in containers:
+                    fallback = (name, item, init)
+                for previous in (False, True) if has_previous(item) else (False,):
+                    tag = f"{name}/{item.name}{' previous' if previous else ''}"
+                    logs, unavailable = self._read_log(namespace, name, item.name, previous)
+                    if unavailable:
+                        lines.append((now, f"[{tag}] logs unavailable: {unavailable}"))
+                        continue
+                    lines.append((now, f"[{tag}] ----- last {len(logs)} log lines (tail {DIAGNOSTIC_LOG_LINES}) -----"))
+                    lines.extend((stamp, f"[{tag}] {text}") for stamp, text in logs)
+                    collected[(name, item.name, previous)] = logs
+        events, unavailable = self._events(namespace)
+        lines.append((now, f"{DIAGNOSTICS_TAG} ----- {len(events)} event(s) in {namespace} -----"))
+        if unavailable:
+            lines.append((now, f"{DIAGNOSTICS_TAG} events unavailable: {unavailable}"))
+        lines.extend((event_time(event, now), event_line(event)) for event in events)
+        parts = [] if pods or failure else [f"no agent pod {scope}"]
+        chosen = target or fallback
+        if chosen is not None:
+            name, item, init = chosen
+            kind = "init container" if init else "container"
+            parts.append(f"{kind} {name}/{item.name}: {format_state(getattr(item, 'state', None))}")
+            previous = not collected.get((name, item.name, False)) and bool(collected.get((name, item.name, True)))
+            logs = collected.get((name, item.name, previous)) or []
+            if logs and (init or previous or item.name not in followed):
+                label = f"{name}/{item.name}{' previous' if previous else ''}"
+                parts.append(f"last logs ({label}):\n" + "\n".join(text for _, text in logs[-SUMMARY_LOG_LINES:]))
+        warnings = [event for event in events if getattr(event, "type", None) == "Warning"]
+        if warnings:
+            parts.append("events:\n" + "\n".join(event_line(event) for event in warnings[-SUMMARY_EVENTS:]))
+        parts.append("full diagnostics in container.log")
+        return lines, "\n".join(parts)
+
     def _await_pod(
         self,
         namespace: str,
@@ -792,9 +1036,7 @@ class KubernetesBackend(Backend):
             candidates = [
                 pod
                 for pod in pods
-                if pod.metadata.deletion_timestamp is None
-                and pod.metadata.uid not in exclude
-                and not (self.node and pod.spec.node_name and pod.spec.node_name != self.node)
+                if pod.metadata.deletion_timestamp is None and pod.metadata.uid not in exclude and self._on_node(pod)
             ]
             for pod in candidates:
                 state, detail = pod_state(pod, containers, require_ready)
@@ -956,6 +1198,8 @@ class KubernetesBackend(Backend):
         deployment = load_tool_deployment(self.repo_root, tool)
         handle = ToolHandle(deployment=deployment, profile=profile, spec=spec)
         profile_dir = self.repo_root / "tools" / tool / profile
+        timeout = deployment.startup_timeout or spec.startup_timeout
+        exclude: frozenset[str] = frozenset()
         self._pending.append(handle)
         try:
             self._ensure_namespace(deployment.namespace, {ROLE_LABEL: "tool"})
@@ -966,25 +1210,27 @@ class KubernetesBackend(Backend):
                 self._helm(helm_install_command(deployment, profile, profile_dir, self.settings))
             else:
                 self._install_manifests(handle)
-            self._apply_custom_resources(handle, profile_dir, spec.startup_timeout)
-            exclude: frozenset[str] = frozenset()
+            self._apply_custom_resources(handle, profile_dir, timeout)
             if deployment.restart_after_resources and handle.resources:
                 exclude = self._restart_daemonsets(handle)
             pod = self._await_pod(
                 deployment.namespace,
                 deployment.log_containers,
-                spec.startup_timeout,
+                timeout,
                 selector=deployment.selector,
                 exclude=exclude,
                 require_ready=False,
             )
-        except Exception:
+        except Exception as error:
+            diagnostics, summary = self._diagnose(
+                deployment.namespace, deployment.selector, deployment.log_containers, exclude=exclude
+            )
             self._pending.remove(handle)
             try:
                 self._teardown_tool(handle)
             except Exception:
                 pass
-            raise
+            raise with_diagnostics(error, summary, diagnostics) from error
         self._pending.remove(handle)
         handle.pod = pod.metadata.name
         handle.restarts = restart_counts(pod)
@@ -1025,15 +1271,70 @@ class KubernetesBackend(Backend):
         namespace, pod, containers = self._location(ref)
         return self._follow(ref.id, namespace, pod, containers)
 
+    def _open_exec(self, namespace: str, pod: str, container: str, command: list[str]) -> Any:
+        return self.api.stream(
+            self.api.exec_core.connect_get_namespaced_pod_exec,
+            pod,
+            namespace,
+            container=container,
+            command=command,
+            stderr=True,
+            stdin=False,
+            stdout=True,
+            tty=False,
+            _preload_content=False,
+        )
+
+    def _exec_source(
+        self, key: str, namespace: str, pod: str, container: str, command: list[str], buffer: LineBuffer
+    ) -> Callable[[], Iterable[str]]:
+        def open_stream() -> Iterable[str]:
+            client = None
+            for _ in range(EXEC_OPEN_ATTEMPTS):
+                if buffer.stop_requested.is_set():
+                    return
+                try:
+                    client = self._open_exec(namespace, pod, container, command)
+                    break
+                except Exception:
+                    self.sleep(POLL_SECONDS)
+            if client is None:
+                return
+            self._responses.setdefault(key, []).append(client)
+            try:
+                while client.is_open():
+                    client.update(timeout=POLL_SECONDS)
+                    if client.peek_stdout():
+                        yield client.read_stdout()
+                    if client.peek_stderr():
+                        client.read_stderr()
+                if client.peek_stdout():
+                    yield client.read_stdout()
+            finally:
+                try:
+                    client.close()
+                except Exception:
+                    pass
+
+        return open_stream
+
     def tail_file(self, path: Path) -> LineBuffer:
         handle = self._tools.get(self._current_tool or "")
         if handle is None:
             buffer = LineBuffer()
             buffer.close()
             return buffer
-        return self._follow(
-            str(self._current_tool), handle.namespace, str(handle.pod), (handle.deployment.alerts_container,)
+        key = str(self._current_tool)
+        deployment = handle.deployment
+        if deployment.alerts_file is None:
+            return self._follow(key, handle.namespace, str(handle.pod), (deployment.alerts_container,))
+        buffer = LineBuffer()
+        self._buffers.setdefault(key, []).append(buffer)
+        source = self._exec_source(
+            key, handle.namespace, str(handle.pod), deployment.alerts_container, tail_command(deployment.alerts_file), buffer
         )
+        pump_read_lines(source, buffer, self.clock, f"tail-{handle.pod}")
+        return buffer
 
     def _log_tail(self, logs: LineBuffer, count: int = 20) -> str:
         return "\n".join(line for _, line in logs.lines()[-count:])
@@ -1060,6 +1361,20 @@ class KubernetesBackend(Backend):
         handle = self._tools.get(ref.id)
         if handle is not None and handle.deployment.ready_pattern != ADAPTER:
             pattern = handle.deployment.ready_pattern
+        if handle is not None and handle.deployment.startup_timeout:
+            timeout = handle.deployment.startup_timeout
+        try:
+            self._wait_ready(ref, logs, pattern, timeout)
+        except Exception as error:
+            if handle is None:
+                raise
+            deployment = handle.deployment
+            diagnostics, summary = self._diagnose(
+                handle.namespace, deployment.selector, deployment.log_containers, followed=deployment.log_containers
+            )
+            raise with_diagnostics(error, summary, diagnostics) from error
+
+    def _wait_ready(self, ref: ContainerRef, logs: LineBuffer, pattern: str | None, timeout: float) -> None:
         if pattern is None:
             self.sleep(min(3.0, timeout))
             self._ensure_running(ref, logs)
@@ -1085,18 +1400,7 @@ class KubernetesBackend(Backend):
         argv = exec_command(command, environment, timeout)
         started_at = self.clock()
         try:
-            client = self.api.stream(
-                self.api.exec_core.connect_get_namespaced_pod_exec,
-                pod,
-                namespace,
-                container=containers[0],
-                command=argv,
-                stderr=True,
-                stdin=False,
-                stdout=True,
-                tty=False,
-                _preload_content=False,
-            )
+            client = self._open_exec(namespace, pod, containers[0], argv)
         except Exception as error:
             return ExecResult(-1, f"[bench] exec error: {error}", started_at, self.clock())
         chunks: list[str] = []

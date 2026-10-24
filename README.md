@@ -166,6 +166,41 @@ Fixes that were needed to run each pinned release, kept in the repository:
 - **Tracee 0.24.1**: policy data filters only support equality, and the health endpoint did not answer with the documented configuration; readiness uses the `tracee_info` event.
 - **Kunai 0.6.2**: fails without `/sys/class/dmi/id/product_uuid` (`failed to read host_uuid`); the configurations set a fixed `host_uuid`.
 
+### Kubernetes mode on kind
+
+Run `20261024T114807Z`, 2026-10-24, same WSL2 host, single-node kind cluster (Kubernetes 1.33.1, containerd 2.1.1), tools installed with their upstream Helm charts or a DaemonSet. Full report: [`results/20261024T114807Z/report.md`](results/20261024T114807Z/report.md). Details, fixes and evidence: [deploy/kubernetes/README.md](deploy/kubernetes/README.md#validated-on-kind--wsl2).
+
+| Tool | Result on kind / WSL2 |
+|---|---|
+| Falco, Tracee, Kunai | run end to end, alerts attributed to the victim pods |
+| Pulsar | crashed the host twice at the same step (Docker and the WSL2 VM exited during its overhead workloads): not scored |
+| Tetragon | blocked: WSL2 has no host procfs in the kernel's initial PID namespace, so events cannot be tied to pods |
+| KubeArmor | blocked: containers registered with `pidns=0/mntns=0`, 0 alerts |
+
+| Tool | Profile | Recall | FP rate | Median latency | Recall / FP rate in Docker mode |
+|---|---|---|---|---|---|
+| Falco | tuned | 100.0% | 33.3% | 0.003 s | 100.0% / 33.3% |
+| Kunai | tuned | 100.0% | 33.3% | 0.076 s | 100.0% / 33.3% |
+| Tracee | tuned | 91.7% | 33.3% | 0.002 s | 91.7% / 33.3% |
+| Falco | default | 45.8% | 16.7% | 0.003 s | 45.8% / 16.7% |
+| Tracee | default | 20.8% | 16.7% | 0.006 s | 20.8% / 16.7% |
+| Kunai | default | 0.0% | 0.0% | — | 0.0% / 0.0% |
+
+| Tool | Profile | `exec` throughput | `openat` p50 latency | Syscall latency (median of metrics) | Attributed alerts | Alerts with container identity |
+|---|---|---|---|---|---|---|
+| Falco | default | -0.5% | +56.6% | +9.6% | 100.0% | 100.0% |
+| Falco | tuned | -1.4% | +52.0% | +7.1% | 90.2% | 97.1% |
+| Tracee | default | +14.0% | +145.3% | +35.5% | 100.0% | 100.0% |
+| Tracee | tuned | +9.2% | +200.9% | +46.9% | 100.0% | 100.0% |
+| Kunai | default | +50.8% | +51.5% | +76.8% | — | — |
+| Kunai | tuned | +15.4% | +32.1% | +28.3% | 90.4% | 100.0% |
+
+- **Detection matches Docker mode exactly** for the three tools that run: same recall and same false positive rate in every profile. Moving from a Docker container to a pod with a Helm-installed agent changed nothing for them.
+- **Overhead ranks the same way**: Falco is the cheapest, then Tracee, then Kunai. Tool CPU and memory are missing because metrics-server was not installed.
+- **t1046-network-scan is invalid in Kubernetes mode** (0/5 in the control runs). The victims reach the attacker through a ClusterIP Service that only exposes ports 8080, 4444 and 3333; connections to the other scanned ports get no answer, and the scan hits its timeout before it reports the open port. Recall still counts it out of 24, as in Docker mode.
+- **Kunai default** prints every event and exceeded the runner's log cap (5 million lines or 2 GiB): 20.8 million lines were dropped. That does not change its result, because the profile has no rules.
+- A first run (`20261023T132537Z`, not published) lost Falco tuned and Tracee to a DNS outage after the machine went to sleep, then stopped when Pulsar crashed the host.
+
 ## Limitations
 
 - **Single host, WSL2 kernel.** Results come from one machine with a Microsoft WSL2 kernel, which lacks BPF-LSM and the kprobe override helper. Absolute numbers and the enforcement results of KubeArmor and Tetragon may differ on a regular Linux host.
@@ -173,7 +208,7 @@ Fixes that were needed to run each pinned release, kept in the repository:
 - **Scenario realism.** Scenarios are short, simulated behaviors run in containers; they do not reproduce multi-stage intrusions or evasion.
 - **Attribution.** Alerts are credited to a scenario through container identity or the scenario marker. Tools that report no container identity, like Pulsar here, are under-credited.
 - **Raw alert files are not published.** `alerts/*.jsonl` contain host-wide events of the machine that ran the benchmark, not only the victim containers, and the Tetragon files weigh 73–95 MB each. `runs.jsonl`, `workloads.jsonl`, `metadata.json`, `score.json` (with the rules matched per run) and `report.md` are published; re-running the benchmark regenerates the alert files.
-- **Kubernetes mode** (`deploy/kubernetes/`) is implemented and unit-tested but these results come from Docker mode only.
+- **Kubernetes mode** was only run on kind under WSL2, where Tetragon, KubeArmor and Pulsar cannot be evaluated. A comparison of all six tools in Kubernetes needs a native Linux node.
 
 See [docs/methodology.md](docs/methodology.md#threats-to-validity) for the full list.
 

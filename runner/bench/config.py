@@ -29,8 +29,12 @@ CONFIG_KEYS = frozenset(
         "results_dir",
         "backend",
         "kubernetes",
+        "max_log_lines",
+        "max_log_bytes",
     }
 )
+DEFAULT_MAX_LOG_LINES = 5_000_000
+DEFAULT_MAX_LOG_BYTES = 2 * 1024**3
 OVERHEAD_KEYS = frozenset({"enabled", "duration_seconds", "repetitions", "workloads"})
 BACKENDS = ("docker", "kubernetes")
 KUBERNETES_KEYS = frozenset({"kubeconfig", "context", "namespace", "node"})
@@ -111,8 +115,12 @@ class Config:
     kubernetes: KubernetesConfig = field(default_factory=KubernetesConfig)
     source: str = ""
     control_scenarios: bool = True
+    max_log_lines: int = DEFAULT_MAX_LOG_LINES
+    max_log_bytes: int = DEFAULT_MAX_LOG_BYTES
 
     def __post_init__(self) -> None:
+        _require_int("max_log_lines", self.max_log_lines, 1)
+        _require_int("max_log_bytes", self.max_log_bytes, 1)
         if not isinstance(self.control_scenarios, bool):
             raise ValueError(f"control_scenarios must be a boolean, got {self.control_scenarios!r}")
         if self.backend not in BACKENDS:
@@ -152,6 +160,8 @@ class Config:
             "results_dir": str(self.results_dir),
             "backend": self.backend,
             "kubernetes": self.kubernetes.as_dict(),
+            "max_log_lines": self.max_log_lines,
+            "max_log_bytes": self.max_log_bytes,
         }
 
 
@@ -231,6 +241,8 @@ def parse_config(data: Any, source: str = "") -> Config:
         results_dir=Path(results_dir),
         backend=data.get("backend", "docker"),
         kubernetes=_kubernetes(data.get("kubernetes")),
+        max_log_lines=data.get("max_log_lines", DEFAULT_MAX_LOG_LINES),
+        max_log_bytes=data.get("max_log_bytes", DEFAULT_MAX_LOG_BYTES),
         source=source,
     )
 

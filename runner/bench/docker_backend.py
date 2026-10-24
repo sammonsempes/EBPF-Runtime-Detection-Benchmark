@@ -42,7 +42,9 @@ TIMESTAMP_PATTERN = re.compile(r"^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d+
 
 
 class ToolStartError(RuntimeError):
-    pass
+    def __init__(self, message: str = "", diagnostics: Iterable[tuple[float, str]] = ()) -> None:
+        super().__init__(message)
+        self.diagnostics = list(diagnostics)
 
 
 @dataclass(frozen=True)
@@ -67,15 +69,43 @@ class ExecResult:
 
 
 class LineBuffer:
-    def __init__(self) -> None:
+    def __init__(self, max_lines: int | None = None, max_bytes: int | None = None) -> None:
         self._lines: list[tuple[float, str]] = []
         self._condition = threading.Condition()
         self._closed = False
         self.stop_requested = threading.Event()
+        self.max_lines = max_lines
+        self.max_bytes = max_bytes
+        self.bytes = 0
+        self.dropped_lines = 0
+        self.dropped_bytes = 0
+
+    def limit(self, max_lines: int | None, max_bytes: int | None) -> None:
+        with self._condition:
+            self.max_lines = max_lines
+            self.max_bytes = max_bytes
+
+    @property
+    def overflow(self) -> bool:
+        with self._condition:
+            return self.dropped_lines > 0
+
+    def _full(self, size: int) -> bool:
+        if self.dropped_lines:
+            return True
+        if self.max_lines is not None and len(self._lines) >= self.max_lines:
+            return True
+        return self.max_bytes is not None and self.bytes + size > self.max_bytes
 
     def append(self, emitted_at: float, line: str) -> None:
+        size = len(line.encode("utf-8", errors="replace")) + 1
         with self._condition:
+            if self._full(size):
+                self.dropped_lines += 1
+                self.dropped_bytes += size
+                return
             self._lines.append((emitted_at, line))
+            self.bytes += size
             self._condition.notify_all()
 
     def close(self) -> None:

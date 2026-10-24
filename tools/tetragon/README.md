@@ -91,7 +91,11 @@ An alert is any event produced by a TracingPolicy of the active profile: `proces
 
 Enforcement is identified from upstream fields only: `raw.process_kprobe.action` (or the `action` of the other policy event types) is `KPROBE_ACTION_SIGKILL` (or `KPROBE_ACTION_OVERRIDE` for an Override variant) instead of `KPROBE_ACTION_POST`; the killed process later produces a `process_exit` with `signal: "SIGKILL"` (telemetry, not parsed as an alert).
 
-Alerts are read from the export file (`alerts_file`), so `emitted_at` is the runner read time. `ready_pattern` is `Listening for events\.\.\.`, logged by `pkg/observer/observer_linux.go` after the base sensor and all policies of `tracing-policy-dir` are loaded (`cmd/tetragon/main.go`).
+Alerts are read from the export file (`alerts_file`), so `emitted_at` is the runner read time. In Kubernetes mode the chart's `export-stdout` sidecar is disabled and the export file lives in `/var/lib/ebpf-bench/tetragon`, read with `tail -F` through the exec API: printing events on stdout or writing them under `/var/log` makes `file-monitoring-filtered` report its own output in a loop (see `deploy/kubernetes/README.md`, "Known differences from Docker mode"). `ready_pattern` is `Listening for events\.\.\.`, logged by `pkg/observer/observer_linux.go` after the base sensor and all policies of `tracing-policy-dir` are loaded (`cmd/tetragon/main.go`).
+
+## Kubernetes mode
+
+On kind under WSL2, Tetragon 1.7.1 (chart 1.7.0) runs but its events cannot be attributed: it rejects the mounted procfs (`inode mismatch: procfs does not appear to be host procfs`) because the WSL2 Linux distribution itself runs in a non-initial PID namespace of the WSL utility VM, so most policy events have `"flags":"unknown"` and no pod or container id (0% recall in both profiles). The `/var/log` feedback loop of the chart's stdout export was fixed in the deployment. Details and evidence: `deploy/kubernetes/README.md`, "Validated on kind / WSL2". A Kubernetes result for Tetragon needs a native Linux node.
 
 ## Fixtures
 
