@@ -7,8 +7,10 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $devtcp: .data.command_line ~= '/dev/(tcp|udp)/'
-condition: $devtcp
+condition: ($devtcp) and $in_container and not $runtime
 severity: 9
 actions: [ kill ]
 
@@ -23,8 +25,10 @@ match-on:
   events:
     kunai: [ connect ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $shell: .data.exe.path ~= '/(ba|da|z|k|tc|c|fi|a)?sh$'
-condition: $shell
+condition: ($shell) and $in_container and not $runtime
 severity: 8
 actions: [ kill ]
 
@@ -39,9 +43,11 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $interpreter: .data.parent_exe ~= '/(python[0-9.]*|perl[0-9.]*|ruby[0-9.]*|php[0-9.]*|node|lua[0-9.]*)$'
   $shell: .data.exe.path ~= '/(ba|da|z|k|a)?sh$'
-condition: $interpreter and $shell
+condition: ($interpreter and $shell) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -56,9 +62,11 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $inline: .data.parent_command_line ~= '^(\S*/)?(python[0-9.]*|perl|ruby|php)\s+(-\S+\s+)*-(c|e|r)\s'
   $shell: .data.exe.path ~= '/(ba|da|z|k|a)?sh$'
-condition: $inline and $shell
+condition: ($inline and $shell) and $in_container and not $runtime
 severity: 7
 actions: [ kill ]
 
@@ -120,8 +128,10 @@ match-on:
   events:
     kunai: [ write_config, file_create, write_close ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $cron: .data.path ~= '^/(etc/cron(tab$|\.d/|\.daily/|\.hourly/|\.weekly/|\.monthly/)|var/spool/cron/)'
-condition: $cron
+condition: ($cron) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -136,8 +146,10 @@ match-on:
   events:
     kunai: [ file_rename ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $cron: .data.new ~= '^/(etc/cron(tab$|\.d/|\.daily/|\.hourly/|\.weekly/|\.monthly/)|var/spool/cron/)'
-condition: $cron
+condition: ($cron) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -152,9 +164,11 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $crontab: .data.exe.path ~= '/crontab$'
   $list: .data.command_line ~= '\s-l(\s|$)'
-condition: $crontab and not $list
+condition: ($crontab and not $list) and $in_container and not $runtime
 severity: 5
 actions: [ kill ]
 
@@ -169,8 +183,10 @@ match-on:
   events:
     kunai: [ write_config, file_create, write_close ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $unit: .data.path ~= '^/(etc/systemd/(system|user)/|usr/lib/systemd/(system|user)/|lib/systemd/(system|user)/|root/\.config/systemd/user/|home/[^/]+/\.config/systemd/user/)'
-condition: $unit
+condition: ($unit) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -185,8 +201,10 @@ match-on:
   events:
     kunai: [ file_rename ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $unit: .data.new ~= '^/(etc/systemd/(system|user)/|usr/lib/systemd/(system|user)/|lib/systemd/(system|user)/)'
-condition: $unit
+condition: ($unit) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -201,8 +219,10 @@ match-on:
   events:
     kunai: [ write_config, file_create, write_close ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $keys: .data.path ~= '/\.ssh/authorized_keys2?$'
-condition: $keys
+condition: ($keys) and $in_container and not $runtime
 severity: 7
 actions: [ kill ]
 
@@ -217,8 +237,10 @@ match-on:
   events:
     kunai: [ file_rename ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $keys: .data.new ~= '/\.ssh/authorized_keys2?$'
-condition: $keys
+condition: ($keys) and $in_container and not $runtime
 severity: 7
 actions: [ kill ]
 
@@ -233,9 +255,11 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $keys: .data.command_line ~= '\.ssh/authorized_keys'
   $sshd: .data.exe.path ~= '/(sshd|ssh-keygen)$'
-condition: $keys and not $sshd
+condition: ($keys and not $sshd) and $in_container and not $runtime
 severity: 5
 actions: [ kill ]
 
@@ -250,8 +274,10 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $tool: .data.exe.path ~= '/(useradd|adduser|newusers|chpasswd)$'
-condition: $tool
+condition: ($tool) and $in_container and not $runtime
 severity: 5
 actions: [ kill ]
 
@@ -265,6 +291,10 @@ meta:
 match-on:
   events:
     kunai: [ init_module ]
+matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
+condition: $in_container and not $runtime
 severity: 8
 actions: [ kill ]
 
@@ -279,10 +309,12 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $insmod: .data.exe.path ~= '/insmod$'
   $modprobe: .data.exe.path ~= '/modprobe$'
   $remove: .data.command_line ~= '\s(-r|--remove|-n|--dry-run|--show-depends|-c|--showconfig)(\s|$)'
-condition: $insmod or ($modprobe and not $remove)
+condition: ($insmod or ($modprobe and not $remove)) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -297,9 +329,11 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $chmod: .data.exe.path ~= '/chmod$'
   $suid: .data.command_line ~= '\s([ugoa]*\+[rwxXt]*s[rwxXt]*|0?[2467][0-7]{3})(\s|,)'
-condition: $chmod and $suid
+condition: ($chmod and $suid) and $in_container and not $runtime
 severity: 7
 actions: [ kill ]
 
@@ -314,9 +348,11 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $tool: .data.exe.path ~= '/(chmod|chown|chgrp|setfacl)$'
   $target: .data.command_line ~= '\s/etc/(shadow|gshadow|passwd|group|sudoers)(\s|$)'
-condition: $tool and $target
+condition: ($tool and $target) and $in_container and not $runtime
 severity: 7
 actions: [ kill ]
 
@@ -331,9 +367,11 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $nsenter: .data.exe.path ~= '/nsenter$'
   $target: .data.command_line ~= '(\s-t|\s--target)(\s+|=)1(\s|$)|\s-[a-zA-Z]*t\s*1(\s|$)'
-condition: $nsenter and $target
+condition: ($nsenter and $target) and $in_container and not $runtime
 severity: 8
 actions: [ kill ]
 
@@ -348,9 +386,11 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $mount: .data.exe.path ~= '/mount$'
   $device: .data.command_line ~= '\s/dev/(sd[a-z]|vd[a-z]|xvd[a-z]|hd[a-z]|nvme[0-9]|mmcblk[0-9]|dm-[0-9]|mapper/)'
-condition: $mount and $device
+condition: ($mount and $device) and $in_container and not $runtime
 severity: 8
 actions: [ kill ]
 
@@ -365,9 +405,11 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $chroot: .data.exe.path ~= '/chroot$'
   $host: .data.command_line ~= '\s/(host|mnt|media)(/\S*)?(\s|$)'
-condition: $chroot and $host
+condition: ($chroot and $host) and $in_container and not $runtime
 severity: 7
 actions: [ kill ]
 
@@ -382,8 +424,10 @@ match-on:
   events:
     kunai: [ file_unlink ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $history: .data.path ~= '/\.(bash|zsh|sh|ash|mysql|psql|python)_history$|/fish_history$'
-condition: $history
+condition: ($history) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -398,9 +442,11 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $tool: .data.command_line ~= '(^|/|\s)(rm|shred|truncate|unlink|ln|cp|mv|wipe)\s.*_history(\s|$)'
   $histfile: .data.command_line ~= '(unset\s+HISTFILE|HISTFILE=/dev/null|HISTSIZE=0|history\s+-c)'
-condition: $tool or $histfile
+condition: ($tool or $histfile) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -447,9 +493,11 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $name: .data.exe.path ~= '/(sshd|systemd[a-z-]*|crond?|atd|kworker[^/]*|kthreadd|ksoftirqd[^/]*|init|dbus-daemon|rsyslogd|syslogd|agetty|udevd|containerd|dockerd|kubelet)$'
   $system: .data.exe.path ~= '^/(usr/)?(s?bin|lib|lib64|libexec|lib/systemd)/'
-condition: $name and not $system
+condition: ($name and not $system) and $in_container and not $runtime
 severity: 8
 actions: [ kill ]
 
@@ -464,8 +512,10 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $hidden: .data.exe.path ~= '^/(tmp|dev/shm|var/tmp|run)/(.*/)?\.[^/]+/'
-condition: $hidden
+condition: ($hidden) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -480,9 +530,11 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $memfd: .data.exe.path ~= '^/?memfd:'
   $fd: .data.exe.path ~= '^/(proc/(self|[0-9]+)/fd|dev/fd)/[0-9]+'
-condition: $memfd or $fd
+condition: ($memfd or $fd) and $in_container and not $runtime
 severity: 9
 actions: [ kill ]
 
@@ -497,9 +549,11 @@ match-on:
   events:
     kunai: [ read_config ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $shadow: .data.path ~= '^/etc/(shadow|gshadow|security/opasswd)$'
   $legit: .data.exe.path ~= '/(sshd|login|su|sudo|passwd|unix_chkpwd|chage|useradd|usermod|userdel|groupadd|groupmod|pwck|grpck|chpasswd|newusers|cron|crond|systemd|systemd-[a-z-]+)$'
-condition: $shadow and not $legit
+condition: ($shadow and not $legit) and $in_container and not $runtime
 severity: 7
 actions: [ kill ]
 
@@ -514,9 +568,11 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $shadow: .data.command_line ~= '(^|\s)/etc/(shadow|gshadow)(\s|$)'
   $perm: .data.exe.path ~= '/(chmod|chown|chgrp|setfacl)$'
-condition: $shadow and not $perm
+condition: ($shadow and not $perm) and $in_container and not $runtime
 severity: 7
 actions: [ kill ]
 
@@ -531,9 +587,11 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $files: .data.command_line ~= '\.aws/credentials|\.ssh/id_(rsa|dsa|ecdsa|ed25519)|(^|\s|/)id_(rsa|dsa|ecdsa|ed25519)(\s|$)|\.git-credentials|\.docker/config\.json|\.kube/config|\.netrc|\.pgpass|\.config/gcloud/(credentials|access_tokens)'
   $ssh: .data.exe.path ~= '/(ssh|scp|sftp|ssh-add|ssh-keygen|ssh-agent|git|aws|kubectl|docker)$'
-condition: $files and not $ssh
+condition: ($files and not $ssh) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -548,11 +606,13 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $token: .data.command_line ~= '/run/secrets/kubernetes\.io/serviceaccount'
   $socket: .data.command_line ~= '(docker|containerd|crio|podman)\.sock'
   $api: .data.command_line ~= ':(2375|2376|10250|10255)(/|\s|$)'
   $daemon: .data.exe.path ~= '/(dockerd|containerd|containerd-shim[a-z0-9-]*|runc|kubelet)$'
-condition: ($token or $socket or $api) and not $daemon
+condition: (($token or $socket or $api) and not $daemon) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -599,10 +659,12 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $nc: .data.exe.path ~= '/(nc|ncat|netcat|nc\.openbsd|nc\.traditional|busybox)$'
   $scan: .data.command_line ~= '\s-[a-zA-Z]*z|\s[0-9]+-[0-9]+(\s|$)'
   $scanner: .data.exe.path ~= '/(nmap|masscan|zmap|rustscan|naabu|unicornscan|hping3)$'
-condition: ($nc and $scan) or $scanner
+condition: (($nc and $scan) or $scanner) and $in_container and not $runtime
 severity: 5
 actions: [ kill ]
 
@@ -617,9 +679,11 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $tool: .data.exe.path ~= '/(curl|wget)$'
   $upload: .data.command_line ~= '(\s-d|\s--data[a-z-]*|\s-F|\s--form)(\s+|=)\S*@|\s(-T|--upload-file|--post-file)(\s|=)'
-condition: $tool and $upload
+condition: ($tool and $upload) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]
 
@@ -634,9 +698,11 @@ match-on:
   events:
     kunai: [ execve, execve_script ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $exe: .data.exe.path ~= '/(xmrig[^/]*|xmr-stak[^/]*|minerd|cpuminer[^/]*|ccminer|ethminer|nbminer|t-rex|lolminer|kdevtmpfsi|kinsing)$'
   $stratum: .data.command_line ~= 'stratum\+(tcp|ssl|tls)://|--donate-level|\s-o\s+\S+:(3333|4444|5555|7777|14444|45700)(\s|$)'
-condition: $exe or $stratum
+condition: ($exe or $stratum) and $in_container and not $runtime
 severity: 8
 actions: [ kill ]
 
@@ -651,12 +717,14 @@ match-on:
   events:
     kunai: [ connect ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $exe: .data.exe.path ~= '/(xmrig[^/]*|xmr-stak[^/]*|minerd|cpuminer[^/]*|ccminer|ethminer|nbminer|t-rex|lolminer)$'
   $p3333: .data.dst.port == '3333'
   $p14444: .data.dst.port == '14444'
   $p14433: .data.dst.port == '14433'
   $p45700: .data.dst.port == '45700'
-condition: $exe or $p3333 or $p14444 or $p14433 or $p45700
+condition: ($exe or $p3333 or $p14444 or $p14433 or $p45700) and $in_container and not $runtime
 severity: 7
 actions: [ kill ]
 
@@ -671,8 +739,10 @@ match-on:
   events:
     kunai: [ execve ]
 matches:
+  $in_container: .data.ancestors ~= '/containerd-shim[a-z0-9-]*(\||$)'
+  $runtime: .data.exe.path ~= '/(runc|containerd[a-z0-9-]*|dockerd|kubelet)$|runc_cloned'
   $tool: .data.exe.path ~= '/(shred|wipe|srm|wipefs)$'
   $dd: .data.command_line ~= '(^|/|\s)dd\s.*if=/dev/(zero|urandom|random).*of=/'
-condition: $tool or $dd
+condition: ($tool or $dd) and $in_container and not $runtime
 severity: 6
 actions: [ kill ]

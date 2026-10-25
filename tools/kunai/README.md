@@ -58,6 +58,11 @@ printed by the single-threaded event loop once the loader yields; a few events r
   `download.to.tmpfs`, `chmod.exec.in.tmpfs` (a compiled or downloaded binary in `/tmp`), `defense_evasion.logs.clear`
   and `defense_evasion.logs.delete` (log rotation), `discovery.container.environment` and `discovery.system.information`
   (admin commands). Same rule set and severities as tuned, so detection results are comparable.
+  Every kill rule also requires `$in_container` (`.data.ancestors` contains `containerd-shim`) and `not $runtime`
+  (the executable is not `runc`, `containerd*`, `dockerd` or `kubelet`). Without this scope, on the native host of run
+  `20261025T090806Z`, `defense_evasion.history.delete` killed `dockerd` while it removed a container layer holding a
+  `.bash_history`, and `defense_evasion.fileless.memfd_exec` tried to kill `runc init` on every `docker exec`. The
+  scope keeps detection identical for the 33 scenario rules.
 - `community/config.yaml` + `community/rules/`: the default configuration with `scanner.rules` set to the
   `/etc/kunai/rules` directory, which holds the upstream community rules verbatim (see below). No rule of ours.
 
@@ -103,6 +108,9 @@ A process killed after `execve` may already have done its work, a file written t
 the killed task can be the scenario shell itself when the matching operation is a shell builtin (for example a
 redirection into `authorized_keys`). Kill is skipped for kunai itself and for tasks already killed, and silently
 ignored on filter rules.
+
+`kunai replay -r <rules>` applies the actions too: replaying enforce rules sends `SIGKILL` to the PIDs found in the
+replayed events. Strip `actions` from a copy of the rules before replaying them.
 
 Identifying an enforcement: the alert `raw.detection.actions` contains `"kill"` (union of the actions of the matching
 rules). This is the configured action, not its outcome; the outcome is only logged on stderr at WARN level

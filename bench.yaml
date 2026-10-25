@@ -36,3 +36,6 @@ kubernetes:
   context: kind-ebpf-bench
   namespace: ebpf-bench
   node: null
+
+max_log_lines: 15000000
+max_log_bytes: 16106127360

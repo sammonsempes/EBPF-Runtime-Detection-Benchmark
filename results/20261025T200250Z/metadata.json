@@ -1,0 +1,653 @@
+{
+  "run_id": "20261025T200250Z",
+  "status": "interrupted",
+  "started_at": 1792958570.4458332,
+  "finished_at": 1792990281.889974,
+  "host": {
+    "backend": "kubernetes",
+    "kernel": "6.12.105+deb13-amd64",
+    "operating_system": "Debian GNU/Linux 12 (bookworm)",
+    "architecture": "amd64",
+    "cpus": 8,
+    "memory_bytes": 33201963008.0,
+    "node": "ebpf-bench-control-plane",
+    "container_runtime": "containerd://2.1.1",
+    "kubelet_version": "v1.33.1",
+    "kubernetes_version": "v1.33.1",
+    "kube_context": "kind-ebpf-bench",
+    "namespace": "ebpf-bench",
+    "runner_python": "3.12.15"
+  },
+  "host_repo_root": "/home/sam/hackathon/EBPF-Runtime-Detection-Benchmark",
+  "config": {
+    "tools": [
+      "pulsar"
+    ],
+    "profiles": [
+      "default",
+      "tuned",
+      "enforce",
+      "community"
+    ],
+    "scenarios": "all",
+    "repetitions": 5,
+    "grace_seconds": 10,
+    "idle_seconds": 3,
+    "control_scenarios": true,
+    "overhead": {
+      "enabled": true,
+      "duration_seconds": 30,
+      "repetitions": 3,
+      "workloads": [
+        "syscall",
+        "exec",
+        "fileio"
+      ]
+    },
+    "results_dir": "results",
+    "backend": "kubernetes",
+    "kubernetes": {
+      "kubeconfig": null,
+      "context": "kind-ebpf-bench",
+      "namespace": "ebpf-bench",
+      "node": null
+    },
+    "max_log_lines": 15000000,
+    "max_log_bytes": 16106127360
+  },
+  "bench_yaml": "tools:\n  - pulsar\n\nprofiles:\n  - default\n  - tuned\n  - enforce\n  - community\n\nscenarios: all\n\nrepetitions: 5\ngrace_seconds: 10\nidle_seconds: 3\ncontrol_scenarios: true\n\noverhead:\n  duration_seconds: 30\n  repetitions: 3\n  workloads:\n    - syscall\n    - exec\n    - fileio\n\nresults_dir: results\n\nbackend: docker\n\nkubernetes:\n  kubeconfig: null\n  context: kind-ebpf-bench\n  namespace: ebpf-bench\n  node: null\n\nmax_log_lines: 15000000\nmax_log_bytes: 16106127360\n",
+  "tools": {
+    "pulsar": {
+      "name": "pulsar",
+      "version": "0.10.1",
+      "profiles": [
+        "default",
+        "tuned"
+      ],
+      "supported_profiles": [
+        "default",
+        "tuned"
+      ],
+      "config_sha256": {
+        "default": "9cb2665a655ee8a5be83daff71c0f959a822bda130dc167dbed9778a159b9c8a",
+        "tuned": "dd1914d537536c908ca021d86c456226f60f594aa68d47a31283b04bc2ba82d4",
+        "enforce": null,
+        "community": null
+      },
+      "available": true,
+      "status": "partial",
+      "error": "default: MaxRetryError: HTTPSConnectionPool(host='127.0.0.1', port=37723): Max retries exceeded with url: /apis/apps/v1/namespaces/ebpf-bench/deployments/attacker?propagationPolicy=Foreground (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)')))"
+    }
+  },
+  "operational": {
+    "pulsar": {
+      "tool": "pulsar",
+      "version": "0.10.1",
+      "license": "Apache-2.0 AND GPL-2.0",
+      "deployment": {
+        "linux": "official multi-arch image ghcr.io/exein-io/pulsar:v0.10.1 (entrypoint pulsard) run privileged with host PID namespace, /sys/kernel/debug, /sys/kernel/btf, /sys/fs/bpf and /var/lib/docker mounted",
+        "kubernetes": "none upstream",
+        "steps": 2
+      },
+      "rules": {
+        "language": "YAML rule files (name, type, category, severity, description, condition) with a typed condition DSL over event header and payload (==, !=, <, >, STARTS_WITH, ENDS_WITH, CONTAINS, IN, AND/OR/NOT, is_some())",
+        "custom_rules": true,
+        "hot_reload": true
+      },
+      "output": {
+        "formats": [
+          "json",
+          "plaintext",
+          "syslog"
+        ],
+        "enrichment": [
+          "container",
+          "image",
+          "user"
+        ],
+        "attack_mapping": false
+      },
+      "response": {
+        "blocking": false,
+        "mechanisms": [],
+        "synchronous": null,
+        "notes": "v0.10.1 has no response or enforcement capability: the modules are process-monitor, file-system-monitor, network-monitor, rules-engine, threat-logger, desktop-notifier and smtp-notifier, and rules only have name, type, category, severity, description and condition fields (no action). A matching rule only emits a threat event, so no enforce profile is provided."
+      },
+      "scores": {
+        "deployment": 4,
+        "rule_customization": 4,
+        "output_quality": 4
+      },
+      "notes": "Deployment 4: upstream publishes release binaries (pulsard-<arch>[-static], pulsar-<arch>[-static], pulsar-install.sh) and the release workflow pushes ghcr.io/exein-io/pulsar:<tag> built from .github/docker/Dockerfile with the default config and rules baked in; the quickstart is 2 commands (install script, `pulsard`), and the image only needs the usual eBPF privileges and mounts plus /var/lib/docker for container enrichment. No Helm chart or manifest upstream. Rule customization 4: 47 default YAML rule files in rules/ (Elastic detection-rules based) loaded recursively from /var/lib/pulsar/rules; the DSL is declarative and typed but has no regex, no process ancestry and only per-event fields. hot_reload is true because the rules-engine on_config_change hook rebuilds the engine from disk when its configuration is changed at runtime through `pulsar config` / the engine API (no file watcher); this was removed after 0.10.1. Output quality 4: threat-logger prints threat events as JSON (`output_format=json`) with header (image, pid, parent_pid, uid, gid, container id/name/image/image_digest/layers, threat source/description/extra) and the typed payload; the rule name is threat.description and extra holds category, severity, description and condition. No ATT&CK ids (only a category), no ancestry beyond parent_pid, timestamps are serialized as secs/nanos since epoch."
+    }
+  },
+  "scenarios": [
+    {
+      "id": "benign-admin-commands",
+      "name": "Routine administration commands",
+      "kind": "benign",
+      "description": "Runs the commands an operator types when checking a machine: id, ps aux, ls -la /, df -h, free -m, cat /etc/os-release and uptime. Read only, local only.",
+      "path": "/bench/scenarios/benign-admin-commands",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "benign-backup",
+      "name": "Data directory backup with tar",
+      "kind": "benign",
+      "description": "Creates a data directory /srv/bench-data-<marker> with a few text files, archives it with tar -czf to /backup/data-<marker>.tar.gz, lists the archive to verify it and removes both afterwards. Local only, no network.",
+      "path": "/bench/scenarios/benign-backup",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "benign-compile",
+      "name": "Compile and run a C program",
+      "kind": "benign",
+      "description": "Writes a small C program in /root/workspace/bench-<marker>, compiles it with gcc (cc1, as and collect2/ld child processes, new executable written to disk) and runs the produced binary. The workspace is removed afterwards.",
+      "path": "/bench/scenarios/benign-compile",
+      "tactic": null,
+      "technique": null,
+      "timeout": 60.0,
+      "requires": []
+    },
+    {
+      "id": "benign-log-rotation",
+      "name": "Application log rotation with logrotate",
+      "kind": "benign",
+      "description": "Writes application logs to /var/log/benchapp-<marker>/, runs logrotate -f with a dedicated configuration (rotate 3, compress) and state file, which renames the logs and gzips the rotated copies, then verifies the .1.gz archives. Everything is removed afterwards. Exercises legitimate file renames and writes under /var/log.",
+      "path": "/bench/scenarios/benign-log-rotation",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "benign-package-query",
+      "name": "Installed package queries",
+      "kind": "benign",
+      "description": "Queries the local package database without network access: dpkg -l, dpkg -s coreutils, dpkg -L bash and apt-cache policy for bash and python3 (reads the apt lists kept in the victim image).",
+      "path": "/bench/scenarios/benign-package-query",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "benign-web-server",
+      "name": "Local Python web server queried with curl",
+      "kind": "benign",
+      "description": "Starts python3 -m http.server bound to 127.0.0.1:18080 serving a static directory /tmp/bench-site-<marker>, waits until it answers, fetches the index page with curl, then stops the server and removes the directory. Loopback traffic only.",
+      "path": "/bench/scenarios/benign-web-server",
+      "tactic": null,
+      "technique": null,
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1003-008-shadow-read",
+      "name": "Read /etc/shadow",
+      "kind": "attack",
+      "description": "Reads /etc/shadow with cat and copies it to /tmp/bench-shadow-<marker> with dd, the way a credential dumper stages hashes for offline cracking. Prints only account names. The copy is removed afterwards.",
+      "path": "/bench/scenarios/t1003-008-shadow-read",
+      "tactic": "credential-access",
+      "technique": "T1003.008",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1036-005-masquerading",
+      "name": "Binary masquerading as sshd in a hidden directory",
+      "kind": "attack",
+      "description": "Copies /usr/bin/sleep to the hidden directory /tmp/.X11-<marker>/sshd and runs it, producing a process named sshd whose executable lives in /tmp and whose content is not the OpenSSH daemon. The directory is removed afterwards.",
+      "path": "/bench/scenarios/t1036-005-masquerading",
+      "tactic": "defense-evasion",
+      "technique": "T1036.005",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1046-network-scan",
+      "name": "TCP port scan of the attacker with netcat",
+      "kind": "attack",
+      "description": "Runs nc -z (connect scan) against $BENCH_ATTACKER on ports 1-1024, 3300-3400 and 8000-8100, i.e. about 1200 TCP connection attempts in a few seconds, most of them refused. Port 4444 is deliberately skipped so the reverse shell sink is not triggered. Exits 0 when the scan found at least one open port (8080 is always open), which proves the scan reached the attacker.",
+      "path": "/bench/scenarios/t1046-network-scan",
+      "tactic": "discovery",
+      "technique": "T1046",
+      "timeout": 60.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1048-exfiltration-http",
+      "name": "Sensitive files archived and posted over HTTP",
+      "kind": "attack",
+      "description": "Archives /etc/passwd, /etc/shadow and the honey credential files (/root/.aws/credentials, /root/.ssh/id_rsa, /opt/app/.env) into /tmp/bench-exfil-<marker>.tar.gz and uploads it with curl --data-binary to http://$BENCH_ATTACKER:8080/upload, which discards the data. The archive is removed afterwards.",
+      "path": "/bench/scenarios/t1048-exfiltration-http",
+      "tactic": "exfiltration",
+      "technique": "T1048",
+      "timeout": 30.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1053-003-cron-persistence",
+      "name": "Cron job dropped in /etc/cron.d",
+      "kind": "attack",
+      "description": "Writes /etc/cron.d/bench-<marker> containing a job running every minute as root, prints it, then removes it. The cron daemon is not started, the file creation in /etc/cron.d is the behavior.",
+      "path": "/bench/scenarios/t1053-003-cron-persistence",
+      "tactic": "persistence",
+      "technique": "T1053.003",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1059-004-reverse-shell",
+      "name": "Reverse shell with bash /dev/tcp",
+      "kind": "attack",
+      "description": "Starts an interactive bash whose stdin, stdout and stderr are redirected to a TCP socket opened with the bash /dev/tcp pseudo device towards $BENCH_ATTACKER:4444. The attacker sink sends id, uname -a, hostname and exit, then closes. The shell history is disabled so the scenario leaves no trace. BENCH_MARKER is the $0 of the outer bash -c.",
+      "path": "/bench/scenarios/t1059-004-reverse-shell",
+      "tactic": "execution",
+      "technique": "T1059.004",
+      "timeout": 30.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1059-006-python-exec",
+      "name": "Python inline code spawning a shell",
+      "kind": "attack",
+      "description": "Runs python3 -c with inline code that spawns /bin/sh -c to execute id and uname. The resulting process tree is python3 -> sh -> id/uname. BENCH_MARKER is passed as a python argument and echoed by the shell.",
+      "path": "/bench/scenarios/t1059-006-python-exec",
+      "tactic": "execution",
+      "technique": "T1059.006",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1070-002-clear-logs",
+      "name": "System logs truncated under /var/log",
+      "kind": "attack",
+      "description": "Truncates /var/log/auth.log (seeded honey log), wtmp, btmp, lastlog, dpkg.log, apt/history.log and a dedicated /var/log/bench-<marker>.log, using both shell redirection and truncate -s 0. Every existing file is backed up to /tmp/bench-logs-<marker>/ first and its content restored in place on exit.",
+      "path": "/bench/scenarios/t1070-002-clear-logs",
+      "tactic": "defense-evasion",
+      "technique": "T1070.002",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1070-003-clear-history",
+      "name": "Shell history cleared",
+      "kind": "attack",
+      "description": "Clears /root/.bash_history (seeded by the victim image) with the usual sequence: bash history -c / history -w, truncate -s 0, rm -f, then replaces it with a symlink to /dev/null. The original history is backed up to /tmp/bench-history-<marker>.bak first and restored on exit.",
+      "path": "/bench/scenarios/t1070-003-clear-history",
+      "tactic": "defense-evasion",
+      "technique": "T1070.003",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1082-system-discovery",
+      "name": "System information discovery",
+      "kind": "attack",
+      "description": "Collects host information the way a post exploitation survey script does: uname -a, /proc/version, /etc/os-release, hostname, machine id, lscpu and /proc/cpuinfo, /proc/meminfo, uptime, network interfaces and routes with ip, mounted filesystems, and a walk over /proc/<pid>/comm and cmdline for every process (hostnamectl style inventory without systemd).",
+      "path": "/bench/scenarios/t1082-system-discovery",
+      "tactic": "discovery",
+      "technique": "T1082",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1098-004-ssh-authorized-keys",
+      "name": "SSH key appended to root authorized_keys",
+      "kind": "attack",
+      "description": "Appends a fake ed25519 public key whose comment is bench-<marker> to /root/.ssh/authorized_keys (the victim image seeds this file with a honey admin key). Afterwards the injected line is removed in place, keeping the original content and inode.",
+      "path": "/bench/scenarios/t1098-004-ssh-authorized-keys",
+      "tactic": "persistence",
+      "technique": "T1098.004",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1105-ingress-tool-transfer",
+      "name": "Download and execute a script with curl",
+      "kind": "attack",
+      "description": "Downloads a shell script from http://$BENCH_ATTACKER:8080/payload.sh with curl, writes it to /tmp/bench-payload-<marker>.sh, makes it executable and runs it. The payload is harmless (prints id and uname). The file is removed afterwards.",
+      "path": "/bench/scenarios/t1105-ingress-tool-transfer",
+      "tactic": "command-and-control",
+      "technique": "T1105",
+      "timeout": 30.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1136-001-create-account",
+      "name": "Local account created with useradd",
+      "kind": "attack",
+      "description": "Creates a local account named bench<sanitized marker> with useradd (home directory, bash shell, GECOS comment \"bench <marker>\"), sets its password with chpasswd, then deletes it with userdel -r. Writes /etc/passwd, /etc/shadow and /etc/group.",
+      "path": "/bench/scenarios/t1136-001-create-account",
+      "tactic": "persistence",
+      "technique": "T1136.001",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1222-002-permission-modification",
+      "name": "World writable /etc/shadow",
+      "kind": "attack",
+      "description": "Records the mode of /etc/shadow, runs chmod 777 on it, shows the new mode and restores the original mode on exit.",
+      "path": "/bench/scenarios/t1222-002-permission-modification",
+      "tactic": "defense-evasion",
+      "technique": "T1222.002",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1485-data-destruction",
+      "name": "Files shredded and deleted",
+      "kind": "attack",
+      "description": "Creates /tmp/bench-destruction-<marker>/documents with 20 random 4 KiB files, then overwrites and unlinks them with shred -u -z -n 1 and removes the directory tree with rm -rf. Only files created by the script itself are destroyed.",
+      "path": "/bench/scenarios/t1485-data-destruction",
+      "tactic": "impact",
+      "technique": "T1485",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1496-cryptominer",
+      "name": "Simulated xmrig miner talking stratum",
+      "kind": "attack",
+      "description": "Copies the python3 interpreter to /tmp/bench-miner-<marker>/xmrig and runs it with xmrig style arguments (--url stratum+tcp://$BENCH_ATTACKER:3333 --user bench-<marker> --donate-level 1). The process, named xmrig, connects to the attacker stratum sink, sends a JSON-RPC login with agent xmrig/6.21.0, burns CPU for about three seconds computing SHA-256 hashes (no real mining) and submits a fake share. The directory is removed afterwards.",
+      "path": "/bench/scenarios/t1496-cryptominer",
+      "tactic": "impact",
+      "technique": "T1496",
+      "timeout": 30.0,
+      "requires": [
+        "attacker"
+      ]
+    },
+    {
+      "id": "t1543-002-systemd-service",
+      "name": "Systemd service unit created and enabled",
+      "kind": "attack",
+      "description": "Creates /etc/systemd/system/bench-<marker>.service with Restart=always and enables it the way systemctl enable does, by symlinking it into multi-user.target.wants. systemd is not running in the container; the unit file write and symlink are the behavior. Both are removed afterwards.",
+      "path": "/bench/scenarios/t1543-002-systemd-service",
+      "tactic": "persistence",
+      "technique": "T1543.002",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1547-006-kernel-module",
+      "name": "Kernel module load attempt with insmod",
+      "kind": "attack",
+      "description": "Writes a dummy, non ELF file /tmp/bench-module-<marker>.ko and calls insmod on it, which issues the finit_module syscall. The kernel always rejects the file (ENOEXEC \"Invalid module format\", or EPERM without CAP_SYS_MODULE), so nothing is ever loaded; the load attempt itself is the behavior. The scenario exits 0 when insmod reports that the kernel refused the module, i.e. the syscall was issued.",
+      "path": "/bench/scenarios/t1547-006-kernel-module",
+      "tactic": "persistence",
+      "technique": "T1547.006",
+      "timeout": 30.0,
+      "requires": [
+        "privileged"
+      ]
+    },
+    {
+      "id": "t1548-001-setuid-binary",
+      "name": "Setuid copy of a binary",
+      "kind": "attack",
+      "description": "Copies /usr/bin/id to /tmp/bench-suid-<marker>, sets the setuid bit with chmod u+s, then runs it as nobody through setpriv to show the effective uid 0. The copy is removed afterwards.",
+      "path": "/bench/scenarios/t1548-001-setuid-binary",
+      "tactic": "privilege-escalation",
+      "technique": "T1548.001",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1552-001-credentials-in-files",
+      "name": "Credential files searched and read",
+      "kind": "attack",
+      "description": "Searches /root, /home, /opt and /srv with find (names credentials, id_rsa*, *.pem, .env) and grep (aws_secret_access_key, PRIVATE KEY, PASSWORD) and reads every hit. The victim image seeds honey files: /root/.aws/credentials, /root/.ssh/id_rsa and /opt/app/.env. The hit list is staged in /tmp/bench-credential-hits-<marker> and removed afterwards. Exits 0 when at least one credential file was read.",
+      "path": "/bench/scenarios/t1552-001-credentials-in-files",
+      "tactic": "credential-access",
+      "technique": "T1552.001",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1552-007-container-api",
+      "name": "Kubernetes token and Docker socket probing",
+      "kind": "attack",
+      "description": "Lists and reads the Kubernetes service account directory /var/run/secrets/kubernetes.io/serviceaccount (the victim image seeds a honey token, real pods get the projected one), checks KUBERNETES_SERVICE_HOST, then probes /var/run/docker.sock and calls the Docker API /containers/json through it with curl --unix-socket. The socket is normally absent; the access attempts are the behavior, so the scenario exits 0 once the token path was opened.",
+      "path": "/bench/scenarios/t1552-007-container-api",
+      "tactic": "credential-access",
+      "technique": "T1552.007",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1611-escape-to-host",
+      "name": "Host filesystem mounted from a privileged container",
+      "kind": "attack",
+      "description": "From the privileged victim, finds the host block device backing /etc/hostname in /proc/self/mountinfo, creates a device node with mknod when /dev does not expose it, and mounts that host filesystem under /tmp/bench-hostfs-<marker>. The mount is read only (ro, or a rw mount of the already mounted superblock immediately remounted bind,ro when the kernel refuses to change the superblock read only state). It lists the host root and Docker container directory, then unmounts and removes everything. It also runs nsenter into the namespaces of PID 1. Nothing is ever written to the host filesystem. Exits 0 when the host filesystem was mounted and listed.",
+      "path": "/bench/scenarios/t1611-escape-to-host",
+      "tactic": "privilege-escalation",
+      "technique": "T1611",
+      "timeout": 60.0,
+      "requires": [
+        "privileged"
+      ]
+    },
+    {
+      "id": "t1613-container-discovery",
+      "name": "Container environment enumeration",
+      "kind": "attack",
+      "description": "Enumerates the container environment the way breakout tooling such as deepce or amicontained does: /.dockerenv, /proc/1/cgroup and /proc/self/cgroup, the cgroup filesystem, /proc/self/mountinfo, the capability sets in /proc/self/status decoded with capsh, seccomp and no_new_privs status, PID 1 command line and container related environment variables.",
+      "path": "/bench/scenarios/t1613-container-discovery",
+      "tactic": "discovery",
+      "technique": "T1613",
+      "timeout": 30.0,
+      "requires": []
+    },
+    {
+      "id": "t1620-fileless-exec",
+      "name": "Fileless execution from memfd_create",
+      "kind": "attack",
+      "description": "A python3 process creates an anonymous memory file with os.memfd_create named bench-memfd-<marker>, copies the /bin/sh binary into it and executes it with os.execve on the file descriptor (execveat with AT_EMPTY_PATH). The executed image has no path on disk (/memfd:bench-memfd-<marker> (deleted)) and runs echo and id.",
+      "path": "/bench/scenarios/t1620-fileless-exec",
+      "tactic": "defense-evasion",
+      "technique": "T1620",
+      "timeout": 30.0,
+      "requires": []
+    }
+  ],
+  "baseline": {
+    "status": "completed",
+    "errors": [],
+    "started_at": 1792958570.7959821,
+    "ended_at": 1792958846.8207288
+  },
+  "control": {
+    "tool": "none",
+    "profile": "control",
+    "status": "completed",
+    "error": null,
+    "errors": [],
+    "container_id": null,
+    "started_at": 1792958846.8215125,
+    "container_started_at": null,
+    "ready_at": null,
+    "time_to_ready": null,
+    "workloads_started_at": null,
+    "workloads_ended_at": null,
+    "scenarios_started_at": 1792958847.8934762,
+    "scenarios_ended_at": 1792959602.762591,
+    "ended_at": 1792959612.858252,
+    "runs": 150,
+    "log_lines": 0,
+    "log_bytes": 0,
+    "alerts_file_lines": 0,
+    "alerts_file_bytes": 0,
+    "log_overflow": false,
+    "dropped_log_lines": 0,
+    "dropped_log_bytes": 0,
+    "dropped_alerts_file_lines": 0,
+    "dropped_alerts_file_bytes": 0,
+    "alerts": 0,
+    "parse_errors": 0,
+    "cleanup_failures": 0,
+    "enforce": false,
+    "enforcement_verified": null,
+    "enforcement_alerts": 0,
+    "confirmed_enforcements": []
+  },
+  "deployments": {
+    "pulsar-default": {
+      "tool": "pulsar",
+      "profile": "default",
+      "status": "failed",
+      "error": "pulsard grew to 28.6 GiB RSS during the second fileio workload and exhausted host memory; the Kubernetes API stopped answering and the deployment was aborted",
+      "errors": [
+        "workload fileio #1: WorkloadError: workload fileio exited with code -1: '[bench] exec error: (0)\\nReason: Connection to remote host was lost.\\n'",
+        "workload syscall #2: WorkloadError: workload syscall exited with code 124: '\\n[bench] timed out after 150s'",
+        "workload exec #2: WorkloadError: workload exec exited with code -1: '[bench] exec error: (0)\\nReason: [Errno 32] Broken pipe\\n'",
+        "workload fileio #2: WorkloadError: workload fileio exited with code -1: '[bench] exec error: (0)\\nReason: [Errno 32] Broken pipe\\n'"
+      ],
+      "container_id": "f653be1c-d456-4957-97d9-a9998bbd3c53",
+      "started_at": 1792959612.8592184,
+      "container_started_at": 1792959614.9084268,
+      "ready_at": 1792959614.9190903,
+      "time_to_ready": 0.010663509368896484,
+      "workloads_started_at": 1792959619.9213362,
+      "workloads_ended_at": 1792990242.0754886,
+      "scenarios_started_at": null,
+      "scenarios_ended_at": null,
+      "ended_at": 1792990242.1706097,
+      "runs": 0,
+      "log_lines": 2393223,
+      "log_bytes": 242578385,
+      "alerts_file_lines": 0,
+      "alerts_file_bytes": 0,
+      "log_overflow": false,
+      "dropped_log_lines": 0,
+      "dropped_log_bytes": 0,
+      "dropped_alerts_file_lines": 0,
+      "dropped_alerts_file_bytes": 0,
+      "alerts": 6,
+      "parse_errors": 0,
+      "cleanup_failures": 0,
+      "enforce": false,
+      "enforcement_verified": null,
+      "enforcement_alerts": 0,
+      "confirmed_enforcements": []
+    },
+    "pulsar-tuned": {
+      "tool": "pulsar",
+      "profile": "tuned",
+      "status": "skipped",
+      "error": "not run: pulsar-default exhausted host memory in Kubernetes mode",
+      "errors": [],
+      "container_id": null,
+      "started_at": 1792990251.7390559,
+      "container_started_at": null,
+      "ready_at": null,
+      "time_to_ready": null,
+      "workloads_started_at": null,
+      "workloads_ended_at": null,
+      "scenarios_started_at": null,
+      "scenarios_ended_at": null,
+      "ended_at": 1792990272.7066064,
+      "runs": 0,
+      "log_lines": 0,
+      "log_bytes": 0,
+      "alerts_file_lines": 0,
+      "alerts_file_bytes": 0,
+      "log_overflow": false,
+      "dropped_log_lines": 0,
+      "dropped_log_bytes": 0,
+      "dropped_alerts_file_lines": 0,
+      "dropped_alerts_file_bytes": 0,
+      "alerts": 0,
+      "parse_errors": 0,
+      "cleanup_failures": 0,
+      "enforce": false,
+      "enforcement_verified": null,
+      "enforcement_alerts": 0,
+      "confirmed_enforcements": []
+    },
+    "pulsar-enforce": {
+      "tool": "pulsar",
+      "profile": "enforce",
+      "status": "skipped",
+      "error": "profile 'enforce' not supported by adapter",
+      "errors": [],
+      "container_id": null,
+      "started_at": null,
+      "container_started_at": null,
+      "ready_at": null,
+      "time_to_ready": null,
+      "workloads_started_at": null,
+      "workloads_ended_at": null,
+      "scenarios_started_at": null,
+      "scenarios_ended_at": null,
+      "ended_at": null,
+      "runs": 0,
+      "log_lines": 0,
+      "log_bytes": 0,
+      "alerts_file_lines": 0,
+      "alerts_file_bytes": 0,
+      "log_overflow": false,
+      "dropped_log_lines": 0,
+      "dropped_log_bytes": 0,
+      "dropped_alerts_file_lines": 0,
+      "dropped_alerts_file_bytes": 0,
+      "alerts": 0,
+      "parse_errors": 0,
+      "cleanup_failures": 0,
+      "enforce": true,
+      "enforcement_verified": null,
+      "enforcement_alerts": 0,
+      "confirmed_enforcements": []
+    },
+    "pulsar-community": {
+      "tool": "pulsar",
+      "profile": "community",
+      "status": "skipped",
+      "error": "profile 'community' not supported by adapter",
+      "errors": [],
+      "container_id": null,
+      "started_at": null,
+      "container_started_at": null,
+      "ready_at": null,
+      "time_to_ready": null,
+      "workloads_started_at": null,
+      "workloads_ended_at": null,
+      "scenarios_started_at": null,
+      "scenarios_ended_at": null,
+      "ended_at": null,
+      "runs": 0,
+      "log_lines": 0,
+      "log_bytes": 0,
+      "alerts_file_lines": 0,
+      "alerts_file_bytes": 0,
+      "log_overflow": false,
+      "dropped_log_lines": 0,
+      "dropped_log_bytes": 0,
+      "dropped_alerts_file_lines": 0,
+      "dropped_alerts_file_bytes": 0,
+      "alerts": 0,
+      "parse_errors": 0,
+      "cleanup_failures": 0,
+      "enforce": false,
+      "enforcement_verified": null,
+      "enforcement_alerts": 0,
+      "confirmed_enforcements": []
+    }
+  }
+}

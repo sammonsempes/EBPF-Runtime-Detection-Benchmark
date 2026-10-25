@@ -1,11 +1,10 @@
 # Kubernetes mode
 
-> **Status: run on kind under WSL2 only; no native Linux node yet.** Falco, Tracee and Kunai detect and attribute the
-> scenarios, with the same recall and false positive rate as in Docker mode (run `20261024T114807Z`). Pulsar crashed
-> the host during its overhead workloads. On this host Tetragon and KubeArmor produce no attributable alerts, because
-> of how the host is built, not because of the deployment. See [Validated on kind / WSL2](#validated-on-kind--wsl2). Unit tests mock the Kubernetes client and `helm`
-> (`runner/tests/test_k8s_backend.py`). A valid Kubernetes comparison of all six tools still needs a native Linux
-> node.
+> **Status: run on kind on a native Linux node (runs `20261025T160602Z`, `20261025T200250Z`) and on kind under WSL2
+> (run `20261024T114807Z`).** Falco, Tetragon, Tracee and Kunai detect and attribute the scenarios with the same recall
+> as in Docker mode. KubeArmor produces no alert on kind, native kernel included. Pulsar exhausts the host's memory
+> during its overhead workloads. See [Validated on kind / native Linux](#validated-on-kind--native-linux). Unit tests
+> mock the Kubernetes client and `helm` (`runner/tests/test_k8s_backend.py`).
 
 The scenarios, the scoring and the report are the same as in Docker mode. What changes:
 
@@ -346,7 +345,8 @@ Two findings.
 KubeArmor needs `agent.startup_timeout: 600` because its `kubearmor-init` container is slow. It then loads the
 policies (`Detected a Security Policy (added/ebpf-bench/...)`) and detects the victim pods, but registers every
 container with `pidns=0/mntns=0`. No kernel event matches the victims' policies, so there are 0 alerts. The likely
-cause, not proven, is the same family as Tetragon's: namespace resolution in nested PID namespaces under WSL2.
+cause suggested here, namespace resolution in nested PID namespaces under WSL2, is ruled out: the same
+registration happens on a native kernel (see [Validated on kind / native Linux](#validated-on-kind--native-linux)).
 KubeArmor also logs `BPF LSM not supported` and `Disabled KubeArmor Enforcer`: no enforcement on WSL2, as in Docker
 mode.
 
@@ -355,11 +355,35 @@ mode.
 On kind / WSL2, Falco, Tracee and Kunai can be compared in Kubernetes mode. A valid Kubernetes comparison of
 Tetragon, KubeArmor and Pulsar needs a native Linux node (bare metal or VM), not kind on WSL2.
 
+## Validated on kind / native Linux
+
+Host: Debian 13, kernel 6.12.105 with BTF and BPF-LSM, 8 CPUs, 30.9 GiB, Docker 26.1.5, kind 0.29.0 with
+`kindest/node:v1.33.1` (containerd 2.1.1), metrics-server 0.7.2. The tool images were pulled into the node with
+`crictl pull` before the run: the network needed almost 7 minutes for `kubearmor-init` alone, which would otherwise
+count as time to ready. `bench.yaml` raised the log cap to 15 million lines.
+
+| Tool | Result |
+|---|---|
+| Falco | default and tuned: same recall and false positive rate as Docker mode |
+| Tetragon | default and tuned: same recall and false positive rate as Docker mode; the WSL2 procfs blocker does not exist here |
+| Tracee | default and tuned: same recall and false positive rate as Docker mode |
+| Kunai | all four profiles run (DaemonSet); same recall as Docker mode; enforce prevented 0 of 23 valid attacks, its kills only hit the victim pods |
+| KubeArmor | 0 alerts in default and tuned: containers still registered with `pidns=0/mntns=0`, so the cause is kind's nested runtime, not WSL2; the controller never starts (`runAsNonRoot` with an image that runs as root) |
+| Pulsar | `pulsard` reached 28.6 GiB RSS three minutes after start, during the second `fileio` workload; the host ran out of memory and the API server stopped answering; not scored |
+
+- **Profiles**: `tool.yaml` of the Helm-based tools only maps `default` and `tuned`. Enforce and community were not
+  added for this run. Tetragon enforce in particular is unsafe on kind as written: its Sigkill selectors exclude the
+  host mount namespace, but the node's `kubelet` and `containerd` run in the kind container's namespace, and the
+  `/var/log` rule of `history-and-log-tampering` would match their pod log cleanup.
+- **Pulsar** ran in a separate runner because the first one held 18 GiB of log lines after Kunai default.
+- **Overhead** in kind is noisier than in Docker mode (Tetragon default shows a negative latency overhead); KubeArmor
+  uses 4.8 to 5.7 GiB there against about 0.3 GiB in Docker mode.
+
 ## Open points
 
-- Run on a native Linux node and confirm Tetragon's procfs check passes and KubeArmor registers the victims' pid and
-  mount namespaces.
-- Confirm that the KubeArmor `kubearmor.io/container.name` selector matches pods in Kubernetes mode (not observable
-  on WSL2, where no event matched any container).
-- Install metrics-server for tool CPU and memory figures.
+- KubeArmor on kind: find why containers register with `pidns=0/mntns=0` (containerd 2.x task PID resolution from the
+  agent's `/host/procfs` is the first suspect) or validate on a multi-node cluster on bare nodes.
+- Add `enforce` and `community` Helm values, with blocking policies scoped to Kubernetes namespaces
+  (`TracingPolicyNamespaced` for Tetragon) so they cannot hit node daemons.
+- Pulsar: bound its memory or report the growth upstream before running it again in Kubernetes mode.
 - Pin the Tetragon image tag to the adapter version once the Tetragon adapter exists.
